@@ -42,16 +42,17 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
     <Card className="w-full">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-xs font-medium">
-          {snippet.authorName}
-          {snippet.authorWebsite && (
+          {snippet.authorWebsite ? (
             <a
               href={snippet.authorWebsite}
               target="_blank"
               rel="noopener noreferrer"
-              className="ml-2 text-xs text-blue-500 hover:underline"
+              className="text-blue-500 hover:underline"
             >
-              {snippet.authorWebsite}
+              {snippet.authorName}
             </a>
+          ) : (
+            snippet.authorName
           )}
         </CardTitle>
         <div className="flex items-center gap-2">
