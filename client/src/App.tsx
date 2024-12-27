@@ -9,10 +9,10 @@ function App() {
       <nav className="border-b">
         <div className="container mx-auto px-4">
           <div className="flex h-14 items-center justify-between">
-            <div className="flex items-center gap-4">
-              <span className="text-lg font-bold">FabSnippets</span>
+            <span className="text-lg font-bold">FabSnippets</span>
+            <div className="flex-1 flex items-center justify-center gap-8">
               <Link href="/" className="font-medium hover:text-primary">
-                Home
+                Snippet feed
               </Link>
               <Link href="/leaderboard" className="font-medium hover:text-primary">
                 Leaderboard
