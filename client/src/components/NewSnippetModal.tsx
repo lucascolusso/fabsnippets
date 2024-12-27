@@ -9,22 +9,33 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { useState } from "react";
 import type { CodeCategory } from "@/lib/types";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const categories: CodeCategory[] = ['TMDL', 'DAX', 'SQL', 'Python'];
 
-interface FormValues {
-  title: string;
-  code: string;
-  category: CodeCategory;
-  authorName: string;
-  authorWebsite: string;
-}
+const formSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  code: z.string().min(1, "Code is required"),
+  category: z.enum(['TMDL', 'DAX', 'SQL', 'Python']),
+  authorName: z.string().min(1, "Name is required"),
+  authorWebsite: z.string().optional().transform(val => {
+    if (!val) return val;
+    if (!/^https?:\/\//i.test(val)) {
+      return `https://${val}`;
+    }
+    return val;
+  })
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 export function NewSnippetModal() {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
       code: '',
@@ -70,45 +81,31 @@ export function NewSnippetModal() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle className="text-lg">Share a Code Snippet</DialogTitle>
+          <DialogTitle className="text-lg">Submit Snippet</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-3">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Enter a descriptive title..." />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="code"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Code</FormLabel>
-                  <FormControl>
-                    <CodeEditor {...field} className="min-h-[200px]" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <div className="grid grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Title</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Enter a descriptive title..." />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category</FormLabel>
+                    <FormLabel>Code category</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -127,13 +124,29 @@ export function NewSnippetModal() {
                   </FormItem>
                 )}
               />
+            </div>
 
+            <FormField
+              control={form.control}
+              name="code"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Code</FormLabel>
+                  <FormControl>
+                    <CodeEditor {...field} className="min-h-[200px]" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-2 gap-3">
               <FormField
                 control={form.control}
                 name="authorName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Your Name</FormLabel>
+                    <FormLabel>Your name</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -141,21 +154,21 @@ export function NewSnippetModal() {
                   </FormItem>
                 )}
               />
-            </div>
 
-            <FormField
-              control={form.control}
-              name="authorWebsite"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Website (optional)</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="url" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="authorWebsite"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Website or social media URL</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="text" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <Button type="submit" disabled={mutation.isPending} className="w-full">
               {mutation.isPending ? "Submitting..." : "Submit Snippet"}
