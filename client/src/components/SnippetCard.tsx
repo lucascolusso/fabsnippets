@@ -41,7 +41,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
   return (
     <Card className="w-full">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">
+        <CardTitle className="text-xs font-medium">
           {snippet.authorName}
           {snippet.authorWebsite && (
             <a
@@ -55,7 +55,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
           )}
         </CardTitle>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             {new Date(snippet.createdAt).toLocaleDateString()}
           </span>
           <Button
@@ -64,14 +64,14 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             onClick={() => voteMutation.mutate()}
             disabled={voteMutation.isPending}
           >
-            <ThumbsUp className="h-4 w-4 mr-1" />
+            <ThumbsUp className="h-3 w-3 mr-1" />
             {snippet.votes}
           </Button>
         </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          <span className="inline-block px-2 py-1 text-xs font-semibold rounded bg-primary/10">
+          <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded bg-primary/10">
             {snippet.category}
           </span>
           <CodeEditor

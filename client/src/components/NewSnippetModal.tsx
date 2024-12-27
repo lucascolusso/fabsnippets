@@ -64,11 +64,11 @@ export function NewSnippetModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Share Code Snippet</Button>
+        <Button>Submit Snippet</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[725px]">
         <DialogHeader>
-          <DialogTitle>Share a Code Snippet</DialogTitle>
+          <DialogTitle className="text-xl">Share a Code Snippet</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-4">
@@ -140,7 +140,7 @@ export function NewSnippetModal() {
             />
 
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Sharing..." : "Share Snippet"}
+              {mutation.isPending ? "Submitting..." : "Submit Snippet"}
             </Button>
           </form>
         </Form>

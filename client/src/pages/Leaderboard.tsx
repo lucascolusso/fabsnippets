@@ -28,10 +28,10 @@ export function Leaderboard() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">Leaderboard</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Leaderboard</h1>
         <Select onValueChange={setSelectedCategory} value={selectedCategory}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[160px]">
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
           <SelectContent>
