@@ -4,6 +4,7 @@ import { SnippetCard } from "@/components/SnippetCard";
 import type { Snippet, CodeCategory } from "@/lib/types";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const categories: CodeCategory[] = ['TMDL', 'DAX', 'SQL', 'Python'];
 
