@@ -7,10 +7,10 @@ import type { Snippet, CodeCategory } from "@/lib/types";
 const categories: CodeCategory[] = ['TMDL', 'DAX', 'SQL', 'Python'];
 
 export function Leaderboard() {
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   const { data: snippets } = useQuery<Snippet[]>({
-    queryKey: [`/api/leaderboard${selectedCategory ? `?category=${selectedCategory}` : ''}`]
+    queryKey: [`/api/leaderboard${selectedCategory !== "all" ? `?category=${selectedCategory}` : ''}`]
   });
 
   const topContributors = snippets?.reduce((acc, snippet) => {
@@ -35,7 +35,7 @@ export function Leaderboard() {
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Categories</SelectItem>
+            <SelectItem value="all">All Categories</SelectItem>
             {categories.map((category) => (
               <SelectItem key={category} value={category}>
                 {category}
