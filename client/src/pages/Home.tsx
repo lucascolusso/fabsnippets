@@ -23,7 +23,10 @@ export function Home() {
         <Button
           variant={selectedCategory === 'all' ? "ghost" : "outline"}
           onClick={() => setSelectedCategory('all')}
-          className="whitespace-nowrap"
+          className={cn(
+            "whitespace-nowrap",
+            selectedCategory === 'all' && "border-2 border-white font-bold"
+          )}
         >
           All Categories
         </Button>
@@ -32,7 +35,10 @@ export function Home() {
             key={category}
             variant={selectedCategory === category ? "ghost" : "outline"}
             onClick={() => setSelectedCategory(category)}
-            className="whitespace-nowrap"
+            className={cn(
+              "whitespace-nowrap",
+              selectedCategory === category && "border-2 border-white font-bold"
+            )}
           >
             {category}
           </Button>
