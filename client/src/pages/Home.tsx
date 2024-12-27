@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { SnippetCard } from "@/components/SnippetCard";
-import { NewSnippetModal } from "@/components/NewSnippetModal";
 import type { Snippet } from "@/lib/types";
 
 export function Home() {
@@ -10,11 +9,6 @@ export function Home() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">FabSnippets</h1>
-        <NewSnippetModal />
-      </div>
-
       {isLoading ? (
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
