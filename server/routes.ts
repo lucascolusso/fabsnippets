@@ -17,8 +17,9 @@ export function registerRoutes(app: Express): Server {
 
   // Create new snippet
   app.post("/api/snippets", async (req, res) => {
-    const { code, category, authorName, authorWebsite } = req.body;
+    const { title, code, category, authorName, authorWebsite } = req.body;
     const newSnippet = await db.insert(snippets).values({
+      title,
       code,
       category,
       authorName,
