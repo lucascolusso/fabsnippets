@@ -1,10 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CodeEditor } from "./CodeEditor";
-import { ThumbsUp } from "lucide-react";
+import { ThumbsUp, Copy, CheckCircle2 } from "lucide-react";
 import type { Snippet } from "@/lib/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 interface SnippetCardProps {
   snippet: Snippet;
@@ -12,6 +13,7 @@ interface SnippetCardProps {
 
 export function SnippetCard({ snippet }: SnippetCardProps) {
   const queryClient = useQueryClient();
+  const [isCopied, setIsCopied] = useState(false);
 
   const voteMutation = useMutation({
     mutationFn: async () => {
@@ -37,6 +39,24 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
       });
     }
   });
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(snippet.code);
+      setIsCopied(true);
+      toast({
+        title: "Copied!",
+        description: "Code snippet copied to clipboard",
+      });
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to copy code to clipboard",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <Card className="w-full">
@@ -72,9 +92,23 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded bg-primary/10">
-            {snippet.category}
-          </span>
+          <div className="flex items-center justify-between">
+            <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded bg-primary/10">
+              {snippet.category}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleCopy}
+              className="h-8 px-2"
+            >
+              {isCopied ? (
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
           <CodeEditor
             value={snippet.code}
             onChange={() => {}}
