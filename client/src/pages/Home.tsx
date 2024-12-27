@@ -21,7 +21,7 @@ export function Home() {
     <div className="container mx-auto py-8 px-4 max-w-3xl">
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
         <Button
-          variant={selectedCategory === 'all' ? "default" : "outline"}
+          variant={selectedCategory === 'all' ? "ghost" : "outline"}
           onClick={() => setSelectedCategory('all')}
           className="whitespace-nowrap"
         >
@@ -30,7 +30,7 @@ export function Home() {
         {categories.map((category) => (
           <Button
             key={category}
-            variant={selectedCategory === category ? "default" : "outline"}
+            variant={selectedCategory === category ? "ghost" : "outline"}
             onClick={() => setSelectedCategory(category)}
             className="whitespace-nowrap"
           >
