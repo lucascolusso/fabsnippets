@@ -8,9 +8,9 @@ const categories: CodeCategory[] = ['TMDL', 'DAX', 'SQL', 'Python'];
 
 export function Leaderboard() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
-  
+
   const { data: snippets } = useQuery<Snippet[]>({
-    queryKey: ['/api/leaderboard', selectedCategory ? `?category=${selectedCategory}` : '']
+    queryKey: [`/api/leaderboard${selectedCategory ? `?category=${selectedCategory}` : ''}`]
   });
 
   const topContributors = snippets?.reduce((acc, snippet) => {
