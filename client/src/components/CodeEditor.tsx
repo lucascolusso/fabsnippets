@@ -1,10 +1,9 @@
-import { Editor } from '@monaco-editor/react';
 import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
 
 interface CodeEditorProps {
   value: string;
   onChange: (value: string) => void;
-  language?: string;
   readOnly?: boolean;
   className?: string;
 }
@@ -12,26 +11,20 @@ interface CodeEditorProps {
 export function CodeEditor({
   value,
   onChange,
-  language = "javascript",
   readOnly = false,
   className
 }: CodeEditorProps) {
   return (
-    <div className={cn("w-full h-[300px] border rounded-md", className)}>
-      <Editor
-        value={value}
-        onChange={(value) => onChange(value || "")}
-        language={language}
-        theme="vs-dark"
-        options={{
-          minimap: { enabled: false },
-          readOnly,
-          fontSize: 14,
-          lineNumbers: "on",
-          scrollBeyondLastLine: false,
-          automaticLayout: true,
-        }}
-      />
-    </div>
+    <Textarea
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      readOnly={readOnly}
+      className={cn(
+        "font-mono text-sm min-h-[300px] resize-none bg-secondary/50",
+        "focus:ring-1 focus:ring-primary",
+        className
+      )}
+      placeholder="Paste your code here..."
+    />
   );
 }

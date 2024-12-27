@@ -76,8 +76,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
           </span>
           <CodeEditor
             value={snippet.code}
-            onChange={() => {}} 
-            language={snippet.category.toLowerCase()}
+            onChange={() => {}}
             readOnly
           />
         </div>
