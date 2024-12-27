@@ -13,6 +13,7 @@ import type { CodeCategory } from "@/lib/types";
 const categories: CodeCategory[] = ['TMDL', 'DAX', 'SQL', 'Python'];
 
 interface FormValues {
+  title: string;
   code: string;
   category: CodeCategory;
   authorName: string;
@@ -25,6 +26,7 @@ export function NewSnippetModal() {
 
   const form = useForm<FormValues>({
     defaultValues: {
+      title: '',
       code: '',
       category: 'Python',
       authorName: '',
@@ -72,6 +74,20 @@ export function NewSnippetModal() {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-3">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Title</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Enter a descriptive title..." />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="code"

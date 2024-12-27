@@ -67,6 +67,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
   return (
     <Card className="w-full">
       <CardContent className="p-4 space-y-3">
+        <h2 className="text-lg font-semibold mb-2">{snippet.title}</h2>
         <CodeEditor
           value={snippet.code}
           onChange={() => {}}

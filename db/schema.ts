@@ -4,6 +4,7 @@ import { relations } from "drizzle-orm";
 
 export const snippets = pgTable("snippets", {
   id: serial("id").primaryKey(),
+  title: varchar("title", { length: 200 }).notNull(),
   code: text("code").notNull(),
   category: varchar("category", { length: 20 }).notNull(),
   authorName: varchar("author_name", { length: 100 }).notNull(),
