@@ -21,7 +21,14 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
         method: 'POST',
         credentials: 'include'
       });
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) {
+        const error = await res.text();
+        // Check if it's the already voted error
+        if (error.includes("Already voted")) {
+          throw new Error("Thanks for your enthusiasm! You've already voted for this snippet.");
+        }
+        throw new Error(error);
+      }
       return res.json();
     },
     onSuccess: () => {
@@ -33,7 +40,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
+        title: "Couldn't vote",
         description: error.message,
         variant: "destructive"
       });
