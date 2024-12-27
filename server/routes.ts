@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { db } from "@db";
 import { snippets, votes } from "@db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 
 export function registerRoutes(app: Express): Server {
   const httpServer = createServer(app);
@@ -43,9 +43,13 @@ export function registerRoutes(app: Express): Server {
     }
 
     await db.transaction(async (tx) => {
+      // Insert the vote
       await tx.insert(votes).values({ snippetId, ipAddress });
-      await tx.update(snippets)
-        .set({ votes: db.raw('votes + 1') })
+
+      // Increment the votes count using sql template literal
+      await tx
+        .update(snippets)
+        .set({ votes: sql`${snippets.votes} + 1` })
         .where(eq(snippets.id, snippetId));
     });
 
@@ -56,11 +60,11 @@ export function registerRoutes(app: Express): Server {
   app.get("/api/leaderboard", async (req, res) => {
     const { category } = req.query;
     let query = db.select().from(snippets);
-    
+
     if (category) {
       query = query.where(eq(snippets.category, category as string));
     }
-    
+
     const leaderboard = await query.orderBy(desc(snippets.votes));
     res.json(leaderboard);
   });
