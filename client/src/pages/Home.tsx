@@ -8,7 +8,7 @@ export function Home() {
   });
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto py-8 px-4 max-w-3xl">
       {isLoading ? (
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
