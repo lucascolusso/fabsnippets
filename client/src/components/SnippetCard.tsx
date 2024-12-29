@@ -87,11 +87,14 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             )}
           </Button>
         </div>
-        <CodeEditor
-          value={snippet.code}
-          onChange={() => {}}
-          readOnly
-        />
+        <div className="h-[200px] overflow-auto">
+          <CodeEditor
+            value={snippet.code}
+            onChange={() => {}}
+            readOnly
+            className="text-[13px]"
+          />
+        </div>
         <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t">
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <span>Submitted by</span>
