@@ -70,11 +70,11 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
 
   return (
     <Card className="w-full shadow-md">
-      <CardContent className="p-4 space-y-3">
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <div className="flex items-center gap-2">
+      <CardContent className="p-2 space-y-2">
+        <div className="flex items-center justify-between gap-1 mb-1">
+          <div className="flex items-center gap-1">
             <h2 className="text-base font-semibold">{snippet.title}</h2>
-            <span className="inline-block px-2 py-0.5 text-[10px] font-semibold rounded bg-primary/10">
+            <span className="inline-block px-1 py-0.5 text-[10px] font-semibold rounded bg-primary/10">
               {snippet.category}
             </span>
           </div>
@@ -96,8 +96,8 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             />
           </div>
         </ScrollArea>
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-between gap-1 pt-1">
+          <div className="flex items-center gap-0.5 text-xs text-muted-foreground">
             <span>Submitted by</span>
             <Link href={`/profile/${snippet.authorName}`} className="underline">
               {snippet.authorName}
