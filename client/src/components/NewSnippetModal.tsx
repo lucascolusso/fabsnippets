@@ -171,7 +171,7 @@ export function NewSnippetModal() {
             </div>
 
             <Button type="submit" disabled={mutation.isPending} className="w-full">
-              {mutation.isPending ? "Submitting..." : "Submit Snippet"}
+              {mutation.isPending ? "Submitting..." : "Submit"}
             </Button>
           </form>
         </Form>
