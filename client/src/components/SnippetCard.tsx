@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CodeEditor } from "./CodeEditor";
-import { Copy, ThumbsUp } from "lucide-react";
+import { Copy, ThumbsUp, CheckCircle2 } from "lucide-react";
 import { Link } from "wouter";
 import type { Snippet } from "@/lib/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
