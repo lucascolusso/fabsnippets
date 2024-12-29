@@ -86,7 +86,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             )}
           </Button>
         </div>
-        <ScrollArea className="h-[300px]">
+        <ScrollArea className="h-[200px]">
           <div>
             <CodeEditor
               value={snippet.code}
