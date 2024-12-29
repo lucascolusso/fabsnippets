@@ -36,7 +36,7 @@ export function Home() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <div className="flex gap-2 overflow-x-auto pb-2">
+        <div className="flex gap-2 overflow-x-auto pb-2 justify-center">
         <Button
           variant={selectedCategory === 'all' ? "ghost" : "outline"}
           onClick={() => setSelectedCategory('all')}
