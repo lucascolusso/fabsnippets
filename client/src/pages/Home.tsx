@@ -3,6 +3,7 @@ import { SnippetCard } from "@/components/SnippetCard";
 import type { Snippet, CodeCategory } from "@/lib/types";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const categories: CodeCategory[] = ['TMDL', 'DAX', 'SQL', 'Python'];
@@ -25,13 +26,16 @@ export function Home() {
   return (
     <div className="container mx-auto py-8 px-4 max-w-3xl">
       <div className="space-y-4 mb-6">
-        <input
-          type="text"
-          placeholder="Search snippets, contributors, or categories..."
-          className="w-full px-4 py-2 rounded-lg border bg-background"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+        <div className="relative w-full">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search snippets, contributors, or categories..."
+            className="w-full pl-9 pr-4 py-2 rounded-lg border bg-background"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
         <div className="flex gap-2 overflow-x-auto pb-2">
         <Button
           variant={selectedCategory === 'all' ? "ghost" : "outline"}
