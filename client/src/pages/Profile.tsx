@@ -31,27 +31,27 @@ export function Profile() {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-3xl">
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold mb-2">{authorName}</h1>
-        {data.snippets[0]?.authorWebsite && (
-          <a 
-            href={data.snippets[0].authorWebsite} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-blue-500 hover:underline inline-flex items-center gap-1"
-          >
-            Visit website <ExternalLink className="h-4 w-4" />
-          </a>
-        )}
-      </div>
-
-      {topPositions.length > 0 && (
+      {(topPositions.length > 0 || data.snippets[0]?.authorWebsite) && (
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>Leaderboard Positions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
+            <div className="flex justify-between items-start">
+              <div>
+                <h1 className="text-2xl font-bold mb-2">{authorName}</h1>
+                {data.snippets[0]?.authorWebsite && (
+                  <a 
+                    href={data.snippets[0].authorWebsite} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline inline-flex items-center gap-1"
+                  >
+                    Visit website <ExternalLink className="h-4 w-4" />
+                  </a>
+                )}
+              </div>
+              {topPositions.length > 0 && (
+                <div>
+                  <CardTitle className="mb-4">Leaderboard Positions</CardTitle>
+                  <div className="space-y-2">
               {topPositions.map(({ category, position }) => (
                 <div key={category} className="flex justify-between items-center">
                   <Link 
@@ -66,7 +66,10 @@ export function Profile() {
                 </div>
               ))}
             </div>
-          </CardContent>
+                </div>
+              )}
+            </div>
+          </CardHeader>
         </Card>
       )}
 
