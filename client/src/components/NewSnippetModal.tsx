@@ -77,7 +77,7 @@ export function NewSnippetModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Submit Snippet</Button>
+        <Button>Submit</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
