@@ -20,32 +20,34 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
   const voteMutation = useMutation({
     mutationFn: async () => {
       const res = await fetch(`/api/snippets/${snippet.id}/vote`, {
-        method: 'POST',
-        credentials: 'include'
+        method: "POST",
+        credentials: "include",
       });
       if (!res.ok) {
         const error = await res.text();
         if (error.includes("Already voted")) {
-          throw new Error("Thanks for your enthusiasm! You've already voted for this snippet.");
+          throw new Error(
+            "Thanks for your enthusiasm! You've already voted for this snippet.",
+          );
         }
         throw new Error(error);
       }
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/snippets'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/snippets"] });
       toast({
         title: "Vote recorded",
-        description: "Thanks for voting!"
+        description: "Thanks for voting!",
       });
     },
     onError: (error: Error) => {
       toast({
         title: "Couldn't vote",
         description: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
-    }
+    },
   });
 
   const handleCopy = async () => {
@@ -61,7 +63,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
       toast({
         title: "Error",
         description: "Failed to copy code to clipboard",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -76,11 +78,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
               {snippet.category}
             </span>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleCopy}
-          >
+          <Button variant="outline" size="sm" onClick={handleCopy}>
             {isCopied ? (
               <CheckCircle2 className="h-4 w-4 text-green-500" />
             ) : (
@@ -88,7 +86,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             )}
           </Button>
         </div>
-        <ScrollArea className="max-h-[300px] overflow-y-auto">
+        <ScrollArea className="min-h-[200px] max-h-[300px] overflow-y-auto">
           <CodeEditor
             value={snippet.code}
             onChange={() => {}}
