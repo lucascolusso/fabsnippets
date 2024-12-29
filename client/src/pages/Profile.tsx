@@ -2,7 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { SnippetCard } from "@/components/SnippetCard";
 import type { Snippet } from "@/lib/types";
-import { useRoute } from "wouter";
+import { useRoute, Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExternalLink } from "lucide-react";
 
@@ -54,7 +54,12 @@ export function Profile() {
             <div className="space-y-2">
               {topPositions.map(({ category, position }) => (
                 <div key={category} className="flex justify-between items-center">
-                  <span>{category === 'all' ? 'Overall' : category}</span>
+                  <Link 
+                    href={`/leaderboard?category=${category === 'all' ? '' : category.toLowerCase()}`}
+                    className="hover:text-primary"
+                  >
+                    {category === 'all' ? 'Overall' : category}
+                  </Link>
                   <span className="text-muted-foreground">
                     #{position}
                   </span>
