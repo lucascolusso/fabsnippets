@@ -55,7 +55,10 @@ export function Leaderboard() {
               {sortedContributors.map(([author, count], index) => (
                 <div key={author} className="flex justify-between items-center">
                   <span>
-                    {index + 1}. {author}
+                    {index + 1}.{" "}
+                    <Link href={`/profile/${author}`} className="hover:text-primary hover:underline">
+                      {author}
+                    </Link>
                   </span>
                   <span className="text-muted-foreground">
                     {count} snippet{count === 1 ? '' : 's'}
@@ -75,7 +78,10 @@ export function Leaderboard() {
               {topVoted.map((snippet, index) => (
                 <div key={snippet.id} className="flex justify-between items-center">
                   <span>
-                    {index + 1}. {snippet.authorName}
+                    {index + 1}.{" "}
+                    <Link href={`/profile/${snippet.authorName}`} className="hover:text-primary hover:underline">
+                      {snippet.authorName}
+                    </Link>
                   </span>
                   <div className="flex items-center gap-2">
                     <span className="text-xs px-2 py-1 rounded bg-primary/10">
