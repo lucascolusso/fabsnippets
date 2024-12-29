@@ -88,12 +88,12 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             )}
           </Button>
         </div>
-        <ScrollArea className="h-[200px]">
+        <ScrollArea className="max-h-[200px] overflow-y-auto">
           <CodeEditor
             value={snippet.code}
             onChange={() => {}}
             readOnly
-            className="text-[13px]"
+            className="text-[13px] min-h-0"
           />
         </ScrollArea>
         <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
