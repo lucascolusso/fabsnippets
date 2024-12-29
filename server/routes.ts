@@ -70,5 +70,24 @@ export function registerRoutes(app: Express): Server {
     res.json(leaderboard);
   });
 
+  app.get("/api/authors/:name", async (req, res) => {
+    const authorName = req.params.name;
+    const authorSnippets = await db.select().from(snippets)
+      .where(eq(snippets.authorName, authorName))
+      .orderBy(desc(snippets.createdAt));
+
+    const leaderboards = await Promise.all(['TMDL', 'DAX', 'SQL', 'Python', 'all'].map(async (category) => {
+      let query = db.select().from(snippets);
+      if (category !== 'all') {
+        query = query.where(eq(snippets.category, category));
+      }
+      const board = await query.orderBy(desc(snippets.votes));
+      const position = board.findIndex(s => s.authorName === authorName) + 1;
+      return { category, position: position || null };
+    }));
+
+    res.json({ snippets: authorSnippets, leaderboards });
+  });
+
   return httpServer;
 }
