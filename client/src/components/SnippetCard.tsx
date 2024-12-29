@@ -66,7 +66,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
   };
 
   return (
-    <Card className="w-full">
+    <Card className="w-full shadow-md">
       <CardContent className="p-4 space-y-3">
         <div className="flex items-center justify-between gap-2 mb-2">
           <div className="flex items-center gap-2">
@@ -95,7 +95,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             className="text-[13px]"
           />
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t">
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <span>Submitted by</span>
             <Link href={`/profile/${snippet.authorName}`} className="underline">
