@@ -86,8 +86,8 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             )}
           </Button>
         </div>
-        <ScrollArea className="h-[300px] rounded-md border">
-          <div className="p-4">
+        <ScrollArea className="h-[300px]">
+          <div>
             <CodeEditor
               value={snippet.code}
               onChange={() => {}}
