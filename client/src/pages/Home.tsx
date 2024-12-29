@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { SnippetCard } from "@/components/SnippetCard";
 import type { Snippet, CodeCategory } from "@/lib/types";
