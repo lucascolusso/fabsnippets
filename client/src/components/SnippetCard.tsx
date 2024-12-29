@@ -87,7 +87,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             )}
           </Button>
         </div>
-        <div className="h-[200px] overflow-auto">
+        <div className="h-[200px] overflow-y-auto">
           <CodeEditor
             value={snippet.code}
             onChange={() => {}}
