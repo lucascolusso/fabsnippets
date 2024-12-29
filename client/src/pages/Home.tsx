@@ -30,7 +30,7 @@ export function Home() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search snippets, contributors, or categories..."
+            placeholder="Search snippet titles and code, contributors, or categories..."
             className="w-full pl-9 pr-4 py-2 rounded-lg border bg-background"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
