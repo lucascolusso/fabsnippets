@@ -7,8 +7,8 @@ import { NewSnippetModal } from "./components/NewSnippetModal";
 function App() {
   const [location] = useLocation();
   return (
-    <div className="min-h-screen bg-background">
-      <nav className="border-b">
+    <div className="min-h-screen pt-14">
+      <nav className="border-b fixed top-0 left-0 right-0 z-50">
         <div className="container mx-auto px-4">
           <div className="flex h-14 items-center justify-between">
             <Link href="/" className="text-base font-bold">FabSnippets</Link>
