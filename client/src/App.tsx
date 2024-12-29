@@ -8,10 +8,10 @@ function App() {
   const [location] = useLocation();
   return (
     <div className="min-h-screen pt-14">
-      <nav className="border-b fixed top-0 left-0 right-0 z-50">
+      <nav className="border-b fixed top-0 left-0 right-0 z-50 bg-gray-900">
         <div className="container mx-auto px-4">
           <div className="flex h-14 items-center justify-between">
-            <Link href="/" className="text-base font-bold">FabSnippets</Link>
+            <Link href="/" className="text-base font-bold text-white">FabSnippets</Link>
             <div className="flex-1 flex items-center justify-center gap-8">
               <Link 
                 href="/" 
