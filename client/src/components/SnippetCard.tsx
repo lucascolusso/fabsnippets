@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { CodeEditor } from "./CodeEditor";
 import { Copy, ThumbsUp, CheckCircle2 } from "lucide-react";
 import { Link } from "wouter";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Snippet } from "@/lib/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
@@ -87,14 +88,14 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             )}
           </Button>
         </div>
-        <div className="h-[200px] overflow-y-auto">
+        <ScrollArea className="h-[200px]">
           <CodeEditor
             value={snippet.code}
             onChange={() => {}}
             readOnly
             className="text-[13px]"
           />
-        </div>
+        </ScrollArea>
         <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <span>Submitted by</span>
