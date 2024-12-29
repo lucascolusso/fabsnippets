@@ -67,7 +67,12 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
   return (
     <Card className="w-full">
       <CardContent className="p-4 space-y-3">
-        <h2 className="text-lg font-semibold mb-2">{snippet.title}</h2>
+        <div className="flex items-center gap-2 mb-2">
+          <h2 className="text-lg font-semibold">{snippet.title}</h2>
+          <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded bg-primary/10">
+            {snippet.category}
+          </span>
+        </div>
         <CodeEditor
           value={snippet.code}
           onChange={() => {}}
@@ -87,9 +92,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             ) : (
               <span className="text-sm">{snippet.authorName}</span>
             )}
-            <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded bg-primary/10">
-              {snippet.category}
-            </span>
+            
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">
