@@ -7,9 +7,24 @@ import { eq, desc, sql } from "drizzle-orm";
 export function registerRoutes(app: Express): Server {
   const httpServer = createServer(app);
 
-  // Get all snippets
+  // Get all snippets with search
   app.get("/api/snippets", async (req, res) => {
-    const allSnippets = await db.query.snippets.findMany({
+    const { search } = req.query;
+    let query = db.query.snippets;
+    
+    if (search) {
+      const searchTerm = search.toString().toLowerCase();
+      const allSnippets = await query.findMany();
+      const filtered = allSnippets.filter(snippet => 
+        snippet.title.toLowerCase().includes(searchTerm) ||
+        snippet.code.toLowerCase().includes(searchTerm) ||
+        snippet.authorName.toLowerCase().includes(searchTerm) ||
+        snippet.category.toLowerCase().includes(searchTerm)
+      );
+      return res.json(filtered);
+    }
+
+    const allSnippets = await query.findMany({
       orderBy: [desc(snippets.createdAt)]
     });
     res.json(allSnippets);
