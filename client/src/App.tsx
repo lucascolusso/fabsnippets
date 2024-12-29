@@ -1,6 +1,7 @@
 import { Switch, Route, Link } from "wouter";
 import { Home } from "./pages/Home";
 import { Leaderboard } from "./pages/Leaderboard";
+import { Profile } from "./pages/Profile";
 import { NewSnippetModal } from "./components/NewSnippetModal";
 
 function App() {
