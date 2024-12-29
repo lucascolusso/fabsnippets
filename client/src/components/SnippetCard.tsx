@@ -79,6 +79,22 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
           readOnly
         />
         <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t">
+          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            <span>Submitted by</span>
+            {snippet.authorWebsite ? (
+              <a
+                href={snippet.authorWebsite}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:underline"
+              >
+                {snippet.authorName}
+              </a>
+            ) : (
+              <span>{snippet.authorName}</span>
+            )}
+            <span>on {new Date(snippet.createdAt).toLocaleDateString()}</span>
+          </div>
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -101,22 +117,6 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                 <Copy className="h-4 w-4" />
               )}
             </Button>
-          </div>
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            <span>Submitted by</span>
-            {snippet.authorWebsite ? (
-              <a
-                href={snippet.authorWebsite}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                {snippet.authorName}
-              </a>
-            ) : (
-              <span>{snippet.authorName}</span>
-            )}
-            <span>on {new Date(snippet.createdAt).toLocaleDateString()}</span>
           </div>
         </div>
       </CardContent>
