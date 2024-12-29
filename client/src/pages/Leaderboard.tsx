@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
+import { Link } from "wouter";
 import type { Snippet, CodeCategory } from "@/lib/types";
 
 const categories: CodeCategory[] = ['TMDL', 'DAX', 'SQL', 'Python'];
