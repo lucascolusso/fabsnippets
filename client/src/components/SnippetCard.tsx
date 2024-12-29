@@ -95,7 +95,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
         <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t">
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <span>Submitted by</span>
-            <Link href={`/profile/${snippet.authorName}`} className="hover:underline">
+            <Link href={`/profile/${snippet.authorName}`} className="underline">
               {snippet.authorName}
             </Link>
             <span>on {new Date(snippet.createdAt).toLocaleDateString()}</span>
