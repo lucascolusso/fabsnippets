@@ -67,11 +67,24 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
   return (
     <Card className="w-full">
       <CardContent className="p-4 space-y-3">
-        <div className="flex items-center gap-2 mb-2">
-          <h2 className="text-lg font-semibold">{snippet.title}</h2>
-          <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded bg-primary/10">
-            {snippet.category}
-          </span>
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold">{snippet.title}</h2>
+            <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded bg-primary/10">
+              {snippet.category}
+            </span>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleCopy}
+          >
+            {isCopied ? (
+              <CheckCircle2 className="h-4 w-4 text-green-500" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
+          </Button>
         </div>
         <CodeEditor
           value={snippet.code}
@@ -104,18 +117,6 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             >
               <ThumbsUp className="h-3 w-3 mr-1" />
               {snippet.votes}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleCopy}
-              className="h-8 px-2"
-            >
-              {isCopied ? (
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-              ) : (
-                <Copy className="h-4 w-4" />
-              )}
             </Button>
           </div>
         </div>
