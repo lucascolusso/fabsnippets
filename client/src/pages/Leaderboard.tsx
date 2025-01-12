@@ -78,12 +78,17 @@ export function Leaderboard() {
             <div className="space-y-2">
               {topVoted.map((snippet, index) => (
                 <div key={snippet.id} className="flex justify-between items-center">
-                  <span>
-                    {index + 1}.{" "}
-                    <Link href={`/profile/${snippet.authorName}`} className="hover:text-primary hover:underline">
-                      {snippet.authorName}
-                    </Link>
-                  </span>
+                  <div className="flex flex-col">
+                    <span>
+                      {index + 1}. {snippet.title}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      by{" "}
+                      <Link href={`/profile/${snippet.authorName}`} className="hover:text-primary hover:underline">
+                        {snippet.authorName}
+                      </Link>
+                    </span>
+                  </div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs px-2 py-1 rounded bg-primary/10">
                       {snippet.category}
