@@ -72,6 +72,20 @@ export function registerRoutes(app: Express): Server {
     res.json({ success: true });
   });
 
+  // Get single snippet
+  app.get("/api/snippets/:id", async (req, res) => {
+    const snippetId = parseInt(req.params.id);
+    const snippet = await db.query.snippets.findFirst({
+      where: eq(snippets.id, snippetId)
+    });
+    
+    if (!snippet) {
+      return res.status(404).json({ message: "Snippet not found" });
+    }
+    
+    res.json(snippet);
+  });
+
   // Get leaderboard
   app.get("/api/leaderboard", async (req, res) => {
     const { category } = req.query;

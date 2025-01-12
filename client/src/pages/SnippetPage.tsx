@@ -10,6 +10,13 @@ export function SnippetPage() {
 
   const { data: snippet } = useQuery<Snippet>({
     queryKey: [`/api/snippets/${snippetId}`],
+    queryFn: async () => {
+      const response = await fetch(`/api/snippets/${snippetId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch snippet');
+      }
+      return response.json();
+    },
   });
 
   if (!snippet) {
