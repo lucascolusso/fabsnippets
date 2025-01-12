@@ -2,6 +2,7 @@ import { Switch, Route, Link, useLocation } from "wouter";
 import { Home } from "./pages/Home";
 import { Leaderboard } from "./pages/Leaderboard";
 import { Profile } from "./pages/Profile";
+import { SnippetPage } from "./pages/SnippetPage";
 import { NewSnippetModal } from "./components/NewSnippetModal";
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
         <Route path="/" component={Home} />
         <Route path="/leaderboard" component={Leaderboard} />
         <Route path="/profile/:name" component={Profile} />
+        <Route path="/snippet/:id" component={SnippetPage} />
       </Switch>
     </div>
   );

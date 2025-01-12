@@ -73,7 +73,9 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
       <CardContent className="p-2 space-y-2">
         <div className="flex items-center justify-between gap-1 mb-1">
           <div className="flex items-center gap-1">
-            <h2 className="text-base font-semibold">{snippet.title}</h2>
+            <Link href={`/snippet/${snippet.id}`} className="hover:text-primary hover:underline">
+              <h2 className="text-base font-semibold">{snippet.title}</h2>
+            </Link>
             <span className="inline-block px-1 py-0.5 text-[10px] font-semibold rounded bg-primary/10">
               {snippet.category}
             </span>

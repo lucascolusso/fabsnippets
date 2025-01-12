@@ -80,7 +80,10 @@ export function Leaderboard() {
                 <div key={snippet.id} className="flex justify-between items-center">
                   <div className="flex flex-col">
                     <span>
-                      {index + 1}. {snippet.title}
+                      {index + 1}.{" "}
+                      <Link href={`/snippet/${snippet.id}`} className="hover:text-primary hover:underline">
+                        {snippet.title}
+                      </Link>
                     </span>
                     <span className="text-sm text-muted-foreground">
                       by{" "}
