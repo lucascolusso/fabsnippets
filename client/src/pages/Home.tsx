@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const categories: CodeCategory[] = ['TMDL', 'DAX', 'SQL', 'Python'];
+const categories: CodeCategory[] = ['TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery'];
 
 export function Home() {
   const [selectedCategory, setSelectedCategory] = useState<CodeCategory | 'all'>('all');

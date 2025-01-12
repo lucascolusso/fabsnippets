@@ -1,4 +1,4 @@
-export type CodeCategory = 'TMDL' | 'DAX' | 'SQL' | 'Python';
+export type CodeCategory = 'TMDL' | 'DAX' | 'SQL' | 'Python' | 'PowerQuery';
 
 export interface Snippet {
   id: number;

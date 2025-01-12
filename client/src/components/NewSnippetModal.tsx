@@ -12,12 +12,12 @@ import type { CodeCategory } from "@/lib/types";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-const categories: CodeCategory[] = ['TMDL', 'DAX', 'SQL', 'Python'];
+const categories: CodeCategory[] = ['TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery'];
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   code: z.string().min(1, "Code is required"),
-  category: z.enum(['TMDL', 'DAX', 'SQL', 'Python']),
+  category: z.enum(['TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery']),
   authorName: z.string().min(1, "Name is required"),
   authorWebsite: z.string().optional().transform(val => {
     if (!val) return val;
