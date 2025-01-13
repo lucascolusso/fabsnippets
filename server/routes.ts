@@ -150,7 +150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .where(eq(snippets.authorName, authorName))
       .orderBy(desc(snippets.createdAt));
 
-    const leaderboards = await Promise.all(['TMDL', 'DAX', 'SQL', 'Python', 'all'].map(async (category) => {
+    const leaderboards = await Promise.all(['TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery', 'all'].map(async (category) => {
       let query = db.select().from(snippets);
       if (category !== 'all') {
         query = query.where(eq(snippets.category, category));
