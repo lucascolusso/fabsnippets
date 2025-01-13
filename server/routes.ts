@@ -6,6 +6,8 @@ import { eq, desc, sql } from "drizzle-orm";
 import multer from "multer";
 import path from "path";
 
+app.use('/uploads', express.static('uploads'));
+
 const upload = multer({
   storage: multer.diskStorage({
     destination: 'uploads/',

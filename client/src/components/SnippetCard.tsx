@@ -120,7 +120,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                 </Button>
                 <Dialog open={showImage} onOpenChange={setShowImage}>
                   <DialogContent className="max-w-2xl">
-                    <img src={snippet.imagePath} alt="Snippet visualization" className="w-full" />
+                    <img src={`/uploads/${snippet.imagePath}`} alt="Snippet visualization" className="w-full" />
                   </DialogContent>
                 </Dialog>
               </>

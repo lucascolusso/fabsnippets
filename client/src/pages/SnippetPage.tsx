@@ -28,7 +28,7 @@ export function SnippetPage() {
       <SnippetCard snippet={snippet} />
       {snippet.imagePath && (
         <div className="mt-8">
-          <img src={snippet.imagePath} alt="Snippet visualization" className="w-full rounded-lg shadow-lg" />
+          <img src={`/uploads/${snippet.imagePath}`} alt="Snippet visualization" className="w-full rounded-lg shadow-lg" />
         </div>
       )}
     </div>
