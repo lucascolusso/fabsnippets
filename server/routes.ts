@@ -39,7 +39,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       votes INTEGER NOT NULL DEFAULT 0
     );
 
-    CREATE TABLE votes (
+    CREATE TABLE IF NOT EXISTS votes (
       id SERIAL PRIMARY KEY,
       snippet_id INTEGER NOT NULL REFERENCES snippets(id),
       ip_address VARCHAR(45) NOT NULL,
