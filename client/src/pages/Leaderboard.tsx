@@ -11,7 +11,14 @@ export function Leaderboard() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   const { data: snippets } = useQuery<Snippet[]>({
-    queryKey: [`/api/leaderboard${selectedCategory !== "all" ? `?category=${selectedCategory}` : ''}`]
+    queryKey: [`/api/leaderboard${selectedCategory !== "all" ? `?category=${selectedCategory}` : ''}`],
+    queryFn: async () => {
+      const response = await fetch(`/api/leaderboard${selectedCategory !== "all" ? `?category=${selectedCategory}` : ''}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch leaderboard');
+      }
+      return response.json();
+    }
   });
 
   const topContributors = snippets?.reduce((acc, snippet) => {
