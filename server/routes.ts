@@ -13,7 +13,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, '../public/uploads');
+const uploadsDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
@@ -27,12 +27,12 @@ const upload = multer({
       cb(null, uniqueSuffix + path.extname(file.originalname));
     }
   }),
-  fileFilter: (req, file, cb) => {
+  fileFilter: (_req, file, cb) => {
     // Only accept images
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
-      cb(new Error('Only image files are allowed!'), false);
+      cb(new Error('Only image files are allowed!') as unknown as null, false);
     }
   },
   limits: {
@@ -40,14 +40,14 @@ const upload = multer({
   }
 });
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export function registerRoutes(app: Express): Server {
   // Serve static files from uploads directory
   app.use('/uploads', express.static(uploadsDir));
 
   const httpServer = createServer(app);
 
   // Create tables if they don't exist
-  await db.execute(sql`
+  db.execute(sql`
     CREATE TABLE IF NOT EXISTS snippets (
       id SERIAL PRIMARY KEY,
       title VARCHAR(200) NOT NULL,
@@ -74,7 +74,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { title, code, category, authorName, authorWebsite } = req.body;
       const imagePath = req.file?.filename;
 
-      const newSnippet = await db.insert(snippets).values({
+      const [newSnippet] = await db.insert(snippets).values({
         title,
         code,
         category,
@@ -83,7 +83,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         imagePath
       }).returning();
 
-      res.json(newSnippet[0]);
+      res.json(newSnippet);
     } catch (error) {
       console.error('Error creating snippet:', error);
       res.status(500).json({ 
@@ -95,24 +95,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all snippets with search
   app.get("/api/snippets", async (req, res) => {
     const { search } = req.query;
-    let query = db.query.snippets;
-    
-    if (search) {
-      const searchTerm = search.toString().toLowerCase();
-      const allSnippets = await query.findMany();
-      const filtered = allSnippets.filter(snippet => 
-        snippet.title.toLowerCase().includes(searchTerm) ||
-        snippet.code.toLowerCase().includes(searchTerm) ||
-        snippet.authorName.toLowerCase().includes(searchTerm) ||
-        snippet.category.toLowerCase().includes(searchTerm)
-      );
-      return res.json(filtered);
+    try {
+      const query = db.select().from(snippets).orderBy(desc(snippets.createdAt));
+      const allSnippets = await query;
+
+      if (search) {
+        const searchTerm = search.toString().toLowerCase();
+        const filtered = allSnippets.filter(snippet => 
+          snippet.title.toLowerCase().includes(searchTerm) ||
+          snippet.code.toLowerCase().includes(searchTerm) ||
+          snippet.authorName.toLowerCase().includes(searchTerm) ||
+          snippet.category.toLowerCase().includes(searchTerm)
+        );
+        return res.json(filtered);
+      }
+
+      res.json(allSnippets);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching snippets' });
     }
-    
-    const allSnippets = await query.findMany({
-      orderBy: [desc(snippets.createdAt)]
-    });
-    res.json(allSnippets);
   });
 
   // Vote for a snippet
@@ -120,74 +121,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const snippetId = parseInt(req.params.id);
     const ipAddress = req.ip;
 
-    // Check if already voted
-    const existingVote = await db.query.votes.findFirst({
-      where: eq(votes.snippetId, snippetId),
-      columns: { ipAddress: true }
-    });
+    try {
+      // Check if already voted
+      const existingVote = await db.query.votes.findFirst({
+        where: eq(votes.snippetId, snippetId)
+      });
 
-    if (existingVote) {
-      return res.status(400).json({ message: "Already voted" });
+      if (existingVote) {
+        return res.status(400).json({ message: "Already voted" });
+      }
+
+      await db.transaction(async (tx) => {
+        // Insert the vote
+        await tx.insert(votes).values({
+          snippetId: snippetId,
+          ipAddress: ipAddress
+        });
+
+        // Increment the votes count
+        await tx
+          .update(snippets)
+          .set({ votes: sql`${snippets.votes} + 1` })
+          .where(eq(snippets.id, snippetId));
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: 'Error recording vote' });
     }
-
-    await db.transaction(async (tx) => {
-      // Insert the vote
-      await tx.insert(votes).values({ snippetId, ipAddress });
-
-      // Increment the votes count using sql template literal
-      await tx
-        .update(snippets)
-        .set({ votes: sql`${snippets.votes} + 1` })
-        .where(eq(snippets.id, snippetId));
-    });
-
-    res.json({ success: true });
   });
 
   // Get single snippet
   app.get("/api/snippets/:id", async (req, res) => {
     const snippetId = parseInt(req.params.id);
-    const snippet = await db.query.snippets.findFirst({
-      where: eq(snippets.id, snippetId)
-    });
-    
-    if (!snippet) {
-      return res.status(404).json({ message: "Snippet not found" });
+    try {
+      const snippet = await db.query.snippets.findFirst({
+        where: eq(snippets.id, snippetId)
+      });
+
+      if (!snippet) {
+        return res.status(404).json({ message: "Snippet not found" });
+      }
+
+      res.json(snippet);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching snippet' });
     }
-    
-    res.json(snippet);
   });
 
   // Get leaderboard
   app.get("/api/leaderboard", async (req, res) => {
     const { category } = req.query;
-    let query = db.select().from(snippets);
+    try {
+      const query = db.select().from(snippets);
 
-    if (category) {
-      query = query.where(eq(snippets.category, category as string));
+      if (category && typeof category === 'string') {
+        const filteredSnippets = await query.where(eq(snippets.category, category));
+        return res.json(filteredSnippets);
+      }
+
+      const allSnippets = await query.orderBy(desc(snippets.votes));
+      res.json(allSnippets);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching leaderboard' });
     }
-
-    const leaderboard = await query.orderBy(desc(snippets.votes));
-    res.json(leaderboard);
   });
 
+  // Get author details and snippets
   app.get("/api/authors/:name", async (req, res) => {
     const authorName = req.params.name;
-    const authorSnippets = await db.select().from(snippets)
-      .where(eq(snippets.authorName, authorName))
-      .orderBy(desc(snippets.createdAt));
+    try {
+      const authorSnippets = await db
+        .select()
+        .from(snippets)
+        .where(eq(snippets.authorName, authorName))
+        .orderBy(desc(snippets.createdAt));
 
-    const leaderboards = await Promise.all(['TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery', 'all'].map(async (category) => {
-      let query = db.select().from(snippets);
-      if (category !== 'all') {
-        query = query.where(eq(snippets.category, category));
-      }
-      const board = await query.orderBy(desc(snippets.votes));
-      const position = board.findIndex(s => s.authorName === authorName) + 1;
-      return { category, position: position || null };
-    }));
+      const categories = ['TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery', 'all'];
+      const leaderboards = await Promise.all(
+        categories.map(async (category) => {
+          const query = db.select().from(snippets);
+          const board = category === 'all' 
+            ? await query.orderBy(desc(snippets.votes))
+            : await query.where(eq(snippets.category, category)).orderBy(desc(snippets.votes));
 
-    res.json({ snippets: authorSnippets, leaderboards });
+          const position = board.findIndex(s => s.authorName === authorName) + 1;
+          return { category, position: position || null };
+        })
+      );
+
+      res.json({ snippets: authorSnippets, leaderboards });
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching author details' });
+    }
   });
 
   return httpServer;

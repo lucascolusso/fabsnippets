@@ -1,12 +1,23 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { SnippetCard } from "@/components/SnippetCard";
 import type { Snippet } from "@/lib/types";
 import { useRoute } from "wouter";
+import { useState } from "react";
+import { toast } from "@/hooks/use-toast";
 
 export function SnippetPage() {
   const [, params] = useRoute<{ id: string }>("/snippet/:id");
   const snippetId = parseInt(params?.id || "0");
+  const [imageError, setImageError] = useState(false);
+
+  const handleImageError = () => {
+    setImageError(true);
+    toast({
+      title: "Image Error",
+      description: "Could not load the image",
+      variant: "destructive"
+    });
+  };
 
   const { data: snippet } = useQuery<Snippet>({
     queryKey: [`/api/snippets/${snippetId}`],
@@ -26,9 +37,14 @@ export function SnippetPage() {
   return (
     <div className="container mx-auto py-8 px-4 max-w-3xl">
       <SnippetCard snippet={snippet} />
-      {snippet.imagePath && (
+      {snippet.imagePath && !imageError && (
         <div className="mt-8">
-          <img src={`/api/uploads/${snippet.imagePath}`} alt="Snippet visualization" className="w-full rounded-lg shadow-lg" />
+          <img 
+            src={`/uploads/${snippet.imagePath}`} 
+            alt="Snippet visualization" 
+            className="w-full rounded-lg shadow-lg object-contain max-h-[60vh]"
+            onError={handleImageError}
+          />
         </div>
       )}
     </div>

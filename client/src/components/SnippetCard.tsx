@@ -133,12 +133,14 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                     <DialogHeader>
                       <DialogTitle>Visualization for {snippet.title}</DialogTitle>
                     </DialogHeader>
-                    <img 
-                      src={`/uploads/${snippet.imagePath}`}
-                      alt="Snippet visualization" 
-                      className="w-full mt-2"
-                      onError={handleImageError} 
-                    />
+                    <div className="max-h-[60vh] overflow-hidden">
+                      <img 
+                        src={`/uploads/${snippet.imagePath}`}
+                        alt="Snippet visualization" 
+                        className="w-full object-contain"
+                        onError={handleImageError} 
+                      />
+                    </div>
                   </DialogContent>
                 </Dialog>
               </>
