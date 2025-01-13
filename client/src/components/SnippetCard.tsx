@@ -1,13 +1,14 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CodeEditor } from "./CodeEditor";
-import { Copy, ThumbsUp, CheckCircle2 } from "lucide-react";
+import { Copy, ThumbsUp, CheckCircle2, Image } from "lucide-react";
 import { Link } from "wouter";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Snippet } from "@/lib/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface SnippetCardProps {
   snippet: Snippet;
@@ -16,6 +17,7 @@ interface SnippetCardProps {
 export function SnippetCard({ snippet }: SnippetCardProps) {
   const queryClient = useQueryClient();
   const [isCopied, setIsCopied] = useState(false);
+  const [showImage, setShowImage] = useState(false);
 
   const voteMutation = useMutation({
     mutationFn: async () => {
@@ -107,6 +109,22 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             <span>on {new Date(snippet.createdAt).toLocaleDateString()}</span>
           </div>
           <div className="flex items-center gap-2">
+            {snippet.imagePath && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowImage(true)}
+                >
+                  <Image className="h-3 w-3" />
+                </Button>
+                <Dialog open={showImage} onOpenChange={setShowImage}>
+                  <DialogContent className="max-w-2xl">
+                    <img src={snippet.imagePath} alt="Snippet visualization" className="w-full" />
+                  </DialogContent>
+                </Dialog>
+              </>
+            )}
             <Button
               variant="outline"
               size="sm"

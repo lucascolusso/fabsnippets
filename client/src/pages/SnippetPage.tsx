@@ -26,6 +26,11 @@ export function SnippetPage() {
   return (
     <div className="container mx-auto py-8 px-4 max-w-3xl">
       <SnippetCard snippet={snippet} />
+      {snippet.imagePath && (
+        <div className="mt-8">
+          <img src={snippet.imagePath} alt="Snippet visualization" className="w-full rounded-lg shadow-lg" />
+        </div>
+      )}
     </div>
   );
 }
