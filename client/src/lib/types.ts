@@ -7,6 +7,7 @@ export interface Snippet {
   category: CodeCategory;
   authorName: string;
   authorWebsite?: string;
+  imagePath?: string;
   createdAt: string;
   votes: number;
 }

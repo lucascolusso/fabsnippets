@@ -7,34 +7,47 @@ import multer from "multer";
 import path from "path";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const app = express();
-app.use('/api/uploads', express.static(path.join(__dirname, '../uploads')));
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, '../public/uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 const upload = multer({
   storage: multer.diskStorage({
-    destination: 'uploads/',
+    destination: uploadsDir,
     filename: (req, file, cb) => {
-      cb(null, Date.now() + path.extname(file.originalname));
+      // Generate a unique filename with original extension
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, uniqueSuffix + path.extname(file.originalname));
     }
   }),
   fileFilter: (req, file, cb) => {
+    // Only accept images
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
-      cb(null, false);
+      cb(new Error('Only image files are allowed!'), false);
     }
+  },
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
   }
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Serve static files from uploads directory
+  app.use('/uploads', express.static(uploadsDir));
+
   const httpServer = createServer(app);
 
   // Create tables if they don't exist
-  await db.execute(`
+  await db.execute(sql`
     CREATE TABLE IF NOT EXISTS snippets (
       id SERIAL PRIMARY KEY,
       title VARCHAR(200) NOT NULL,
@@ -55,6 +68,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     );
   `);
 
+  // Create new snippet with image upload
+  app.post("/api/snippets", upload.single('image'), async (req, res) => {
+    try {
+      const { title, code, category, authorName, authorWebsite } = req.body;
+      const imagePath = req.file?.filename;
+
+      const newSnippet = await db.insert(snippets).values({
+        title,
+        code,
+        category,
+        authorName,
+        authorWebsite,
+        imagePath
+      }).returning();
+
+      res.json(newSnippet[0]);
+    } catch (error) {
+      console.error('Error creating snippet:', error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : 'Error creating snippet'
+      });
+    }
+  });
+
   // Get all snippets with search
   app.get("/api/snippets", async (req, res) => {
     const { search } = req.query;
@@ -71,26 +108,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       return res.json(filtered);
     }
-
+    
     const allSnippets = await query.findMany({
       orderBy: [desc(snippets.createdAt)]
     });
     res.json(allSnippets);
-  });
-
-  // Create new snippet
-  app.post("/api/snippets", upload.single('image'), async (req, res) => {
-    const { title, code, category, authorName, authorWebsite } = req.body;
-    const imagePath = req.file?.filename;
-    const newSnippet = await db.insert(snippets).values({
-      title,
-      code,
-      category,
-      authorName,
-      authorWebsite,
-      imagePath
-    }).returning();
-    res.json(newSnippet[0]);
   });
 
   // Vote for a snippet

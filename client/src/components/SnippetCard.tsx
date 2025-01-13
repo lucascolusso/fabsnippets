@@ -8,7 +8,7 @@ import type { Snippet } from "@/lib/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface SnippetCardProps {
   snippet: Snippet;
@@ -18,6 +18,16 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
   const queryClient = useQueryClient();
   const [isCopied, setIsCopied] = useState(false);
   const [showImage, setShowImage] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  const handleImageError = () => {
+    setImageError(true);
+    toast({
+      title: "Image Error",
+      description: "Could not load the image",
+      variant: "destructive"
+    });
+  };
 
   const voteMutation = useMutation({
     mutationFn: async () => {
@@ -96,7 +106,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
               value={snippet.code}
               onChange={() => {}}
               readOnly
-              className="text-[11px] h-full"
+              className="text-[11px] h-full font-mono"
             />
           </div>
         </ScrollArea>
@@ -109,7 +119,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             <span>on {new Date(snippet.createdAt).toLocaleDateString()}</span>
           </div>
           <div className="flex items-center gap-2">
-            {snippet.imagePath && (
+            {snippet.imagePath && !imageError && (
               <>
                 <Button
                   variant="outline"
@@ -120,8 +130,15 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                 </Button>
                 <Dialog open={showImage} onOpenChange={setShowImage}>
                   <DialogContent className="max-w-2xl">
-                    <DialogTitle>Visualization for {snippet.title}</DialogTitle>
-                    <img src={`/api/uploads/${snippet.imagePath}`} alt="Snippet visualization" className="w-full mt-2" />
+                    <DialogHeader>
+                      <DialogTitle>Visualization for {snippet.title}</DialogTitle>
+                    </DialogHeader>
+                    <img 
+                      src={`/uploads/${snippet.imagePath}`}
+                      alt="Snippet visualization" 
+                      className="w-full mt-2"
+                      onError={handleImageError} 
+                    />
                   </DialogContent>
                 </Dialog>
               </>
