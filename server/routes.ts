@@ -25,9 +25,12 @@ const upload = multer({
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
 
-  // Ensure table exists with all columns
+  // Drop and recreate tables
   await db.execute(`
-    CREATE TABLE IF NOT EXISTS snippets (
+    DROP TABLE IF EXISTS votes;
+    DROP TABLE IF EXISTS snippets;
+
+    CREATE TABLE snippets (
       id SERIAL PRIMARY KEY,
       title VARCHAR(200) NOT NULL,
       code TEXT NOT NULL,
@@ -38,8 +41,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       created_at TIMESTAMP NOT NULL DEFAULT NOW(),
       votes INTEGER NOT NULL DEFAULT 0
     );
-    
-    CREATE TABLE IF NOT EXISTS votes (
+
+    CREATE TABLE votes (
       id SERIAL PRIMARY KEY,
       snippet_id INTEGER NOT NULL REFERENCES snippets(id),
       ip_address VARCHAR(45) NOT NULL,
