@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import { db } from "@db";
 import { snippets, votes } from "@db/schema";
@@ -6,6 +6,7 @@ import { eq, desc, sql } from "drizzle-orm";
 import multer from "multer";
 import path from "path";
 
+const app = express();
 app.use('/uploads', express.static('uploads'));
 
 const upload = multer({
