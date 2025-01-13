@@ -25,6 +25,28 @@ const upload = multer({
 export function registerRoutes(app: Express): Server {
   const httpServer = createServer(app);
 
+  // Ensure table exists with all columns
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS snippets (
+      id SERIAL PRIMARY KEY,
+      title VARCHAR(200) NOT NULL,
+      code TEXT NOT NULL,
+      category VARCHAR(20) NOT NULL,
+      author_name VARCHAR(100) NOT NULL,
+      author_website TEXT,
+      image_path TEXT,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      votes INTEGER NOT NULL DEFAULT 0
+    );
+    
+    CREATE TABLE IF NOT EXISTS votes (
+      id SERIAL PRIMARY KEY,
+      snippet_id INTEGER NOT NULL REFERENCES snippets(id),
+      ip_address VARCHAR(45) NOT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    );
+  `);
+
   // Get all snippets with search
   app.get("/api/snippets", async (req, res) => {
     const { search } = req.query;
