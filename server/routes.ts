@@ -25,12 +25,9 @@ const upload = multer({
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
 
-  // Drop and recreate tables
+  // Create tables if they don't exist
   await db.execute(`
-    DROP TABLE IF EXISTS votes;
-    DROP TABLE IF EXISTS snippets;
-
-    CREATE TABLE snippets (
+    CREATE TABLE IF NOT EXISTS snippets (
       id SERIAL PRIMARY KEY,
       title VARCHAR(200) NOT NULL,
       code TEXT NOT NULL,
