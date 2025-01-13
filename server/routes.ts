@@ -22,7 +22,7 @@ const upload = multer({
   }
 });
 
-export function registerRoutes(app: Express): Server {
+export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
 
   // Ensure table exists with all columns
