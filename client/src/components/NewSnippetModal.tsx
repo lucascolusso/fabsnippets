@@ -25,7 +25,8 @@ const formSchema = z.object({
       return `https://${val}`;
     }
     return val;
-  })
+  }),
+  image: z.instanceof(File).optional()
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -47,10 +48,16 @@ export function NewSnippetModal() {
 
   const mutation = useMutation({
     mutationFn: async (values: FormValues) => {
+      const formData = new FormData();
+      Object.entries(values).forEach(([key, value]) => {
+        if (value !== undefined) {
+          formData.append(key, value);
+        }
+      });
+
       const res = await fetch('/api/snippets', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
+        body: formData,
         credentials: 'include'
       });
       if (!res.ok) throw new Error(await res.text());
@@ -134,6 +141,34 @@ export function NewSnippetModal() {
                   <FormLabel>Code</FormLabel>
                   <FormControl>
                     <CodeEditor {...field} className="min-h-[200px]" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="image"
+              render={({ field: { value, onChange, ...field } }) => (
+                <FormItem>
+                  <FormLabel>Image (optional)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          onChange(file);
+                          toast({
+                            title: "Image selected",
+                            description: `Selected ${file.name}`
+                          });
+                        }
+                      }}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

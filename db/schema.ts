@@ -9,6 +9,7 @@ export const snippets = pgTable("snippets", {
   category: varchar("category", { length: 20 }).notNull(),
   authorName: varchar("author_name", { length: 100 }).notNull(),
   authorWebsite: text("author_website"),
+  imagePath: text("image_path"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   votes: integer("votes").default(0).notNull()
 });

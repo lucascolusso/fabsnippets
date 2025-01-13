@@ -3,6 +3,24 @@ import { createServer, type Server } from "http";
 import { db } from "@db";
 import { snippets, votes } from "@db/schema";
 import { eq, desc, sql } from "drizzle-orm";
+import multer from "multer";
+import path from "path";
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: 'uploads/',
+    filename: (req, file, cb) => {
+      cb(null, Date.now() + path.extname(file.originalname));
+    }
+  }),
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(null, false);
+    }
+  }
+});
 
 export function registerRoutes(app: Express): Server {
   const httpServer = createServer(app);
@@ -31,14 +49,16 @@ export function registerRoutes(app: Express): Server {
   });
 
   // Create new snippet
-  app.post("/api/snippets", async (req, res) => {
+  app.post("/api/snippets", upload.single('image'), async (req, res) => {
     const { title, code, category, authorName, authorWebsite } = req.body;
+    const imagePath = req.file?.filename;
     const newSnippet = await db.insert(snippets).values({
       title,
       code,
       category,
       authorName,
       authorWebsite,
+      imagePath
     }).returning();
     res.json(newSnippet[0]);
   });
