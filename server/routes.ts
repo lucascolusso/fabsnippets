@@ -5,6 +5,11 @@ import { snippets, votes } from "@db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import multer from "multer";
 import path from "path";
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
