@@ -1,6 +1,6 @@
 
-import { db } from "../db";
-import { votes, snippets } from "../db/schema";
+const { db } = require("../db");
+const { votes, snippets } = require("../db/schema");
 
 async function clearDatabase() {
   // Delete all votes first due to foreign key constraint
