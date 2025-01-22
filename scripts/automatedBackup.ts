@@ -10,7 +10,7 @@ const backupDir = path.join(__dirname, '../backups');
 
 // Configuration
 const MAX_BACKUPS = 10; // Keep last 10 backups
-const BACKUP_INTERVAL = 3600000; // 1 hour in milliseconds
+const BACKUP_INTERVAL = 14400000; // 4 hours in milliseconds
 
 async function cleanOldBackups() {
   try {
@@ -22,7 +22,7 @@ async function cleanOldBackups() {
 
     // Keep only the most recent MAX_BACKUPS backups
     const filesToDelete = backupFiles.slice(MAX_BACKUPS);
-    
+
     for (const file of filesToDelete) {
       const filePath = path.join(backupDir, file);
       await fs.unlink(filePath);
@@ -37,14 +37,14 @@ async function runBackup() {
   try {
     console.log('\n=== Starting scheduled backup ===');
     console.log(new Date().toISOString());
-    
+
     // Create new backup
     const backupPath = await createBackup();
     console.log(`Backup created at: ${backupPath}`);
-    
+
     // Clean old backups
     await cleanOldBackups();
-    
+
     console.log('=== Backup process completed ===\n');
   } catch (error) {
     console.error('Backup process failed:', error);

@@ -35,12 +35,17 @@ export async function createBackup() {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const backupPath = path.join(backupDir, `backup-${timestamp}.sql`);
 
-  const databaseUrl = new URL(process.env.DATABASE_URL);
-
   console.log('Preparing pg_dump command...');
 
-  // Note: Using -Fc for custom format which is more flexible for restoration
-  const command = `pg_dump "${process.env.DATABASE_URL}" -F c -f "${backupPath}"`;
+  // Use -Fp for plain text format and only backup the data we need
+  const command = `pg_dump "${process.env.DATABASE_URL}" \
+    --data-only \
+    --no-owner \
+    --no-privileges \
+    --no-comments \
+    --table=public.snippets \
+    --table=public.votes \
+    -f "${backupPath}"`;
 
   try {
     console.log('Executing backup...');
@@ -69,15 +74,13 @@ export async function restoreFromBackup(backupPath: string) {
     throw new Error('DATABASE_URL environment variable is not set');
   }
 
-  const databaseUrl = new URL(process.env.DATABASE_URL);
-
   console.log('Preparing to restore from:', backupPath);
 
   // Drop existing connections except our own
   const dropConnectionsCommand = `psql "${process.env.DATABASE_URL}" -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid <> pg_backend_pid() AND datname = current_database();"`;
 
-  // Using pg_restore for custom format backup
-  const restoreCommand = `pg_restore -c -d "${process.env.DATABASE_URL}" "${backupPath}"`;
+  // Use psql to restore the plain text backup
+  const restoreCommand = `psql "${process.env.DATABASE_URL}" -f "${backupPath}"`;
 
   try {
     console.log('Terminating existing connections...');
