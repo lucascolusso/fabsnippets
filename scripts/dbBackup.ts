@@ -73,8 +73,12 @@ export async function createBackup() {
     await fs.writeFile(path.join(backupDirPath, 'snippets.csv'), snippetsCSV);
     console.log('Wrote snippets.csv');
 
-    // Export votes table
-    const votesData = await db.select().from(votes);
+    // Export votes table with only the columns that exist in the schema
+    const votesData = await db.select({
+      id: votes.id,
+      snippetId: votes.snippetId,
+      createdAt: votes.createdAt
+    }).from(votes);
     console.log(`Retrieved ${votesData.length} votes`);
     const votesCSV = objectToCSV(votesData);
     await fs.writeFile(path.join(backupDirPath, 'votes.csv'), votesCSV);
@@ -205,8 +209,9 @@ export async function restoreFromBackup(backupPath: string) {
 
       for (const vote of votesData) {
         await tx.insert(votes).values({
-          snippetId: vote.snippet_id,
-          createdAt: new Date(vote.created_at)
+          id: vote.id,
+          snippetId: vote.snippetId,
+          createdAt: new Date(vote.createdAt)
         });
       }
       console.log(`Restored ${votesData.length} votes`);
