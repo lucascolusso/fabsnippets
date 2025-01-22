@@ -6,7 +6,7 @@ export interface Snippet {
   code: string;
   category: CodeCategory;
   authorId: number;
-  authorUsername: string;
+  authorUsername: string;  
   authorWebsite?: string;
   imagePath?: string;
   createdAt: string;

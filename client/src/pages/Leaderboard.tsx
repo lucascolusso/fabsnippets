@@ -12,17 +12,10 @@ export function Leaderboard() {
 
   const { data: snippets } = useQuery<Snippet[]>({
     queryKey: [`/api/leaderboard${selectedCategory !== "all" ? `?category=${selectedCategory}` : ''}`],
-    queryFn: async () => {
-      const response = await fetch(`/api/leaderboard${selectedCategory !== "all" ? `?category=${selectedCategory}` : ''}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch leaderboard');
-      }
-      return response.json();
-    }
   });
 
   const topContributors = snippets?.reduce((acc, snippet) => {
-    acc[snippet.authorName] = (acc[snippet.authorName] || 0) + 1;
+    acc[snippet.authorUsername] = (acc[snippet.authorUsername] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
@@ -94,8 +87,8 @@ export function Leaderboard() {
                     </span>
                     <span className="text-sm text-muted-foreground">
                       by{" "}
-                      <Link href={`/profile/${snippet.authorName}`} className="hover:text-primary hover:underline">
-                        {snippet.authorName}
+                      <Link href={`/profile/${snippet.authorUsername}`} className="hover:text-primary hover:underline">
+                        {snippet.authorUsername}
                       </Link>
                     </span>
                   </div>
