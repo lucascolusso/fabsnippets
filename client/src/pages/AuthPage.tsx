@@ -6,6 +6,7 @@ import { useUser } from "@/hooks/use-user";
 import { insertUserSchema } from "@db/schema";
 import type { NewUser } from "@db/schema";
 import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
 import {
   Form,
   FormControl,
@@ -22,6 +23,7 @@ export function AuthPage() {
   const { login, register } = useUser();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [, setLocation] = useLocation();
 
   const form = useForm<NewUser>({
     resolver: zodResolver(insertUserSchema),
@@ -43,6 +45,8 @@ export function AuthPage() {
         title: isLogin ? "Login Successful" : "Registration Successful",
         description: isLogin ? "Welcome back!" : "Your account has been created.",
       });
+      // Redirect to home page after successful login/register
+      setLocation("/");
     } catch (error) {
       toast({
         variant: "destructive",
