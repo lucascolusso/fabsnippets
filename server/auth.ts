@@ -5,9 +5,10 @@ import session from "express-session";
 import createMemoryStore from "memorystore";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
-import { users, insertUserSchema, type SelectUser } from "@db/schema";
+import { users, insertUserSchema, type User } from "@db/schema";
 import { db } from "@db";
 import { eq } from "drizzle-orm";
+import { z } from "zod";
 
 const scryptAsync = promisify(scrypt);
 const crypto = {
@@ -28,10 +29,17 @@ const crypto = {
   },
 };
 
+// Profile update validation schema
+const updateProfileSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  email: z.string().email("Invalid email").nullable(),
+  website: z.string().url("Invalid website URL").nullable().optional(),
+});
+
 // extend express user object with our schema
 declare global {
   namespace Express {
-    interface User extends SelectUser { }
+    interface User extends User { }
   }
 }
 
@@ -102,9 +110,10 @@ export function setupAuth(app: Express) {
     try {
       const result = insertUserSchema.safeParse(req.body);
       if (!result.success) {
-        return res
-          .status(400)
-          .send("Invalid input: " + result.error.issues.map(i => i.message).join(", "));
+        return res.status(400).json({
+          message: "Invalid input",
+          errors: result.error.issues.map(i => i.message)
+        });
       }
 
       const { username, password } = result.data;
@@ -117,7 +126,7 @@ export function setupAuth(app: Express) {
         .limit(1);
 
       if (existingUser) {
-        return res.status(400).send("Username already exists");
+        return res.status(400).json({ message: "Username already exists" });
       }
 
       // Hash the password
@@ -150,9 +159,10 @@ export function setupAuth(app: Express) {
   app.post("/api/login", (req, res, next) => {
     const result = insertUserSchema.safeParse(req.body);
     if (!result.success) {
-      return res
-        .status(400)
-        .send("Invalid input: " + result.error.issues.map(i => i.message).join(", "));
+      return res.status(400).json({
+        message: "Invalid input",
+        errors: result.error.issues.map(i => i.message)
+      });
     }
 
     const cb = (err: any, user: Express.User, info: IVerifyOptions) => {
@@ -161,7 +171,7 @@ export function setupAuth(app: Express) {
       }
 
       if (!user) {
-        return res.status(400).send(info.message ?? "Login failed");
+        return res.status(400).json({ message: info.message ?? "Login failed" });
       }
 
       req.logIn(user, (err) => {
@@ -181,7 +191,7 @@ export function setupAuth(app: Express) {
   app.post("/api/logout", (req, res) => {
     req.logout((err) => {
       if (err) {
-        return res.status(500).send("Logout failed");
+        return res.status(500).json({ message: "Logout failed" });
       }
 
       res.json({ message: "Logout successful" });
@@ -193,18 +203,26 @@ export function setupAuth(app: Express) {
       return res.json(req.user);
     }
 
-    res.status(401).send("Not logged in");
+    res.status(401).json({ message: "Not logged in" });
   });
 
   // Add new profile update endpoint
   app.put("/api/user/profile", async (req, res) => {
     if (!req.isAuthenticated()) {
-      return res.status(401).send("Not logged in");
+      return res.status(401).json({ message: "Not logged in" });
     }
 
-    const { username, email, website } = req.body;
-
     try {
+      const result = updateProfileSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({
+          message: "Invalid input",
+          errors: result.error.issues.map(i => i.message)
+        });
+      }
+
+      const { username, email, website } = result.data;
+
       // Check if username already exists (if username is being changed)
       if (username !== req.user.username) {
         const [existingUser] = await db
@@ -214,7 +232,7 @@ export function setupAuth(app: Express) {
           .limit(1);
 
         if (existingUser) {
-          return res.status(400).send("Username already exists");
+          return res.status(400).json({ message: "Username already exists" });
         }
       }
 
@@ -232,11 +250,12 @@ export function setupAuth(app: Express) {
       // Update session
       req.login(updatedUser, (err) => {
         if (err) {
-          return res.status(500).send("Failed to update session");
+          return res.status(500).json({ message: "Failed to update session" });
         }
         res.json(updatedUser);
       });
     } catch (error) {
+      console.error('Profile update error:', error);
       res.status(500).json({ 
         message: error instanceof Error ? error.message : "Failed to update profile"
       });
