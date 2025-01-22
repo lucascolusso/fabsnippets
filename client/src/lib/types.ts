@@ -5,9 +5,18 @@ export interface Snippet {
   title: string;
   code: string;
   category: CodeCategory;
-  authorName: string;
+  authorId: number;
+  authorUsername: string;
   authorWebsite?: string;
   imagePath?: string;
   createdAt: string;
   votes: number;
+}
+
+export interface User {
+  id: number;
+  username: string;
+  email?: string;
+  website?: string;
+  createdAt: string;
 }

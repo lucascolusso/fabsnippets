@@ -18,14 +18,6 @@ const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   code: z.string().min(1, "Code is required"),
   category: z.enum(['TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery']),
-  authorName: z.string().min(1, "Name is required"),
-  authorWebsite: z.string().optional().transform(val => {
-    if (!val) return val;
-    if (!/^https?:\/\//i.test(val)) {
-      return `https://${val}`;
-    }
-    return val;
-  }),
   image: z.instanceof(File).optional()
 });
 
@@ -40,9 +32,7 @@ export function NewSnippetModal() {
     defaultValues: {
       title: '',
       code: '',
-      category: 'Python',
-      authorName: '',
-      authorWebsite: ''
+      category: 'Python'
     }
   });
 
@@ -174,36 +164,6 @@ export function NewSnippetModal() {
                 </FormItem>
               )}
             />
-
-            <div className="grid grid-cols-2 gap-3">
-              <FormField
-                control={form.control}
-                name="authorName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Your name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="authorWebsite"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Website or social media URL</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="text" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
 
             <Button type="submit" disabled={mutation.isPending} className="w-full">
               {mutation.isPending ? "Submitting..." : "Submit"}

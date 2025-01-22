@@ -75,8 +75,6 @@ export function registerRoutes(app: Express): Server {
       code TEXT NOT NULL,
       category VARCHAR(20) NOT NULL,
       author_id INTEGER NOT NULL REFERENCES users(id),
-      author_name VARCHAR(100) NOT NULL,
-      author_website TEXT,
       image_path TEXT,
       created_at TIMESTAMP NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -194,23 +192,38 @@ export function registerRoutes(app: Express): Server {
   // Create new snippet with image upload
   app.post("/api/snippets", upload.single('image'), async (req, res) => {
     try {
-      const { title, code, category, authorName, authorWebsite } = req.body;
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not logged in" });
+      }
+
+      const { title, code, category } = req.body;
       const imagePath = req.file?.filename;
 
       const [newSnippet] = await db.insert(snippets).values({
         title,
         code,
         category,
-        authorName,
-        authorWebsite,
+        authorId: req.user.id,
         imagePath
       }).returning();
 
-      res.json(newSnippet);
+      // Fetch the complete snippet with author information
+      const [snippetWithAuthor] = await db
+        .select({
+          ...snippets,
+          authorUsername: users.username,
+          authorWebsite: users.website
+        })
+        .from(snippets)
+        .where(eq(snippets.id, newSnippet.id))
+        .leftJoin(users, eq(snippets.authorId, users.id))
+        .limit(1);
+
+      res.json(snippetWithAuthor);
     } catch (error) {
       console.error('Error creating snippet:', error);
       res.status(500).json({ 
-        message: error instanceof Error ? error.message : 'Error creating snippet'
+        message: error instanceof Error ? error.message : "Error creating snippet"
       });
     }
   });
@@ -219,7 +232,16 @@ export function registerRoutes(app: Express): Server {
   app.get("/api/snippets", async (req, res) => {
     const { search } = req.query;
     try {
-      const query = db.select().from(snippets).orderBy(desc(snippets.createdAt));
+      const query = db
+        .select({
+          ...snippets,
+          authorUsername: users.username,
+          authorWebsite: users.website
+        })
+        .from(snippets)
+        .leftJoin(users, eq(snippets.authorId, users.id))
+        .orderBy(desc(snippets.createdAt));
+
       const allSnippets = await query;
 
       if (search) {
@@ -227,7 +249,7 @@ export function registerRoutes(app: Express): Server {
         const filtered = allSnippets.filter(snippet => 
           snippet.title.toLowerCase().includes(searchTerm) ||
           snippet.code.toLowerCase().includes(searchTerm) ||
-          snippet.authorName.toLowerCase().includes(searchTerm) ||
+          snippet.authorUsername.toLowerCase().includes(searchTerm) ||
           snippet.category.toLowerCase().includes(searchTerm)
         );
         return res.json(filtered);
@@ -278,9 +300,16 @@ export function registerRoutes(app: Express): Server {
   app.get("/api/snippets/:id", async (req, res) => {
     const snippetId = parseInt(req.params.id);
     try {
-      const snippet = await db.query.snippets.findFirst({
-        where: eq(snippets.id, snippetId)
-      });
+      const [snippet] = await db
+        .select({
+          ...snippets,
+          authorUsername: users.username,
+          authorWebsite: users.website
+        })
+        .from(snippets)
+        .where(eq(snippets.id, snippetId))
+        .leftJoin(users, eq(snippets.authorId, users.id))
+        .limit(1);
 
       if (!snippet) {
         return res.status(404).json({ message: "Snippet not found" });

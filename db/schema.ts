@@ -17,8 +17,6 @@ export const snippets = pgTable("snippets", {
   code: text("code").notNull(),
   category: varchar("category", { length: 20 }).notNull(),
   authorId: integer("author_id").notNull().references(() => users.id),
-  authorName: varchar("author_name", { length: 100 }).notNull(),
-  authorWebsite: text("author_website"),
   imagePath: text("image_path"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

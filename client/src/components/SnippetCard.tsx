@@ -113,8 +113,8 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
         <div className="flex flex-wrap items-center justify-between gap-1 pt-1">
           <div className="flex items-center gap-0.5 text-xs text-muted-foreground">
             <span>Submitted by</span>
-            <Link href={`/profile/${snippet.authorName}`} className="underline">
-              {snippet.authorName}
+            <Link href={`/profile/${snippet.authorUsername}`} className="underline">
+              {snippet.authorUsername}
             </Link>
             <span>on {new Date(snippet.createdAt).toLocaleDateString()}</span>
           </div>
@@ -134,11 +134,11 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                       <DialogTitle>Visualization for {snippet.title}</DialogTitle>
                     </DialogHeader>
                     <div className="max-h-[60vh] overflow-hidden">
-                      <img 
+                      <img
                         src={`/uploads/${snippet.imagePath}`}
-                        alt="Snippet visualization" 
+                        alt="Snippet visualization"
                         className="w-full object-contain"
-                        onError={handleImageError} 
+                        onError={handleImageError}
                       />
                     </div>
                   </DialogContent>
