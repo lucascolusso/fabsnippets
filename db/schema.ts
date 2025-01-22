@@ -26,7 +26,8 @@ export const snippets = pgTable("snippets", {
 export const votes = pgTable("votes", {
   id: serial("id").primaryKey(),
   snippetId: integer("snippet_id").notNull().references(() => snippets.id),
-  userId: integer("user_id").notNull().references(() => users.id),
+  userId: integer("user_id").references(() => users.id),
+  ipAddress: text("ip_address"),
   createdAt: timestamp("created_at").defaultNow().notNull()
 });
 

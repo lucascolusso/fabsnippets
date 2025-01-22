@@ -84,9 +84,10 @@ export function registerRoutes(app: Express): Server {
     CREATE TABLE IF NOT EXISTS votes (
       id SERIAL PRIMARY KEY,
       snippet_id INTEGER NOT NULL REFERENCES snippets(id),
-      user_id INTEGER NOT NULL REFERENCES users(id),
+      user_id INTEGER,
+      ip_address TEXT,
       created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-      UNIQUE(snippet_id, user_id)
+      UNIQUE(snippet_id, user_id, ip_address)
     );
   `);
 
@@ -264,17 +265,17 @@ export function registerRoutes(app: Express): Server {
   // Vote for a snippet
   app.post("/api/snippets/:id/vote", async (req, res) => {
     const snippetId = parseInt(req.params.id);
+    const ipAddress = req.ip;
 
     try {
-      // Get user ID if authenticated, otherwise use IP address as identifier
+      // Get user ID if authenticated
       const userId = req.isAuthenticated() ? req.user.id : null;
-      if (!userId) {
-        return res.status(401).json({ message: "Must be logged in to vote" });
-      }
 
-      // Check if already voted
+      // Check if already voted based on either user ID or IP
       const existingVote = await db.query.votes.findFirst({
-        where: eq(votes.snippetId, snippetId),
+        where: userId 
+          ? eq(votes.userId, userId)
+          : eq(votes.ipAddress, ipAddress),
         columns: {
           id: true
         }
@@ -285,10 +286,11 @@ export function registerRoutes(app: Express): Server {
       }
 
       await db.transaction(async (tx) => {
-        // Insert the vote
+        // Insert the vote with either userId or ipAddress
         await tx.insert(votes).values({
           snippetId,
-          userId,
+          userId: userId || undefined,
+          ipAddress: userId ? undefined : ipAddress
         });
 
         // Increment the votes count
