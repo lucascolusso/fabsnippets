@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, CheckCircle, RefreshCw, Download } from "lucide-react";
+import { AlertCircle, RefreshCw, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Table,
@@ -41,7 +41,7 @@ export function BackupManagement() {
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "Backup created successfully",
+        description: "Backup created successfully (CSV files zipped)",
       });
     },
     onError: (error) => {
@@ -68,7 +68,7 @@ export function BackupManagement() {
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "Database restored successfully",
+        description: "Database restored successfully from CSV backup",
       });
       setIsRestoring(false);
     },
@@ -100,10 +100,13 @@ export function BackupManagement() {
             ) : (
               <Download className="mr-2 h-4 w-4" />
             )}
-            Create Backup
+            Create CSV Backup
           </Button>
         </CardHeader>
         <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">
+            Backups are created as ZIP files containing CSV exports of all database tables.
+          </p>
           {isLoadingBackups ? (
             <div className="flex items-center justify-center py-8">
               <RefreshCw className="h-8 w-8 animate-spin" />

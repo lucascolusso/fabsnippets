@@ -4,6 +4,11 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { db } from "../db";
+import { snippets, votes } from "../db/schema";
+import { sql } from "drizzle-orm";
+import archiver from 'archiver';
+import { createWriteStream } from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -18,9 +23,25 @@ async function ensureBackupDir() {
     await fs.access(backupDir);
     console.log('Backup directory exists at:', backupDir);
   } catch {
-    console.log('Creating backup directory at:', backupDir);
     await fs.mkdir(backupDir, { recursive: true });
+    console.log('Created backup directory at:', backupDir);
   }
+}
+
+function objectToCSV(items: any[]) {
+  if (items.length === 0) return '';
+
+  const headers = Object.keys(items[0]);
+  const csvRows = [
+    headers.join(','), // Header row
+    ...items.map(row => 
+      headers.map(fieldName => 
+        JSON.stringify(row[fieldName] ?? '')
+      ).join(',')
+    )
+  ];
+
+  return csvRows.join('\n');
 }
 
 export async function createBackup() {
@@ -33,34 +54,43 @@ export async function createBackup() {
   await ensureBackupDir();
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const backupPath = path.join(backupDir, `backup-${timestamp}.sql`);
-
-  console.log('Preparing pg_dump command...');
-
-  // Use -Fp for plain text format and only backup the data we need
-  const command = `pg_dump "${process.env.DATABASE_URL}" \
-    --data-only \
-    --no-owner \
-    --no-privileges \
-    --no-comments \
-    --table=public.snippets \
-    --table=public.votes \
-    -f "${backupPath}"`;
+  const backupDirPath = path.join(backupDir, `backup-${timestamp}`);
+  await fs.mkdir(backupDirPath, { recursive: true });
 
   try {
-    console.log('Executing backup...');
-    const { stdout, stderr } = await execAsync(command);
+    console.log('Fetching data from tables...');
 
-    if (stderr) {
-      console.log('pg_dump messages:', stderr);
-    }
+    // Export snippets table
+    const snippetsData = await db.select().from(snippets);
+    const snippetsCSV = objectToCSV(snippetsData);
+    await fs.writeFile(path.join(backupDirPath, 'snippets.csv'), snippetsCSV);
 
-    if (stdout) {
-      console.log('pg_dump output:', stdout);
-    }
+    // Export votes table
+    const votesData = await db.select().from(votes);
+    const votesCSV = objectToCSV(votesData);
+    await fs.writeFile(path.join(backupDirPath, 'votes.csv'), votesCSV);
 
-    console.log(`Backup created successfully at ${backupPath}`);
-    return backupPath;
+    // Create zip file
+    const zipPath = path.join(backupDir, `backup-${timestamp}.zip`);
+    const output = createWriteStream(zipPath);
+    const archive = archiver('zip', {
+      zlib: { level: 9 } // Maximum compression
+    });
+
+    archive.pipe(output);
+    archive.directory(backupDirPath, false);
+
+    await new Promise((resolve, reject) => {
+      output.on('close', resolve);
+      archive.on('error', reject);
+      archive.finalize();
+    });
+
+    // Clean up the temporary directory
+    await fs.rm(backupDirPath, { recursive: true });
+
+    console.log(`Backup created successfully at ${zipPath}`);
+    return zipPath;
   } catch (error) {
     console.error('Error creating backup:', error);
     throw error;
@@ -74,31 +104,69 @@ export async function restoreFromBackup(backupPath: string) {
     throw new Error('DATABASE_URL environment variable is not set');
   }
 
-  console.log('Preparing to restore from:', backupPath);
+  if (!backupPath.endsWith('.zip')) {
+    throw new Error('Invalid backup file format. Expected a zip file.');
+  }
 
-  // Drop existing connections except our own
-  const dropConnectionsCommand = `psql "${process.env.DATABASE_URL}" -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid <> pg_backend_pid() AND datname = current_database();"`;
-
-  // Use psql to restore the plain text backup
-  const restoreCommand = `psql "${process.env.DATABASE_URL}" -f "${backupPath}"`;
+  const tempDir = path.join(backupDir, 'temp-restore');
 
   try {
-    console.log('Terminating existing connections...');
-    const { stdout: dropOut, stderr: dropErr } = await execAsync(dropConnectionsCommand);
+    // Create temporary directory for extraction
+    await fs.mkdir(tempDir, { recursive: true });
 
-    if (dropErr) console.log('Connection termination messages:', dropErr);
-    if (dropOut) console.log('Connection termination output:', dropOut);
+    // Extract zip file
+    await execAsync(`unzip "${backupPath}" -d "${tempDir}"`);
 
-    console.log('Restoring from backup...');
-    const { stdout, stderr } = await execAsync(restoreCommand);
+    // Read and parse CSV files
+    const snippetsCSV = await fs.readFile(path.join(tempDir, 'snippets.csv'), 'utf-8');
+    const votesCSV = await fs.readFile(path.join(tempDir, 'votes.csv'), 'utf-8');
 
-    if (stderr) console.log('Restore messages:', stderr);
-    if (stdout) console.log('Restore output:', stdout);
+    // Parse CSV data
+    const parseCSV = (csv: string) => {
+      const [headers, ...rows] = csv.split('\n');
+      const fields = headers.split(',');
+      return rows.map(row => {
+        const values = row.split(',');
+        return fields.reduce((obj: any, field, index) => {
+          obj[field] = JSON.parse(values[index] || 'null');
+          return obj;
+        }, {});
+      });
+    };
+
+    const snippetsData = parseCSV(snippetsCSV);
+    const votesData = parseCSV(votesCSV);
+
+    // Drop existing connections except our own
+    await db.execute(sql`
+      SELECT pg_terminate_backend(pid) 
+      FROM pg_stat_activity 
+      WHERE pid <> pg_backend_pid() 
+      AND datname = current_database();
+    `);
+
+    // Restore data
+    await db.transaction(async (tx) => {
+      // Clear existing data
+      await tx.delete(votes);
+      await tx.delete(snippets);
+
+      // Insert new data
+      for (const snippet of snippetsData) {
+        await tx.insert(snippets).values(snippet);
+      }
+      for (const vote of votesData) {
+        await tx.insert(votes).values(vote);
+      }
+    });
 
     console.log('Database restored successfully from', backupPath);
   } catch (error) {
     console.error('Error restoring backup:', error);
     throw error;
+  } finally {
+    // Clean up temporary directory
+    await fs.rm(tempDir, { recursive: true }).catch(console.error);
   }
 }
 

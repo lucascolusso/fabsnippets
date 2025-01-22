@@ -7,7 +7,8 @@ import multer from "multer";
 import path from "path";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import fs from 'fs/promises';
+import fs from 'fs';
+import { promises as fsPromises } from 'fs';
 import { createBackup, restoreFromBackup } from '../scripts/dbBackup';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -19,9 +20,9 @@ const uploadsDir = path.join(__dirname, '../uploads');
 // Initialize directories
 async function initializeDirectories() {
   try {
-    await fs.access(uploadsDir);
+    await fsPromises.access(uploadsDir);
   } catch {
-    await fs.mkdir(uploadsDir, { recursive: true });
+    await fsPromises.mkdir(uploadsDir, { recursive: true });
   }
 }
 
@@ -80,16 +81,16 @@ export function registerRoutes(app: Express): Server {
   app.get("/api/backups", async (_req, res) => {
     try {
       const backupDir = path.join(__dirname, '../backups');
-      const files = await fs.readdir(backupDir);
+      const files = await fsPromises.readdir(backupDir);
       const backupFiles = await Promise.all(
         files
-          .filter(file => file.startsWith('backup-') && file.endsWith('.sql'))
+          .filter(file => file.startsWith('backup-') && file.endsWith('.zip'))
           .map(async (filename) => {
             const filePath = path.join(backupDir, filename);
-            const stats = await fs.stat(filePath);
+            const stats = await fsPromises.stat(filePath);
             return {
               filename,
-              timestamp: filename.split('-')[1], // Extract timestamp from filename
+              timestamp: new Date(stats.birthtime).toISOString(),
               size: stats.size
             };
           })
@@ -122,7 +123,7 @@ export function registerRoutes(app: Express): Server {
       const backupPath = path.join(backupDir, filename);
 
       // Security check: ensure the file exists and is within backups directory
-      await fs.access(backupPath);
+      await fsPromises.access(backupPath);
 
       await restoreFromBackup(backupPath);
       res.json({ message: 'Database restored successfully' });
@@ -132,7 +133,6 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Add download route to the Backup Management Routes section
   app.get("/api/backups/download/:filename", async (req, res) => {
     try {
       const { filename } = req.params;
@@ -140,13 +140,13 @@ export function registerRoutes(app: Express): Server {
       const filePath = path.join(backupDir, filename);
 
       // Security check: ensure the file exists and is within backups directory
-      await fs.access(filePath);
+      await fsPromises.access(filePath);
 
       // Set headers for file download
-      res.setHeader('Content-Type', 'application/sql');
+      res.setHeader('Content-Type', 'application/zip');
       res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
 
-      // Stream the file
+      // Create read stream and pipe to response
       const fileStream = fs.createReadStream(filePath);
       fileStream.pipe(res);
     } catch (error) {
