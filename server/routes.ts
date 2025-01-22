@@ -81,6 +81,15 @@ export function registerRoutes(app: Express): Server {
   app.get("/api/backups", async (_req, res) => {
     try {
       const backupDir = path.join(__dirname, '../backups');
+
+      // Ensure backup directory exists
+      try {
+        await fsPromises.access(backupDir);
+      } catch {
+        await fsPromises.mkdir(backupDir, { recursive: true });
+        return res.json([]); // Return empty array if directory was just created
+      }
+
       const files = await fsPromises.readdir(backupDir);
       const backupFiles = await Promise.all(
         files
@@ -108,11 +117,16 @@ export function registerRoutes(app: Express): Server {
 
   app.post("/api/backups", async (_req, res) => {
     try {
+      console.log('Starting backup creation...');
       const backupPath = await createBackup();
+      console.log('Backup created successfully at:', backupPath);
       res.json({ message: 'Backup created successfully', path: backupPath });
     } catch (error) {
       console.error('Error creating backup:', error);
-      res.status(500).json({ message: 'Failed to create backup' });
+      res.status(500).json({ 
+        message: 'Failed to create backup',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 
@@ -129,7 +143,10 @@ export function registerRoutes(app: Express): Server {
       res.json({ message: 'Database restored successfully' });
     } catch (error) {
       console.error('Error restoring backup:', error);
-      res.status(500).json({ message: 'Failed to restore backup' });
+      res.status(500).json({ 
+        message: 'Failed to restore backup',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 
@@ -151,7 +168,10 @@ export function registerRoutes(app: Express): Server {
       fileStream.pipe(res);
     } catch (error) {
       console.error('Error downloading backup:', error);
-      res.status(500).json({ message: 'Failed to download backup' });
+      res.status(500).json({ 
+        message: 'Failed to download backup',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 
