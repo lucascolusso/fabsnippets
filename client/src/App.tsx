@@ -22,10 +22,6 @@ function App() {
     );
   }
 
-  if (!user && location !== "/auth") {
-    return <AuthPage />;
-  }
-
   return (
     <div className="min-h-screen pt-14">
       <nav className="border-b fixed top-0 left-0 right-0 z-50 bg-gray-900">
@@ -63,7 +59,13 @@ function App() {
                   </Button>
                   <NewSnippetModal />
                 </>
-              ) : null}
+              ) : (
+                <Link href="/auth">
+                  <Button variant="ghost" className="text-white hover:text-primary/90">
+                    Login / Sign Up
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -75,7 +77,7 @@ function App() {
         <Route path="/leaderboard" component={Leaderboard} />
         <Route path="/profile/:name" component={Profile} />
         <Route path="/snippet/:id" component={SnippetPage} />
-        <Route path="/backups" component={BackupManagement} />
+        {user?.isAdmin && <Route path="/backups" component={BackupManagement} />}
       </Switch>
     </div>
   );
