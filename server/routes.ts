@@ -343,27 +343,61 @@ export function registerRoutes(app: Express): Server {
   app.get("/api/authors/:name", async (req, res) => {
     const authorName = req.params.name;
     try {
-      const authorSnippets = await db
+      // First get the author's user record
+      const [author] = await db
         .select()
+        .from(users)
+        .where(eq(users.username, authorName))
+        .limit(1);
+
+      if (!author) {
+        return res.status(404).json({ message: "Author not found" });
+      }
+
+      // Get all snippets by the author
+      const authorSnippets = await db
+        .select({
+          id: snippets.id,
+          title: snippets.title,
+          code: snippets.code,
+          category: snippets.category,
+          authorId: snippets.authorId,
+          authorUsername: users.username,
+          authorWebsite: users.website,
+          imagePath: snippets.imagePath,
+          createdAt: snippets.createdAt,
+          votes: snippets.votes,
+        })
         .from(snippets)
-        .where(eq(snippets.authorName, authorName))
+        .leftJoin(users, eq(snippets.authorId, users.id))
+        .where(eq(snippets.authorId, author.id))
         .orderBy(desc(snippets.createdAt));
 
+      // Calculate leaderboard positions
       const categories = ['TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery', 'all'];
       const leaderboards = await Promise.all(
         categories.map(async (category) => {
-          const query = db.select().from(snippets);
-          const board = category === 'all' 
-            ? await query.orderBy(desc(snippets.votes))
-            : await query.where(eq(snippets.category, category)).orderBy(desc(snippets.votes));
+          const query = db
+            .select({
+              id: snippets.id,
+              authorId: snippets.authorId,
+              votes: snippets.votes,
+            })
+            .from(snippets)
+            .orderBy(desc(snippets.votes));
 
-          const position = board.findIndex(s => s.authorName === authorName) + 1;
+          const board = category === 'all'
+            ? await query
+            : await query.where(eq(snippets.category, category));
+
+          const position = board.findIndex(s => s.authorId === author.id) + 1;
           return { category, position: position || null };
         })
       );
 
       res.json({ snippets: authorSnippets, leaderboards });
     } catch (error) {
+      console.error('Error fetching author details:', error);
       res.status(500).json({ message: 'Error fetching author details' });
     }
   });
