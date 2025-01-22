@@ -195,4 +195,51 @@ export function setupAuth(app: Express) {
 
     res.status(401).send("Not logged in");
   });
+
+  // Add new profile update endpoint
+  app.put("/api/user/profile", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Not logged in");
+    }
+
+    const { username, email, website } = req.body;
+
+    try {
+      // Check if username already exists (if username is being changed)
+      if (username !== req.user.username) {
+        const [existingUser] = await db
+          .select()
+          .from(users)
+          .where(eq(users.username, username))
+          .limit(1);
+
+        if (existingUser) {
+          return res.status(400).send("Username already exists");
+        }
+      }
+
+      // Update user profile
+      const [updatedUser] = await db
+        .update(users)
+        .set({
+          username,
+          email,
+          website
+        })
+        .where(eq(users.id, req.user.id))
+        .returning();
+
+      // Update session
+      req.login(updatedUser, (err) => {
+        if (err) {
+          return res.status(500).send("Failed to update session");
+        }
+        res.json(updatedUser);
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to update profile"
+      });
+    }
+  });
 }
