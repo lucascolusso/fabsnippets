@@ -5,9 +5,27 @@ import { Profile } from "./pages/Profile";
 import { SnippetPage } from "./pages/SnippetPage";
 import { BackupManagement } from "./pages/BackupManagement";
 import { NewSnippetModal } from "./components/NewSnippetModal";
+import { AuthPage } from "./pages/AuthPage";
+import { useUser } from "./hooks/use-user";
+import { Loader2 } from "lucide-react";
+import { Button } from "./components/ui/button";
 
 function App() {
   const [location] = useLocation();
+  const { user, isLoading, logout } = useUser();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-border" />
+      </div>
+    );
+  }
+
+  if (!user && location !== "/auth") {
+    return <AuthPage />;
+  }
+
   return (
     <div className="min-h-screen pt-14">
       <nav className="border-b fixed top-0 left-0 right-0 z-50 bg-gray-900">
@@ -28,13 +46,32 @@ function App() {
                 Leaderboard
               </Link>
             </div>
-            <NewSnippetModal />
+            <div className="flex items-center gap-4">
+              {user ? (
+                <>
+                  <Link href={`/profile/${user.username}`}>
+                    <Button variant="ghost" className="text-white hover:text-primary/90">
+                      Profile
+                    </Button>
+                  </Link>
+                  <Button 
+                    variant="ghost" 
+                    className="text-white hover:text-primary/90"
+                    onClick={() => logout()}
+                  >
+                    Logout
+                  </Button>
+                  <NewSnippetModal />
+                </>
+              ) : null}
+            </div>
           </div>
         </div>
       </nav>
 
       <Switch>
         <Route path="/" component={Home} />
+        <Route path="/auth" component={AuthPage} />
         <Route path="/leaderboard" component={Leaderboard} />
         <Route path="/profile/:name" component={Profile} />
         <Route path="/snippet/:id" component={SnippetPage} />

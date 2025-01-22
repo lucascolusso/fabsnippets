@@ -1,7 +1,7 @@
 import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import { db } from "@db";
-import { snippets, votes } from "@db/schema";
+import { snippets, votes, users } from "@db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import multer from "multer";
 import path from "path";
@@ -10,6 +10,7 @@ import { dirname } from 'path';
 import fs from 'fs';
 import { promises as fsPromises } from 'fs';
 import { createBackup, restoreFromBackup } from '../scripts/dbBackup';
+import { setupAuth } from './auth';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -50,6 +51,9 @@ export function registerRoutes(app: Express): Server {
   // Initialize directories before setting up routes
   initializeDirectories().catch(console.error);
 
+  // Setup authentication
+  setupAuth(app);
+
   // Serve static files from uploads directory
   app.use('/uploads', express.static(uploadsDir));
 
@@ -57,23 +61,34 @@ export function registerRoutes(app: Express): Server {
 
   // Create tables if they don't exist
   db.execute(sql`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      username VARCHAR(100) NOT NULL UNIQUE,
+      password TEXT NOT NULL,
+      email TEXT UNIQUE,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    );
+
     CREATE TABLE IF NOT EXISTS snippets (
       id SERIAL PRIMARY KEY,
       title VARCHAR(200) NOT NULL,
       code TEXT NOT NULL,
       category VARCHAR(20) NOT NULL,
+      author_id INTEGER NOT NULL REFERENCES users(id),
       author_name VARCHAR(100) NOT NULL,
       author_website TEXT,
       image_path TEXT,
       created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
       votes INTEGER NOT NULL DEFAULT 0
     );
 
     CREATE TABLE IF NOT EXISTS votes (
       id SERIAL PRIMARY KEY,
       snippet_id INTEGER NOT NULL REFERENCES snippets(id),
-      ip_address VARCHAR(45) NOT NULL,
-      created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      user_id INTEGER NOT NULL REFERENCES users(id),
+      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      UNIQUE(snippet_id, user_id)
     );
   `);
 
