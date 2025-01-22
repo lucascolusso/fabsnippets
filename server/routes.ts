@@ -7,28 +7,33 @@ import multer from "multer";
 import path from "path";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import fs from 'fs';
+import fs from 'fs/promises';
+import { createBackup, restoreFromBackup } from '../scripts/dbBackup';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
+
+// Initialize directories
+async function initializeDirectories() {
+  try {
+    await fs.access(uploadsDir);
+  } catch {
+    await fs.mkdir(uploadsDir, { recursive: true });
+  }
 }
 
 const upload = multer({
   storage: multer.diskStorage({
     destination: uploadsDir,
     filename: (req, file, cb) => {
-      // Generate a unique filename with original extension
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
       cb(null, uniqueSuffix + path.extname(file.originalname));
     }
   }),
   fileFilter: (_req, file, cb) => {
-    // Only accept images
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
@@ -41,6 +46,9 @@ const upload = multer({
 });
 
 export function registerRoutes(app: Express): Server {
+  // Initialize directories before setting up routes
+  initializeDirectories().catch(console.error);
+
   // Serve static files from uploads directory
   app.use('/uploads', express.static(uploadsDir));
 
@@ -67,6 +75,62 @@ export function registerRoutes(app: Express): Server {
       created_at TIMESTAMP NOT NULL DEFAULT NOW()
     );
   `);
+
+  // Backup Management Routes
+  app.get("/api/backups", async (_req, res) => {
+    try {
+      const backupDir = path.join(__dirname, '../backups');
+      const files = await fs.readdir(backupDir);
+      const backupFiles = await Promise.all(
+        files
+          .filter(file => file.startsWith('backup-') && file.endsWith('.sql'))
+          .map(async (filename) => {
+            const filePath = path.join(backupDir, filename);
+            const stats = await fs.stat(filePath);
+            return {
+              filename,
+              timestamp: filename.split('-')[1], // Extract timestamp from filename
+              size: stats.size
+            };
+          })
+      );
+
+      // Sort by timestamp descending (most recent first)
+      backupFiles.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+
+      res.json(backupFiles);
+    } catch (error) {
+      console.error('Error listing backups:', error);
+      res.status(500).json({ message: 'Failed to list backups' });
+    }
+  });
+
+  app.post("/api/backups", async (_req, res) => {
+    try {
+      const backupPath = await createBackup();
+      res.json({ message: 'Backup created successfully', path: backupPath });
+    } catch (error) {
+      console.error('Error creating backup:', error);
+      res.status(500).json({ message: 'Failed to create backup' });
+    }
+  });
+
+  app.post("/api/backups/restore/:filename", async (req, res) => {
+    try {
+      const { filename } = req.params;
+      const backupDir = path.join(__dirname, '../backups');
+      const backupPath = path.join(backupDir, filename);
+
+      // Security check: ensure the file exists and is within backups directory
+      await fs.access(backupPath);
+
+      await restoreFromBackup(backupPath);
+      res.json({ message: 'Database restored successfully' });
+    } catch (error) {
+      console.error('Error restoring backup:', error);
+      res.status(500).json({ message: 'Failed to restore backup' });
+    }
+  });
 
   // Create new snippet with image upload
   app.post("/api/snippets", upload.single('image'), async (req, res) => {
