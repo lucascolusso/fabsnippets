@@ -264,12 +264,20 @@ export function registerRoutes(app: Express): Server {
   // Vote for a snippet
   app.post("/api/snippets/:id/vote", async (req, res) => {
     const snippetId = parseInt(req.params.id);
-    const ipAddress = req.ip;
 
     try {
+      // Get user ID if authenticated, otherwise use IP address as identifier
+      const userId = req.isAuthenticated() ? req.user.id : null;
+      if (!userId) {
+        return res.status(401).json({ message: "Must be logged in to vote" });
+      }
+
       // Check if already voted
       const existingVote = await db.query.votes.findFirst({
-        where: eq(votes.snippetId, snippetId)
+        where: eq(votes.snippetId, snippetId),
+        columns: {
+          id: true
+        }
       });
 
       if (existingVote) {
@@ -279,8 +287,8 @@ export function registerRoutes(app: Express): Server {
       await db.transaction(async (tx) => {
         // Insert the vote
         await tx.insert(votes).values({
-          snippetId: snippetId,
-          ipAddress: ipAddress
+          snippetId,
+          userId,
         });
 
         // Increment the votes count
@@ -292,6 +300,7 @@ export function registerRoutes(app: Express): Server {
 
       res.json({ success: true });
     } catch (error) {
+      console.error('Error recording vote:', error);
       res.status(500).json({ message: 'Error recording vote' });
     }
   });
@@ -325,16 +334,32 @@ export function registerRoutes(app: Express): Server {
   app.get("/api/leaderboard", async (req, res) => {
     const { category } = req.query;
     try {
-      const query = db.select().from(snippets);
+      const query = db
+        .select({
+          id: snippets.id,
+          title: snippets.title,
+          code: snippets.code,
+          category: snippets.category,
+          authorId: snippets.authorId,
+          authorUsername: users.username,
+          authorWebsite: users.website,
+          imagePath: snippets.imagePath,
+          createdAt: snippets.createdAt,
+          votes: snippets.votes,
+        })
+        .from(snippets)
+        .leftJoin(users, eq(snippets.authorId, users.id))
+        .orderBy(desc(snippets.votes));
 
       if (category && typeof category === 'string') {
         const filteredSnippets = await query.where(eq(snippets.category, category));
         return res.json(filteredSnippets);
       }
 
-      const allSnippets = await query.orderBy(desc(snippets.votes));
+      const allSnippets = await query;
       res.json(allSnippets);
     } catch (error) {
+      console.error('Error fetching leaderboard:', error);
       res.status(500).json({ message: 'Error fetching leaderboard' });
     }
   });
@@ -399,6 +424,77 @@ export function registerRoutes(app: Express): Server {
     } catch (error) {
       console.error('Error fetching author details:', error);
       res.status(500).json({ message: 'Error fetching author details' });
+    }
+  });
+
+  // Update snippet
+  app.put("/api/snippets/:id", upload.single('image'), async (req, res) => {
+    const snippetId = parseInt(req.params.id);
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not logged in" });
+      }
+
+      // Get the existing snippet
+      const [snippet] = await db
+        .select()
+        .from(snippets)
+        .where(eq(snippets.id, snippetId))
+        .limit(1);
+
+      if (!snippet) {
+        return res.status(404).json({ message: "Snippet not found" });
+      }
+
+      // Check if user is the author
+      if (snippet.authorId !== req.user.id) {
+        return res.status(403).json({ message: "Not authorized to edit this snippet" });
+      }
+
+      const { title, code, category } = req.body;
+      const updateData: Partial<typeof snippets.$inferInsert> = {
+        title,
+        code,
+        category,
+        updatedAt: new Date(),
+      };
+
+      // Only update image if a new one is provided
+      if (req.file?.filename) {
+        updateData.imagePath = req.file.filename;
+      }
+
+      const [updatedSnippet] = await db
+        .update(snippets)
+        .set(updateData)
+        .where(eq(snippets.id, snippetId))
+        .returning();
+
+      // Fetch complete snippet with author information
+      const [snippetWithAuthor] = await db
+        .select({
+          id: snippets.id,
+          title: snippets.title,
+          code: snippets.code,
+          category: snippets.category,
+          authorId: snippets.authorId,
+          authorUsername: users.username,
+          authorWebsite: users.website,
+          imagePath: snippets.imagePath,
+          createdAt: snippets.createdAt,
+          votes: snippets.votes,
+        })
+        .from(snippets)
+        .where(eq(snippets.id, updatedSnippet.id))
+        .leftJoin(users, eq(snippets.authorId, users.id))
+        .limit(1);
+
+      res.json(snippetWithAuthor);
+    } catch (error) {
+      console.error('Error updating snippet:', error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Error updating snippet" 
+      });
     }
   });
 
