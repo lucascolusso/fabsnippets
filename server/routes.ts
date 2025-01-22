@@ -8,6 +8,7 @@ import path from "path";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import fs from 'fs';
+import { setupAuth } from "./auth";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -22,13 +23,11 @@ const upload = multer({
   storage: multer.diskStorage({
     destination: uploadsDir,
     filename: (req, file, cb) => {
-      // Generate a unique filename with original extension
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
       cb(null, uniqueSuffix + path.extname(file.originalname));
     }
   }),
   fileFilter: (_req, file, cb) => {
-    // Only accept images
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
@@ -40,7 +39,18 @@ const upload = multer({
   }
 });
 
+// Authentication middleware
+const requireAuth = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.status(401).send("Authentication required");
+};
+
 export function registerRoutes(app: Express): Server {
+  // Set up authentication
+  setupAuth(app);
+
   // Serve static files from uploads directory
   app.use('/uploads', express.static(uploadsDir));
 
@@ -48,11 +58,22 @@ export function registerRoutes(app: Express): Server {
 
   // Create tables if they don't exist
   db.execute(sql`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      username VARCHAR(100) NOT NULL UNIQUE,
+      email VARCHAR(255) NOT NULL UNIQUE,
+      password TEXT NOT NULL,
+      password_reset_token TEXT,
+      reset_token_expiry TIMESTAMP,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    );
+
     CREATE TABLE IF NOT EXISTS snippets (
       id SERIAL PRIMARY KEY,
       title VARCHAR(200) NOT NULL,
       code TEXT NOT NULL,
       category VARCHAR(20) NOT NULL,
+      author_id INTEGER NOT NULL REFERENCES users(id),
       author_name VARCHAR(100) NOT NULL,
       author_website TEXT,
       image_path TEXT,
@@ -63,22 +84,24 @@ export function registerRoutes(app: Express): Server {
     CREATE TABLE IF NOT EXISTS votes (
       id SERIAL PRIMARY KEY,
       snippet_id INTEGER NOT NULL REFERENCES snippets(id),
-      ip_address VARCHAR(45) NOT NULL,
-      created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      user_id INTEGER NOT NULL REFERENCES users(id),
+      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      UNIQUE(snippet_id, user_id)
     );
   `);
 
-  // Create new snippet with image upload
-  app.post("/api/snippets", upload.single('image'), async (req, res) => {
+  // Create new snippet with image upload (protected route)
+  app.post("/api/snippets", requireAuth, upload.single('image'), async (req, res) => {
     try {
-      const { title, code, category, authorName, authorWebsite } = req.body;
+      const { title, code, category, authorWebsite } = req.body;
       const imagePath = req.file?.filename;
 
       const [newSnippet] = await db.insert(snippets).values({
         title,
         code,
         category,
-        authorName,
+        authorId: req.user!.id,
+        authorName: req.user!.username,
         authorWebsite,
         imagePath
       }).returning();
@@ -116,15 +139,17 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Vote for a snippet
-  app.post("/api/snippets/:id/vote", async (req, res) => {
+  // Vote for a snippet (protected route)
+  app.post("/api/snippets/:id/vote", requireAuth, async (req, res) => {
     const snippetId = parseInt(req.params.id);
-    const ipAddress = req.ip;
 
     try {
       // Check if already voted
       const existingVote = await db.query.votes.findFirst({
-        where: eq(votes.snippetId, snippetId)
+        where: eq(votes.snippetId, snippetId),
+        with: {
+          user: true
+        }
       });
 
       if (existingVote) {
@@ -134,8 +159,8 @@ export function registerRoutes(app: Express): Server {
       await db.transaction(async (tx) => {
         // Insert the vote
         await tx.insert(votes).values({
-          snippetId: snippetId,
-          ipAddress: ipAddress
+          snippetId,
+          userId: req.user!.id
         });
 
         // Increment the votes count
@@ -184,35 +209,6 @@ export function registerRoutes(app: Express): Server {
       res.json(allSnippets);
     } catch (error) {
       res.status(500).json({ message: 'Error fetching leaderboard' });
-    }
-  });
-
-  // Get author details and snippets
-  app.get("/api/authors/:name", async (req, res) => {
-    const authorName = req.params.name;
-    try {
-      const authorSnippets = await db
-        .select()
-        .from(snippets)
-        .where(eq(snippets.authorName, authorName))
-        .orderBy(desc(snippets.createdAt));
-
-      const categories = ['TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery', 'all'];
-      const leaderboards = await Promise.all(
-        categories.map(async (category) => {
-          const query = db.select().from(snippets);
-          const board = category === 'all' 
-            ? await query.orderBy(desc(snippets.votes))
-            : await query.where(eq(snippets.category, category)).orderBy(desc(snippets.votes));
-
-          const position = board.findIndex(s => s.authorName === authorName) + 1;
-          return { category, position: position || null };
-        })
-      );
-
-      res.json({ snippets: authorSnippets, leaderboards });
-    } catch (error) {
-      res.status(500).json({ message: 'Error fetching author details' });
     }
   });
 
