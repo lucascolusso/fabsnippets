@@ -1,14 +1,20 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CodeEditor } from "./CodeEditor";
-import { Copy, ThumbsUp, CheckCircle2, Image } from "lucide-react";
+import { Copy, ThumbsUp, CheckCircle2, Image, Edit2 } from "lucide-react";
 import { Link } from "wouter";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { Snippet } from "@/lib/types";
+import type { Snippet, CodeCategory } from "@/lib/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useUser } from "@/hooks/use-user";
 
 interface SnippetCardProps {
   snippet: Snippet;
@@ -19,6 +25,16 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
   const [isCopied, setIsCopied] = useState(false);
   const [showImage, setShowImage] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const { user } = useUser();
+
+  const form = useForm({
+    defaultValues: {
+      title: snippet.title,
+      code: snippet.code,
+      category: snippet.category
+    }
+  });
 
   const handleImageError = () => {
     setImageError(true);
@@ -28,6 +44,34 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
       variant: "destructive"
     });
   };
+
+  const updateMutation = useMutation({
+    mutationFn: async (data: { title: string; code: string; category: CodeCategory }) => {
+      const res = await fetch(`/api/snippets/${snippet.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data)
+      });
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/snippets"] });
+      setIsEditing(false);
+      toast({
+        title: "Snippet updated",
+        description: "Your changes have been saved."
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
 
   const voteMutation = useMutation({
     mutationFn: async () => {
@@ -80,6 +124,12 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
     }
   };
 
+  const onSubmit = (data: { title: string; code: string; category: CodeCategory }) => {
+    updateMutation.mutate(data);
+  };
+
+  const isAuthor = user?.id === snippet.authorId;
+
   return (
     <Card className="w-full shadow-md">
       <CardContent className="p-2 space-y-2">
@@ -92,24 +142,95 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
               {snippet.category}
             </span>
           </div>
-          <Button variant="outline" size="sm" onClick={handleCopy}>
-            {isCopied ? (
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
-            ) : (
-              <Copy className="h-4 w-4" />
+          <div className="flex gap-2">
+            {isAuthor && (
+              <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                <Edit2 className="h-4 w-4" />
+              </Button>
             )}
-          </Button>
-        </div>
-        <ScrollArea className="h-[200px]">
-          <div>
-            <CodeEditor
-              value={snippet.code}
-              onChange={() => {}}
-              readOnly
-              className="text-[11px] h-full font-mono"
-            />
+            <Button variant="outline" size="sm" onClick={handleCopy}>
+              {isCopied ? (
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
+            </Button>
           </div>
-        </ScrollArea>
+        </div>
+
+        {isEditing ? (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Title</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="TMDL">TMDL</SelectItem>
+                        <SelectItem value="DAX">DAX</SelectItem>
+                        <SelectItem value="SQL">SQL</SelectItem>
+                        <SelectItem value="Python">Python</SelectItem>
+                        <SelectItem value="PowerQuery">PowerQuery</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Code</FormLabel>
+                    <FormControl>
+                      <CodeEditor {...field} className="text-[11px] h-full font-mono" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <div className="flex gap-2">
+                <Button type="submit" disabled={updateMutation.isPending}>
+                  {updateMutation.isPending ? "Saving..." : "Save"}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </Form>
+        ) : (
+          <ScrollArea className="h-[200px]">
+            <div>
+              <CodeEditor
+                value={snippet.code}
+                onChange={() => {}}
+                readOnly
+                className="text-[11px] h-full font-mono"
+              />
+            </div>
+          </ScrollArea>
+        )}
+
         <div className="flex flex-wrap items-center justify-between gap-1 pt-1">
           <div className="flex items-center gap-0.5 text-xs text-muted-foreground">
             <span>Submitted by</span>
