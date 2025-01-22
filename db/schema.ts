@@ -17,7 +17,7 @@ export const snippets = pgTable("snippets", {
   title: varchar("title", { length: 200 }).notNull(),
   code: text("code").notNull(),
   category: varchar("category", { length: 20 }).notNull(),
-  authorId: integer("author_id").notNull().references(() => users.id),
+  authorId: integer("author_id"),
   authorName: varchar("author_name", { length: 100 }).notNull(),
   authorWebsite: text("author_website"),
   imagePath: text("image_path"),
@@ -28,7 +28,7 @@ export const snippets = pgTable("snippets", {
 export const votes = pgTable("votes", {
   id: serial("id").primaryKey(),
   snippetId: integer("snippet_id").notNull().references(() => snippets.id),
-  userId: integer("user_id").notNull().references(() => users.id),
+  userId: integer("user_id").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow().notNull()
 });
 
@@ -64,8 +64,8 @@ export const insertSnippetSchema = createInsertSchema(snippets);
 export const selectSnippetSchema = createSelectSchema(snippets);
 
 // TypeScript types
+export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
-export type SelectUser = typeof users.$inferSelect;
 export type Snippet = typeof snippets.$inferSelect;
 export type NewSnippet = typeof snippets.$inferInsert;
 export type Vote = typeof votes.$inferSelect;
