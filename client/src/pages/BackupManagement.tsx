@@ -82,6 +82,10 @@ export function BackupManagement() {
     },
   });
 
+  const handleDownload = (filename: string) => {
+    window.location.href = `/api/backups/download/${filename}`;
+  };
+
   return (
     <div className="container mx-auto py-10">
       <Card>
@@ -122,7 +126,14 @@ export function BackupManagement() {
                     </TableCell>
                     <TableCell>{backup.filename}</TableCell>
                     <TableCell>{(backup.size / 1024).toFixed(2)} KB</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDownload(backup.filename)}
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"

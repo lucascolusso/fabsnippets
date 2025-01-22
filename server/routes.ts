@@ -132,6 +132,30 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Add download route to the Backup Management Routes section
+  app.get("/api/backups/download/:filename", async (req, res) => {
+    try {
+      const { filename } = req.params;
+      const backupDir = path.join(__dirname, '../backups');
+      const filePath = path.join(backupDir, filename);
+
+      // Security check: ensure the file exists and is within backups directory
+      await fs.access(filePath);
+
+      // Set headers for file download
+      res.setHeader('Content-Type', 'application/sql');
+      res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+
+      // Stream the file
+      const fileStream = fs.createReadStream(filePath);
+      fileStream.pipe(res);
+    } catch (error) {
+      console.error('Error downloading backup:', error);
+      res.status(500).json({ message: 'Failed to download backup' });
+    }
+  });
+
+
   // Create new snippet with image upload
   app.post("/api/snippets", upload.single('image'), async (req, res) => {
     try {
