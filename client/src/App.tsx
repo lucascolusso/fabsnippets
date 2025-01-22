@@ -28,7 +28,7 @@ function App() {
         <div className="container mx-auto px-4">
           <div className="flex h-14 items-center justify-between">
             <Link href="/" className="text-base font-bold text-white">FabSnippets</Link>
-            <div className="flex-1 flex items-center justify-center gap-8">
+            <div className="flex-1 flex items-center justify-center gap-4">
               <Link 
                 href="/" 
                 className={`text-sm font-medium transition-colors relative ${location === "/" ? "font-bold bg-black text-white after:scale-x-100 after:bg-teal-500 after:h-[2px]" : "hover:after:scale-x-100 hover:text-primary/90"} after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary after:scale-x-0 after:transition-transform px-4 py-2 rounded-t-md`}
