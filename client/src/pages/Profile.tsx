@@ -83,9 +83,9 @@ export function Profile() {
 
   const form = useForm<ProfileFormData>({
     defaultValues: {
-      username: data?.user?.username || "",
-      email: data?.user?.email || "",
-      website: data?.user?.website || "",
+      username: currentUser?.username || "",
+      email: currentUser?.email || "",
+      website: currentUser?.website || "",
     },
   });
 
@@ -167,24 +167,22 @@ export function Profile() {
                 </Form>
               ) : (
                 <>
-                  <div className="flex items-center gap-2 mb-2">
-                    <h1 className="text-2xl font-bold">{authorName}</h1>
-                    {data.user?.website && (
-                      <a 
-                        href={data.user.website} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-blue-500 hover:underline inline-flex items-center gap-1"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                        {data.user.website}
-                      </a>
-                    )}
-                  </div>
+                  <h1 className="text-2xl font-bold mb-2">{authorName}</h1>
+                  {data.user?.website && (
+                    <a 
+                      href={data.user.website} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-500 hover:underline inline-flex items-center gap-1"
+                    >
+                      Visit website <ExternalLink className="h-4 w-4" />
+                    </a>
+                  )}
                   {isOwnProfile && (
                     <Button
                       variant="ghost"
                       size="sm"
+                      className="ml-4"
                       onClick={() => setIsEditing(true)}
                     >
                       <Edit2 className="h-4 w-4 mr-2" />
