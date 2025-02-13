@@ -185,6 +185,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
+                        <SelectItem value="Prompt">Prompt</SelectItem>
                         <SelectItem value="TMDL">TMDL</SelectItem>
                         <SelectItem value="DAX">DAX</SelectItem>
                         <SelectItem value="SQL">SQL</SelectItem>
