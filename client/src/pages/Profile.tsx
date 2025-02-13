@@ -167,22 +167,23 @@ export function Profile() {
                 </Form>
               ) : (
                 <>
-                  <h1 className="text-2xl font-bold mb-2">{authorName}</h1>
-                  {data.user?.website && (
-                    <a 
-                      href={data.user.website} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-500 hover:underline inline-flex items-center gap-1"
-                    >
-                      Visit website <ExternalLink className="h-4 w-4" />
-                    </a>
-                  )}
+                  <div className="flex items-center gap-2 mb-2">
+                    <h1 className="text-2xl font-bold">{authorName}</h1>
+                    {data.user?.website && (
+                      <a 
+                        href={data.user.website} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-500 hover:underline inline-flex items-center gap-1"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </a>
+                    )}
+                  </div>
                   {isOwnProfile && (
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="ml-4"
                       onClick={() => setIsEditing(true)}
                     >
                       <Edit2 className="h-4 w-4 mr-2" />
