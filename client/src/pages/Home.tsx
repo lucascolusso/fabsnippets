@@ -24,8 +24,8 @@ export function Home() {
   );
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-3xl">
-      <div className="space-y-4 mb-6">
+    <div className="container mx-auto py-6 px-4 max-w-3xl">
+      <div className="space-y-3 mb-4">
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
@@ -36,30 +36,30 @@ export function Home() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <div className="flex gap-2 overflow-x-auto pb-2 justify-center">
-        <Button
-          variant={selectedCategory === 'all' ? "ghost" : "outline"}
-          onClick={() => setSelectedCategory('all')}
-          className={cn(
-            "whitespace-nowrap",
-            selectedCategory === 'all' && "border-2 border-white font-bold"
-          )}
-        >
-          All Categories
-        </Button>
-        {categories.map((category) => (
+        <div className="flex gap-1 overflow-x-auto pb-1 justify-center">
           <Button
-            key={category}
-            variant={selectedCategory === category ? "ghost" : "outline"}
-            onClick={() => setSelectedCategory(category)}
+            variant={selectedCategory === 'all' ? "ghost" : "outline"}
+            onClick={() => setSelectedCategory('all')}
             className={cn(
-              "whitespace-nowrap",
-              selectedCategory === category && "border-2 border-white font-bold"
+              "whitespace-nowrap text-xs py-1 px-2 h-auto",
+              selectedCategory === 'all' && "border border-primary font-medium"
             )}
           >
-            {category}
+            All Categories
           </Button>
-        ))}
+          {categories.map((category) => (
+            <Button
+              key={category}
+              variant={selectedCategory === category ? "ghost" : "outline"}
+              onClick={() => setSelectedCategory(category)}
+              className={cn(
+                "whitespace-nowrap text-xs py-1 px-2 h-auto",
+                selectedCategory === category && "border border-primary font-medium"
+              )}
+            >
+              {category}
+            </Button>
+          ))}
         </div>
       </div>
 
