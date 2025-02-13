@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 const categories: CodeCategory[] = ['Prompt', 'TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery'];
 
 export function Home() {
-  const [selectedCategory, setSelectedCategory] = useState<CodeCategory | 'all'>('all');
+  const [selectedCategories, setSelectedCategories] = useState<Set<CodeCategory>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
   const { data: snippets, isLoading } = useQuery<Snippet[]>({
     queryKey: ['/api/snippets', searchTerm],
@@ -19,8 +19,24 @@ export function Home() {
     }
   });
 
+  const toggleCategory = (category: CodeCategory) => {
+    setSelectedCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(category)) {
+        newSet.delete(category);
+      } else {
+        newSet.add(category);
+      }
+      return newSet;
+    });
+  };
+
+  const clearCategories = () => {
+    setSelectedCategories(new Set());
+  };
+
   const filteredSnippets = snippets?.filter(snippet => 
-    selectedCategory === 'all' ? true : snippet.category === selectedCategory
+    selectedCategories.size === 0 ? true : selectedCategories.has(snippet.category)
   );
 
   return (
@@ -38,11 +54,11 @@ export function Home() {
         </div>
         <div className="flex gap-1 overflow-x-auto pb-1 justify-center">
           <Button
-            variant={selectedCategory === 'all' ? "ghost" : "outline"}
-            onClick={() => setSelectedCategory('all')}
+            variant={selectedCategories.size === 0 ? "ghost" : "outline"}
+            onClick={clearCategories}
             className={cn(
               "whitespace-nowrap text-xs py-1 px-2 h-auto",
-              selectedCategory === 'all' && "border border-primary font-medium"
+              selectedCategories.size === 0 && "border border-primary font-medium"
             )}
           >
             All Categories
@@ -50,11 +66,11 @@ export function Home() {
           {categories.map((category) => (
             <Button
               key={category}
-              variant={selectedCategory === category ? "ghost" : "outline"}
-              onClick={() => setSelectedCategory(category)}
+              variant={selectedCategories.has(category) ? "ghost" : "outline"}
+              onClick={() => toggleCategory(category)}
               className={cn(
                 "whitespace-nowrap text-xs py-1 px-2 h-auto",
-                selectedCategory === category && "border border-primary font-medium"
+                selectedCategories.has(category) && "border border-primary font-medium"
               )}
             >
               {category}
