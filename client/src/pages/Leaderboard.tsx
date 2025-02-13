@@ -74,11 +74,15 @@ export function Leaderboard() {
                       </Link>
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs px-2 py-1 rounded bg-primary/10">
-                      {snippet.category}
-                    </span>
-                    <span className="text-muted-foreground">
+                  <div className="flex flex-col items-end gap-1">
+                    <div className="flex flex-wrap gap-1 justify-end">
+                      {(snippet.categories ? JSON.parse(snippet.categories) as CodeCategory[] : []).map((category) => (
+                        <span key={category} className="text-xs px-2 py-0.5 rounded bg-primary/10">
+                          {category}
+                        </span>
+                      ))}
+                    </div>
+                    <span className="text-muted-foreground text-sm">
                       {snippet.votes} vote{snippet.votes === 1 ? '' : 's'}
                     </span>
                   </div>
