@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CodeEditor } from "./CodeEditor";
@@ -81,12 +80,12 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
       });
       if (!res.ok) {
         const error = await res.text();
-        if (error.includes("Already voted")) {
-          throw new Error(
-            "Thanks for your enthusiasm! You've already voted for this snippet.",
-          );
+        try {
+          const errorData = JSON.parse(error);
+          throw new Error(errorData.message || 'Failed to record vote');
+        } catch {
+          throw new Error(error || 'Failed to record vote');
         }
-        throw new Error(error);
       }
       return res.json();
     },

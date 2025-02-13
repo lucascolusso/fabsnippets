@@ -2,7 +2,7 @@ import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import { db } from "@db";
 import { snippets, votes, users } from "@db/schema";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, and } from "drizzle-orm";
 import multer from "multer";
 import path from "path";
 import { fileURLToPath } from 'url';
@@ -271,18 +271,21 @@ export function registerRoutes(app: Express): Server {
       // Get user ID if authenticated
       const userId = req.isAuthenticated() ? req.user.id : null;
 
-      // Check if already voted based on either user ID or IP
+      // Check if already voted based on either user ID or IP, for this specific snippet
       const existingVote = await db.query.votes.findFirst({
-        where: userId 
-          ? eq(votes.userId, userId)
-          : eq(votes.ipAddress, ipAddress),
-        columns: {
-          id: true
+        where: (votes) => {
+          const conditions = [eq(votes.snippetId, snippetId)];
+          if (userId) {
+            conditions.push(eq(votes.userId, userId));
+          } else {
+            conditions.push(eq(votes.ipAddress, ipAddress));
+          }
+          return and(...conditions);
         }
       });
 
       if (existingVote) {
-        return res.status(400).json({ message: "Already voted" });
+        return res.status(400).json({ message: "You have already voted for this snippet" });
       }
 
       await db.transaction(async (tx) => {
@@ -303,7 +306,11 @@ export function registerRoutes(app: Express): Server {
       res.json({ success: true });
     } catch (error) {
       console.error('Error recording vote:', error);
-      res.status(500).json({ message: 'Error recording vote' });
+      res.status(500).json({ 
+        message: error instanceof Error 
+          ? error.message 
+          : 'Error recording vote. Please try again.'
+      });
     }
   });
 
