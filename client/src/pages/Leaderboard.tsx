@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 import type { Snippet, CodeCategory } from "@/lib/types";
 
-const categories: CodeCategory[] = ['TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery'];
+const categories: CodeCategory[] = ['Prompt', 'TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery'];
 
 export function Leaderboard() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
