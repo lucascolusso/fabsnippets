@@ -19,6 +19,20 @@ interface SnippetCardProps {
   snippet: Snippet;
 }
 
+const parsedCategories = (snippet: Snippet): CodeCategory[] => {
+  try {
+    if (!snippet.categories) {
+      // Fallback to single category if categories field is not present
+      return snippet.category ? [snippet.category] : [];
+    }
+    const parsed = JSON.parse(snippet.categories);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    console.error('Error parsing categories:', e);
+    return [];
+  }
+};
+
 export function SnippetCard({ snippet }: SnippetCardProps) {
   const queryClient = useQueryClient();
   const [isCopied, setIsCopied] = useState(false);
@@ -31,7 +45,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
     defaultValues: {
       title: snippet.title,
       code: snippet.code,
-      category: snippet.category
+      categories: parsedCategories(snippet)
     }
   });
 
@@ -45,7 +59,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
   };
 
   const updateMutation = useMutation({
-    mutationFn: async (data: { title: string; code: string; category: CodeCategory }) => {
+    mutationFn: async (data: { title: string; code: string; categories: CodeCategory[] }) => {
       const res = await fetch(`/api/snippets/${snippet.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -123,7 +137,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
     }
   };
 
-  const onSubmit = (data: { title: string; code: string; category: CodeCategory }) => {
+  const onSubmit = (data: { title: string; code: string; categories: CodeCategory[] }) => {
     updateMutation.mutate(data);
   };
 
@@ -133,15 +147,22 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
     <Card className="w-full shadow-md">
       <CardContent className="p-2 space-y-2">
         <div className="flex items-center justify-between gap-1 mb-1">
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 flex-wrap">
             <Link href={`/snippet/${snippet.id}`} className="hover:text-primary hover:underline">
               <h2 className="text-base font-semibold">{snippet.title}</h2>
             </Link>
-            <span className="inline-block px-1 py-0.5 text-[10px] font-semibold rounded bg-primary/10">
-              {snippet.category}
-            </span>
+            <div className="flex gap-1 flex-wrap">
+              {parsedCategories(snippet).map((category, index) => (
+                <span
+                  key={`${category}-${index}`}
+                  className="inline-block px-1 py-0.5 text-[10px] font-semibold rounded bg-primary/10"
+                >
+                  {category}
+                </span>
+              ))}
+            </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-shrink-0">
             {isAuthor && (
               <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
                 <Edit2 className="h-4 w-4" />
@@ -174,14 +195,14 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
               />
               <FormField
                 control={form.control}
-                name="category"
+                name="categories"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormLabel>Categories</FormLabel>
+                    <Select onValueChange={field.onChange} multiple value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a category" />
+                          <SelectValue placeholder="Select categories" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
