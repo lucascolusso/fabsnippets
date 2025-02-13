@@ -534,5 +534,41 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Delete snippet
+  app.delete("/api/snippets/:id", async (req, res) => {
+    const snippetId = parseInt(req.params.id);
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not logged in" });
+      }
+
+      // Get the existing snippet
+      const [snippet] = await db
+        .select()
+        .from(snippets)
+        .where(eq(snippets.id, snippetId))
+        .limit(1);
+
+      if (!snippet) {
+        return res.status(404).json({ message: "Snippet not found" });
+      }
+
+      // Check if user is the author
+      if (snippet.authorId !== req.user.id) {
+        return res.status(403).json({ message: "Not authorized to delete this snippet" });
+      }
+
+      // Delete the snippet
+      await db.delete(snippets).where(eq(snippets.id, snippetId));
+
+      res.json({ message: "Snippet deleted successfully" });
+    } catch (error) {
+      console.error('Error deleting snippet:', error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Error deleting snippet" 
+      });
+    }
+  });
+
   return httpServer;
 }

@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CodeEditor } from "./CodeEditor";
-import { Copy, ThumbsUp, CheckCircle2, Image, Edit2 } from "lucide-react";
+import { Copy, ThumbsUp, CheckCircle2, Image, Edit2, Trash2 } from "lucide-react";
 import { Link } from "wouter";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Snippet, CodeCategory } from "@/lib/types";
@@ -14,6 +14,16 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUser } from "@/hooks/use-user";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 interface SnippetCardProps {
   snippet: Snippet;
@@ -39,6 +49,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
   const [showImage, setShowImage] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { user } = useUser();
 
   const form = useForm({
@@ -119,6 +130,32 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`/api/snippets/${snippet.id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/snippets"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/authors/${snippet.authorUsername}`] });
+      toast({
+        title: "Snippet deleted",
+        description: "Your snippet has been successfully deleted.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(snippet.code);
@@ -164,9 +201,19 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
           </div>
           <div className="flex gap-2 flex-shrink-0">
             {isAuthor && (
-              <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                <Edit2 className="h-4 w-4" />
-              </Button>
+              <>
+                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                  <Edit2 className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </>
             )}
             <Button variant="outline" size="sm" onClick={handleCopy}>
               {isCopied ? (
