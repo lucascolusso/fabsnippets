@@ -19,4 +19,5 @@ export interface User {
   email?: string;
   website?: string;
   createdAt: string;
+  isAdmin: boolean;
 }
