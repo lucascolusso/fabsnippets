@@ -98,7 +98,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
     },
     onError: (error: Error) => {
       toast({
-        title: "Couldn't vote",
+        title: error.message.includes("already voted") ? "Already voted" : "Couldn't vote",
         description: error.message,
         variant: "destructive",
       });
@@ -222,7 +222,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             <div>
               <CodeEditor
                 value={snippet.code}
-                onChange={() => {}}
+                onChange={() => { }}
                 readOnly
                 className="text-[11px] h-full font-mono"
               />
