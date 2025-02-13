@@ -2,10 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { X, Check, ChevronsUpDown } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CodeEditor } from "./CodeEditor";
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -14,15 +11,13 @@ import { useState } from "react";
 import type { CodeCategory } from "@/lib/types";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { cn } from "@/lib/utils";
 
 const categories: CodeCategory[] = ['Prompt', 'TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery'];
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   code: z.string().min(1, "Code is required"),
-  categories: z.array(z.enum(['Prompt', 'TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery']))
-    .min(1, "Select at least one category"),
+  category: z.enum(['Prompt', 'TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery']),
   image: z.instanceof(File).optional()
 });
 
@@ -37,21 +32,18 @@ export function NewSnippetModal() {
     defaultValues: {
       title: '',
       code: '',
-      categories: []
+      category: 'Python'
     }
   });
 
   const mutation = useMutation({
     mutationFn: async (values: FormValues) => {
       const formData = new FormData();
-      formData.append('title', values.title);
-      formData.append('code', values.code);
-      values.categories.forEach((category, index) => {
-        formData.append(`categories[${index}]`, category);
+      Object.entries(values).forEach(([key, value]) => {
+        if (value !== undefined) {
+          formData.append(key, value);
+        }
       });
-      if (values.image) {
-        formData.append('image', values.image);
-      }
 
       const res = await fetch('/api/snippets', {
         method: 'POST',
@@ -107,76 +99,24 @@ export function NewSnippetModal() {
 
               <FormField
                 control={form.control}
-                name="categories"
+                name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Code categories</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            role="combobox"
-                            className={cn(
-                              "w-full justify-between",
-                              !field.value.length && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value.length === 0
-                              ? "Select categories"
-                              : `${field.value.length} selected`}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-full p-0">
-                        <Command>
-                          <CommandInput placeholder="Search categories..." />
-                          <CommandEmpty>No category found.</CommandEmpty>
-                          <CommandGroup>
-                            {categories.map((category) => (
-                              <CommandItem
-                                key={category}
-                                onSelect={() => {
-                                  const currentValue = field.value;
-                                  const newValue = currentValue.includes(category)
-                                    ? currentValue.filter((c) => c !== category)
-                                    : [...currentValue, category];
-                                  field.onChange(newValue);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    field.value.includes(category)
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  )}
-                                />
-                                {category}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {field.value.map((category) => (
-                        <Badge
-                          key={category}
-                          variant="secondary"
-                          className="flex items-center gap-1"
-                        >
-                          {category}
-                          <X
-                            className="h-3 w-3 cursor-pointer"
-                            onClick={() => {
-                              field.onChange(field.value.filter((c) => c !== category));
-                            }}
-                          />
-                        </Badge>
-                      ))}
-                    </div>
+                    <FormLabel>Code category</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
