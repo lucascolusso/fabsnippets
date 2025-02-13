@@ -4,7 +4,7 @@ export interface Snippet {
   id: number;
   title: string;
   code: string;
-  category: CodeCategory;
+  categories: CodeCategory[];  
   authorId: number;
   authorUsername: string;  
   authorWebsite?: string;
