@@ -21,6 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/hooks/use-user";
 
 interface ProfileData {
+  user: User;
   snippets: Snippet[];
   leaderboards: Array<{
     category: string;
@@ -167,9 +168,9 @@ export function Profile() {
               ) : (
                 <>
                   <h1 className="text-2xl font-bold mb-2">{authorName}</h1>
-                  {currentUser?.website && (
+                  {data.user?.website && (
                     <a 
-                      href={currentUser.website} 
+                      href={data.user.website} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-blue-500 hover:underline inline-flex items-center gap-1"
