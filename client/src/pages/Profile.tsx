@@ -83,9 +83,9 @@ export function Profile() {
 
   const form = useForm<ProfileFormData>({
     defaultValues: {
-      username: currentUser?.username || "",
-      email: currentUser?.email || "",
-      website: currentUser?.website || "",
+      username: data?.user?.username || "",
+      email: data?.user?.email || "",
+      website: data?.user?.website || "",
     },
   });
 
@@ -177,6 +177,7 @@ export function Profile() {
                         className="text-blue-500 hover:underline inline-flex items-center gap-1"
                       >
                         <ExternalLink className="h-4 w-4" />
+                        {data.user.website}
                       </a>
                     )}
                   </div>
