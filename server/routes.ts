@@ -198,6 +198,19 @@ export function registerRoutes(app: Express): Server {
       }
 
       const { title, code, category } = req.body;
+
+      // Validate required fields
+      if (!title || !code || !category) {
+        return res.status(400).json({ 
+          message: "Missing required fields", 
+          details: {
+            title: !title ? "Title is required" : null,
+            code: !code ? "Code is required" : null,
+            category: !category ? "Category is required" : null
+          }
+        });
+      }
+
       const imagePath = req.file?.filename;
 
       const [newSnippet] = await db.insert(snippets).values({
@@ -211,9 +224,16 @@ export function registerRoutes(app: Express): Server {
       // Fetch the complete snippet with author information
       const [snippetWithAuthor] = await db
         .select({
-          ...snippets,
+          id: snippets.id,
+          title: snippets.title,
+          code: snippets.code,
+          category: snippets.category,
+          authorId: snippets.authorId,
           authorUsername: users.username,
-          authorWebsite: users.website
+          authorWebsite: users.website,
+          imagePath: snippets.imagePath,
+          createdAt: snippets.createdAt,
+          votes: snippets.votes,
         })
         .from(snippets)
         .where(eq(snippets.id, newSnippet.id))
