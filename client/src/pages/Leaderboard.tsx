@@ -7,6 +7,10 @@ import type { Snippet, CodeCategory } from "@/lib/types";
 export function Leaderboard() {
   const { data: snippets } = useQuery<Snippet[]>({
     queryKey: ['/api/leaderboard'],
+    queryFn: async () => {
+      const response = await fetch('/api/leaderboard');
+      return response.json();
+    }
   });
 
   const topContributors = snippets?.reduce((acc, snippet) => {
@@ -76,7 +80,7 @@ export function Leaderboard() {
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     <div className="flex flex-wrap gap-1 justify-end">
-                      {(snippet.categories ? JSON.parse(snippet.categories) as CodeCategory[] : []).map((category) => (
+                      {JSON.parse(snippet.categories || '[]').map((category: CodeCategory) => (
                         <span key={category} className="text-xs px-2 py-0.5 rounded bg-primary/10">
                           {category}
                         </span>
