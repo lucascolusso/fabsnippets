@@ -7,10 +7,6 @@ import type { Snippet, CodeCategory } from "@/lib/types";
 export function Leaderboard() {
   const { data: snippets } = useQuery<Snippet[]>({
     queryKey: ['/api/leaderboard'],
-    queryFn: async () => {
-      const response = await fetch('/api/leaderboard');
-      return response.json();
-    }
   });
 
   const topContributors = snippets?.reduce((acc, snippet) => {
@@ -78,15 +74,11 @@ export function Leaderboard() {
                       </Link>
                     </span>
                   </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <div className="flex flex-wrap gap-1 justify-end">
-                      {JSON.parse(snippet.categories || '[]').map((category: CodeCategory) => (
-                        <span key={category} className="text-xs px-2 py-0.5 rounded bg-primary/10">
-                          {category}
-                        </span>
-                      ))}
-                    </div>
-                    <span className="text-muted-foreground text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs px-2 py-1 rounded bg-primary/10">
+                      {snippet.category}
+                    </span>
+                    <span className="text-muted-foreground">
                       {snippet.votes} vote{snippet.votes === 1 ? '' : 's'}
                     </span>
                   </div>
