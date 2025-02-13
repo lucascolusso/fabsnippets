@@ -16,7 +16,8 @@ export const snippets = pgTable("snippets", {
   id: serial("id").primaryKey(),
   title: varchar("title", { length: 200 }).notNull(),
   code: text("code").notNull(),
-  category: varchar("category", { length: 20 }).notNull(),
+  category: varchar("category", { length: 20 }), // Keep existing column
+  categories: text("categories"), // Add new column
   authorId: integer("author_id").notNull().references(() => users.id),
   imagePath: text("image_path"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

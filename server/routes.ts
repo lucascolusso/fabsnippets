@@ -73,7 +73,8 @@ export function registerRoutes(app: Express): Server {
       id SERIAL PRIMARY KEY,
       title VARCHAR(200) NOT NULL,
       code TEXT NOT NULL,
-      category VARCHAR(20) NOT NULL,
+      category TEXT,
+      categories TEXT NOT NULL,
       author_id INTEGER NOT NULL REFERENCES users(id),
       image_path TEXT,
       created_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -196,13 +197,15 @@ export function registerRoutes(app: Express): Server {
         return res.status(401).json({ message: "Not logged in" });
       }
 
-      const { title, code, category } = req.body;
+      const { title, code, categories } = req.body;
 
       // Basic validation
       const validationErrors = {};
       if (!title) validationErrors.title = "Title is required";
       if (!code) validationErrors.code = "Code is required";
-      if (!category) validationErrors.category = "Category is required";
+      if (!categories || !Array.isArray(categories) || categories.length === 0) {
+        validationErrors.categories = "At least one category is required";
+      }
 
       if (Object.keys(validationErrors).length > 0) {
         return res.status(400).json({ 
@@ -213,10 +216,12 @@ export function registerRoutes(app: Express): Server {
 
       const imagePath = req.file?.filename;
 
+      // Store categories as JSON string
       const [newSnippet] = await db.insert(snippets).values({
         title,
         code,
-        category,
+        category: Array.isArray(categories) ? categories[0] : null, // Store first category in old field
+        categories: JSON.stringify(categories), // Store all categories as JSON
         authorId: req.user.id,
         imagePath,
         createdAt: new Date(),
@@ -229,7 +234,7 @@ export function registerRoutes(app: Express): Server {
           id: snippets.id,
           title: snippets.title,
           code: snippets.code,
-          category: snippets.category,
+          categories: snippets.categories,
           authorId: snippets.authorId,
           authorUsername: users.username,
           authorWebsite: users.website,
@@ -273,7 +278,7 @@ export function registerRoutes(app: Express): Server {
           snippet.title.toLowerCase().includes(searchTerm) ||
           snippet.code.toLowerCase().includes(searchTerm) ||
           snippet.authorUsername.toLowerCase().includes(searchTerm) ||
-          snippet.category.toLowerCase().includes(searchTerm)
+          snippet.categories.toLowerCase().includes(searchTerm) //search in categories as well
         );
         return res.json(filtered);
       }
@@ -370,7 +375,7 @@ export function registerRoutes(app: Express): Server {
           id: snippets.id,
           title: snippets.title,
           code: snippets.code,
-          category: snippets.category,
+          categories: snippets.categories,
           authorId: snippets.authorId,
           authorUsername: users.username,
           authorWebsite: users.website,
@@ -383,7 +388,7 @@ export function registerRoutes(app: Express): Server {
         .orderBy(desc(snippets.votes));
 
       if (category && typeof category === 'string') {
-        const filteredSnippets = await query.where(eq(snippets.category, category));
+        const filteredSnippets = await query.where(eq(snippets.categories, category));
         return res.json(filteredSnippets);
       }
 
@@ -416,7 +421,7 @@ export function registerRoutes(app: Express): Server {
           id: snippets.id,
           title: snippets.title,
           code: snippets.code,
-          category: snippets.category,
+          categories: snippets.categories,
           authorId: snippets.authorId,
           authorUsername: users.username,
           authorWebsite: users.website,
@@ -444,7 +449,7 @@ export function registerRoutes(app: Express): Server {
 
           const board = category === 'all'
             ? await query
-            : await query.where(eq(snippets.category, category));
+            : await query.where(eq(snippets.categories, category));
 
           const position = board.findIndex(s => s.authorId === author.id) + 1;
           return { category, position: position || null };
@@ -482,11 +487,11 @@ export function registerRoutes(app: Express): Server {
         return res.status(403).json({ message: "Not authorized to edit this snippet" });
       }
 
-      const { title, code, category } = req.body;
+      const { title, code, categories } = req.body;
       const updateData: Partial<typeof snippets.$inferInsert> = {
         title,
         code,
-        category,
+        categories: JSON.stringify(categories),
         updatedAt: new Date(),
       };
 
@@ -507,7 +512,7 @@ export function registerRoutes(app: Express): Server {
           id: snippets.id,
           title: snippets.title,
           code: snippets.code,
-          category: snippets.category,
+          categories: snippets.categories,
           authorId: snippets.authorId,
           authorUsername: users.username,
           authorWebsite: users.website,
