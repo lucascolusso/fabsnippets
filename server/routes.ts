@@ -190,7 +190,6 @@ export function registerRoutes(app: Express): Server {
   });
 
 
-  // Create new snippet with image upload
   app.post("/api/snippets", upload.single('image'), async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
@@ -199,15 +198,16 @@ export function registerRoutes(app: Express): Server {
 
       const { title, code, category } = req.body;
 
-      // Validate required fields
-      if (!title || !code || !category) {
+      // Basic validation
+      const validationErrors = {};
+      if (!title) validationErrors.title = "Title is required";
+      if (!code) validationErrors.code = "Code is required";
+      if (!category) validationErrors.category = "Category is required";
+
+      if (Object.keys(validationErrors).length > 0) {
         return res.status(400).json({ 
-          message: "Missing required fields", 
-          details: {
-            title: !title ? "Title is required" : null,
-            code: !code ? "Code is required" : null,
-            category: !category ? "Category is required" : null
-          }
+          message: "Validation failed",
+          errors: validationErrors
         });
       }
 
@@ -218,7 +218,9 @@ export function registerRoutes(app: Express): Server {
         code,
         category,
         authorId: req.user.id,
-        imagePath
+        imagePath,
+        createdAt: new Date(),
+        updatedAt: new Date()
       }).returning();
 
       // Fetch the complete snippet with author information
