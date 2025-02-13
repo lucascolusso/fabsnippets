@@ -1,17 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { Link } from "wouter";
 import type { Snippet, CodeCategory } from "@/lib/types";
 
-const categories: CodeCategory[] = ['Prompt', 'TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery'];
-
 export function Leaderboard() {
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-
   const { data: snippets } = useQuery<Snippet[]>({
-    queryKey: [`/api/leaderboard${selectedCategory !== "all" ? `?category=${selectedCategory}` : ''}`],
+    queryKey: ['/api/leaderboard'],
   });
 
   const topContributors = snippets?.reduce((acc, snippet) => {
@@ -31,19 +26,6 @@ export function Leaderboard() {
     <div className="container mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Leaderboard</h1>
-        <Select onValueChange={setSelectedCategory} value={selectedCategory}>
-          <SelectTrigger className="w-[160px]">
-            <SelectValue placeholder="All Categories" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            {categories.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
