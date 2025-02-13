@@ -82,9 +82,9 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
         const error = await res.text();
         try {
           const errorData = JSON.parse(error);
-          throw new Error(errorData.message || 'Failed to record vote');
+          throw new Error(errorData.message);
         } catch {
-          throw new Error(error || 'Failed to record vote');
+          throw new Error('Failed to record vote');
         }
       }
       return res.json();
