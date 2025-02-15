@@ -376,6 +376,7 @@ export function registerRoutes(app: Express): Server {
           title: snippets.title,
           code: snippets.code,
           categories: snippets.categories,
+          category: snippets.category, // Include both for backward compatibility
           authorId: snippets.authorId,
           authorUsername: users.username,
           authorWebsite: users.website,
@@ -387,13 +388,41 @@ export function registerRoutes(app: Express): Server {
         .leftJoin(users, eq(snippets.authorId, users.id))
         .orderBy(desc(snippets.votes));
 
+      let results = await query;
+
+      // Transform categories to ensure consistent array format
+      results = results.map(snippet => ({
+        ...snippet,
+        categories: (() => {
+          try {
+            if (snippet.categories) {
+              // If it's already a JSON string, parse it
+              if (typeof snippet.categories === 'string') {
+                return JSON.parse(snippet.categories);
+              }
+              // If it's already an array, use it
+              if (Array.isArray(snippet.categories)) {
+                return snippet.categories;
+              }
+            }
+            // Fallback to legacy category field if exists
+            return snippet.category ? [snippet.category] : [];
+          } catch (e) {
+            console.error('Error parsing categories for snippet:', snippet.id, e);
+            // Fallback to single category if parsing fails
+            return snippet.category ? [snippet.category] : [];
+          }
+        })()
+      }));
+
       if (category && typeof category === 'string') {
-        const filteredSnippets = await query.where(eq(snippets.categories, category));
+        const filteredSnippets = results.filter(snippet => 
+          snippet.categories.includes(category.toUpperCase())
+        );
         return res.json(filteredSnippets);
       }
 
-      const allSnippets = await query;
-      res.json(allSnippets);
+      res.json(results);
     } catch (error) {
       console.error('Error fetching leaderboard:', error);
       res.status(500).json({ message: 'Error fetching leaderboard' });

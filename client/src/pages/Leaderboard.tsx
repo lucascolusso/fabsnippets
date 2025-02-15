@@ -20,7 +20,7 @@ function ContributorCard({ contributors }: { contributors: [string, number][] })
                 </Link>
               </span>
               <span className="text-muted-foreground">
-                {count} snippet{count === 1 ? '' : 's'}
+                {count} snippet{count === 1 ? "" : "s"}
               </span>
             </div>
           ))}
@@ -38,56 +38,36 @@ function TopVotedCard({ snippets }: { snippets: Snippet[] }) {
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          {snippets.map((snippet, index) => {
-            // Parse the categories
-            let categories: string[] = [];
-            try {
-              if (snippet.categories) {
-                categories = typeof snippet.categories === 'string' 
-                  ? JSON.parse(snippet.categories)
-                  : Array.isArray(snippet.categories) 
-                    ? snippet.categories 
-                    : [];
-              }
-            } catch (e) {
-              console.error('Error parsing categories:', e);
-              // If JSON parsing fails, try using it as a direct string
-              categories = typeof snippet.categories === 'string'
-                ? [snippet.categories]
-                : [];
-            }
-
-            return (
-              <div key={snippet.id} className="flex justify-between items-center">
-                <div className="flex flex-col">
-                  <span>
-                    {index + 1}.{" "}
-                    <Link href={`/snippet/${snippet.id}`} className="hover:text-primary hover:underline">
-                      {snippet.title}
-                    </Link>
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    by{" "}
-                    <Link href={`/profile/${snippet.authorUsername}`} className="hover:text-primary hover:underline">
-                      {snippet.authorUsername}
-                    </Link>
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-1">
-                    {categories.map((category: string) => (
-                      <span key={category} className="text-xs px-2 py-1 rounded bg-primary/10">
-                        {category}
-                      </span>
-                    ))}
-                  </div>
-                  <span className="text-muted-foreground">
-                    {snippet.votes} vote{snippet.votes === 1 ? '' : 's'}
-                  </span>
-                </div>
+          {snippets.map((snippet, index) => (
+            <div key={snippet.id} className="flex justify-between items-center">
+              <div className="flex flex-col">
+                <span>
+                  {index + 1}.{" "}
+                  <Link href={`/snippet/${snippet.id}`} className="hover:text-primary hover:underline">
+                    {snippet.title}
+                  </Link>
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  by{" "}
+                  <Link href={`/profile/${snippet.authorUsername}`} className="hover:text-primary hover:underline">
+                    {snippet.authorUsername}
+                  </Link>
+                </span>
               </div>
-            );
-          })}
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1">
+                  {(Array.isArray(snippet.categories) ? snippet.categories : []).map((category: string) => (
+                    <span key={category} className="text-xs px-2 py-1 rounded bg-primary/10">
+                      {category}
+                    </span>
+                  ))}
+                </div>
+                <span className="text-muted-foreground">
+                  {snippet.votes} vote{snippet.votes === 1 ? "" : "s"}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>
@@ -96,7 +76,7 @@ function TopVotedCard({ snippets }: { snippets: Snippet[] }) {
 
 export function Leaderboard() {
   const { data: snippets } = useQuery<Snippet[]>({
-    queryKey: ['/api/leaderboard'],
+    queryKey: ["/api/leaderboard"],
   });
 
   const topContributors = snippets?.reduce((acc, snippet) => {
