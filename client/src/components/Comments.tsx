@@ -69,41 +69,43 @@ export function Comments({ snippetId }: CommentsProps) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Comments</CardTitle>
+    <Card className="text-sm">
+      <CardHeader className="px-4 py-3">
+        <CardTitle className="text-base">Comments</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-4 py-2">
         {user && (
-          <form onSubmit={handleSubmit} className="mb-6">
+          <form onSubmit={handleSubmit} className="mb-3">
             <Textarea
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder="Write your comment..."
-              className="mb-2"
+              className="mb-2 text-xs min-h-[60px] resize-none"
             />
             <Button 
               type="submit" 
               disabled={addCommentMutation.isPending || !newComment.trim()}
+              size="sm"
+              className="text-xs"
             >
               {addCommentMutation.isPending ? "Posting..." : "Post Comment"}
             </Button>
           </form>
         )}
 
-        <div className="space-y-4">
+        <div className="space-y-2">
           {comments.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No comments yet.</p>
+            <p className="text-muted-foreground text-xs">No comments yet.</p>
           ) : (
             comments.map((comment) => (
-              <div key={comment.id} className="border-b pb-4 last:border-b-0">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="font-medium">{comment.authorUsername}</span>
-                  <span className="text-sm text-muted-foreground">
+              <div key={comment.id} className="border-b pb-2 last:border-b-0 last:pb-0">
+                <div className="flex justify-between items-start mb-1">
+                  <span className="font-medium text-xs">{comment.authorUsername}</span>
+                  <span className="text-xs text-muted-foreground">
                     {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
                   </span>
                 </div>
-                <p className="text-sm whitespace-pre-wrap">{comment.content}</p>
+                <p className="text-xs whitespace-pre-wrap leading-relaxed">{comment.content}</p>
               </div>
             ))
           )}
