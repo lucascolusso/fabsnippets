@@ -1,8 +1,75 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useState } from "react";
 import { Link } from "wouter";
-import type { Snippet, CodeCategory } from "@/lib/types";
+import type { Snippet } from "@/lib/types";
+
+function ContributorCard({ contributors }: { contributors: [string, number][] }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Top Contributors</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          {contributors.map(([author, count], index) => (
+            <div key={author} className="flex justify-between items-center">
+              <span>
+                {index + 1}.{" "}
+                <Link href={`/profile/${author}`} className="hover:text-primary hover:underline">
+                  {author}
+                </Link>
+              </span>
+              <span className="text-muted-foreground">
+                {count} snippet{count === 1 ? '' : 's'}
+              </span>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function TopVotedCard({ snippets }: { snippets: Snippet[] }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Most Voted Snippets</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          {snippets.map((snippet, index) => (
+            <div key={snippet.id} className="flex justify-between items-center">
+              <div className="flex flex-col">
+                <span>
+                  {index + 1}.{" "}
+                  <Link href={`/snippet/${snippet.id}`} className="hover:text-primary hover:underline">
+                    {snippet.title}
+                  </Link>
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  by{" "}
+                  <Link href={`/profile/${snippet.authorUsername}`} className="hover:text-primary hover:underline">
+                    {snippet.authorUsername}
+                  </Link>
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs px-2 py-1 rounded bg-primary/10">
+                  {snippet.category}
+                </span>
+                <span className="text-muted-foreground">
+                  {snippet.votes} vote{snippet.votes === 1 ? '' : 's'}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export function Leaderboard() {
   const { data: snippets } = useQuery<Snippet[]>({
@@ -29,64 +96,8 @@ export function Leaderboard() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Top Contributors</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {sortedContributors.map(([author, count], index) => (
-                <div key={author} className="flex justify-between items-center">
-                  <span>
-                    {index + 1}.{" "}
-                    <Link href={`/profile/${author}`} className="hover:text-primary hover:underline">
-                      {author}
-                    </Link>
-                  </span>
-                  <span className="text-muted-foreground">
-                    {count} snippet{count === 1 ? '' : 's'}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Most Voted Snippets</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {topVoted.map((snippet, index) => (
-                <div key={snippet.id} className="flex justify-between items-center">
-                  <div className="flex flex-col">
-                    <span>
-                      {index + 1}.{" "}
-                      <Link href={`/snippet/${snippet.id}`} className="hover:text-primary hover:underline">
-                        {snippet.title}
-                      </Link>
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      by{" "}
-                      <Link href={`/profile/${snippet.authorUsername}`} className="hover:text-primary hover:underline">
-                        {snippet.authorUsername}
-                      </Link>
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs px-2 py-1 rounded bg-primary/10">
-                      {snippet.category}
-                    </span>
-                    <span className="text-muted-foreground">
-                      {snippet.votes} vote{snippet.votes === 1 ? '' : 's'}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <ContributorCard contributors={sortedContributors} />
+        <TopVotedCard snippets={topVoted} />
       </div>
     </div>
   );
