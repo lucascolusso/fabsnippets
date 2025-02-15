@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
+import { Link } from "wouter";
 
 interface Comment {
   id: number;
@@ -100,7 +101,12 @@ export function Comments({ snippetId }: CommentsProps) {
             comments.map((comment) => (
               <div key={comment.id} className="border-b pb-2 last:border-b-0 last:pb-0">
                 <div className="flex justify-between items-start mb-1">
-                  <span className="font-medium text-xs">{comment.authorUsername}</span>
+                  <Link 
+                    href={`/profile/${comment.authorUsername}`}
+                    className="font-medium text-xs hover:text-primary transition-colors"
+                  >
+                    {comment.authorUsername}
+                  </Link>
                   <span className="text-xs text-muted-foreground">
                     {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
                   </span>
