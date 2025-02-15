@@ -56,11 +56,9 @@ function TopVotedCard({ snippets }: { snippets: Snippet[] }) {
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                {snippet.categories.map((category) => (
-                  <span key={category} className="text-xs px-2 py-1 rounded bg-primary/10">
-                    {category}
-                  </span>
-                ))}
+                <span className="text-xs px-2 py-1 rounded bg-primary/10">
+                  {snippet.category}
+                </span>
                 <span className="text-muted-foreground">
                   {snippet.votes} vote{snippet.votes === 1 ? '' : 's'}
                 </span>
