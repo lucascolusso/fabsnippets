@@ -334,10 +334,10 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                 </Dialog>
               </>
             )}
-            {!window.location.pathname.includes('/snippet/') && (
+            {!window.location.pathname.includes('/snippet/') && snippet.commentCount > 0 && (
               <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <MessageSquare className="h-3 w-3" />
-                <span>{snippet.commentCount || 0}</span>
+                <span>{snippet.commentCount}</span>
               </div>
             )}
             <Button
