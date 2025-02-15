@@ -335,16 +335,10 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
               </>
             )}
             {!window.location.pathname.includes('/snippet/') && (
-              <Button
-                variant="outline"
-                size="sm"
-                asChild
-              >
-                <Link href={`/snippet/${snippet.id}#comments`}>
-                  <MessageSquare className="h-3 w-3 mr-1" />
-                  {snippet.commentCount || 0}
-                </Link>
-              </Button>
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <MessageSquare className="h-3 w-3" />
+                <span>{snippet.commentCount || 0}</span>
+              </div>
             )}
             <Button
               variant="outline"
