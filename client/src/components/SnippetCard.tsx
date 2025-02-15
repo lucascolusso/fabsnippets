@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CodeEditor } from "./CodeEditor";
-import { Copy, ThumbsUp, CheckCircle2, Image, Edit2, Trash2 } from "lucide-react";
+import { Copy, ThumbsUp, CheckCircle2, Image, Edit2, Trash2, MessageSquare } from "lucide-react";
 import { Link } from "wouter";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Snippet, CodeCategory } from "@/lib/types";
@@ -333,6 +333,18 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                   </DialogContent>
                 </Dialog>
               </>
+            )}
+            {!window.location.pathname.includes('/snippet/') && (
+              <Button
+                variant="outline"
+                size="sm"
+                asChild
+              >
+                <Link href={`/snippet/${snippet.id}#comments`}>
+                  <MessageSquare className="h-3 w-3 mr-1" />
+                  {snippet.commentCount || 0}
+                </Link>
+              </Button>
             )}
             <Button
               variant="outline"
