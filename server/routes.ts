@@ -268,17 +268,38 @@ export function registerRoutes(app: Express): Server {
   app.get("/api/snippets", async (req, res) => {
     const { search } = req.query;
     try {
-      const query = db
+      const snippetsWithComments = await db
         .select({
-          ...snippets,
+          id: snippets.id,
+          title: snippets.title,
+          code: snippets.code,
+          categories: snippets.categories,
+          authorId: snippets.authorId,
           authorUsername: users.username,
-          authorWebsite: users.website
+          authorWebsite: users.website,
+          imagePath: snippets.imagePath,
+          createdAt: snippets.createdAt,
+          votes: snippets.votes,
+          commentCount: sql<number>`COUNT(DISTINCT ${comments.id})::integer`,
         })
         .from(snippets)
         .leftJoin(users, eq(snippets.authorId, users.id))
+        .leftJoin(comments, eq(snippets.id, comments.snippetId))
+        .groupBy(
+          snippets.id,
+          snippets.title,
+          snippets.code,
+          snippets.categories,
+          snippets.authorId,
+          users.username,
+          users.website,
+          snippets.imagePath,
+          snippets.createdAt,
+          snippets.votes
+        )
         .orderBy(desc(snippets.createdAt));
 
-      const allSnippets = await query;
+      const allSnippets = await snippetsWithComments;
 
       if (search) {
         const searchTerm = search.toString().toLowerCase();
@@ -286,14 +307,62 @@ export function registerRoutes(app: Express): Server {
           snippet.title.toLowerCase().includes(searchTerm) ||
           snippet.code.toLowerCase().includes(searchTerm) ||
           snippet.authorUsername.toLowerCase().includes(searchTerm) ||
-          snippet.categories.toLowerCase().includes(searchTerm) //search in categories as well
+          snippet.categories.toLowerCase().includes(searchTerm)
         );
         return res.json(filtered);
       }
 
       res.json(allSnippets);
     } catch (error) {
+      console.error('Error fetching snippets:', error);
       res.status(500).json({ message: 'Error fetching snippets' });
+    }
+  });
+
+  // Get single snippet
+  app.get("/api/snippets/:id", async (req, res) => {
+    const snippetId = parseInt(req.params.id);
+    try {
+      const [snippet] = await db
+        .select({
+          id: snippets.id,
+          title: snippets.title,
+          code: snippets.code,
+          categories: snippets.categories,
+          authorId: snippets.authorId,
+          authorUsername: users.username,
+          authorWebsite: users.website,
+          imagePath: snippets.imagePath,
+          createdAt: snippets.createdAt,
+          votes: snippets.votes,
+          commentCount: sql<number>`COUNT(DISTINCT ${comments.id})::integer`,
+        })
+        .from(snippets)
+        .where(eq(snippets.id, snippetId))
+        .leftJoin(users, eq(snippets.authorId, users.id))
+        .leftJoin(comments, eq(snippets.id, comments.snippetId))
+        .groupBy(
+          snippets.id,
+          snippets.title,
+          snippets.code,
+          snippets.categories,
+          snippets.authorId,
+          users.username,
+          users.website,
+          snippets.imagePath,
+          snippets.createdAt,
+          snippets.votes
+        )
+        .limit(1);
+
+      if (!snippet) {
+        return res.status(404).json({ message: "Snippet not found" });
+      }
+
+      res.json(snippet);
+    } catch (error) {
+      console.error('Error fetching snippet:', error);
+      res.status(500).json({ message: 'Error fetching snippet' });
     }
   });
 
@@ -346,31 +415,6 @@ export function registerRoutes(app: Express): Server {
           ? error.message 
           : 'Error recording vote. Please try again.'
       });
-    }
-  });
-
-  // Get single snippet
-  app.get("/api/snippets/:id", async (req, res) => {
-    const snippetId = parseInt(req.params.id);
-    try {
-      const [snippet] = await db
-        .select({
-          ...snippets,
-          authorUsername: users.username,
-          authorWebsite: users.website
-        })
-        .from(snippets)
-        .where(eq(snippets.id, snippetId))
-        .leftJoin(users, eq(snippets.authorId, users.id))
-        .limit(1);
-
-      if (!snippet) {
-        return res.status(404).json({ message: "Snippet not found" });
-      }
-
-      res.json(snippet);
-    } catch (error) {
-      res.status(500).json({ message: 'Error fetching snippet' });
     }
   });
 

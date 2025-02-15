@@ -11,6 +11,7 @@ export interface Snippet {
   imagePath?: string;
   createdAt: string;
   votes: number;
+  commentCount: number;
 }
 
 export interface User {
