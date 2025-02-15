@@ -39,8 +39,31 @@ function TopVotedCard({ snippets }: { snippets: Snippet[] }) {
       <CardContent>
         <div className="space-y-2">
           {snippets.map((snippet, index) => {
-            // Parse the categories JSON string into an array
-            const categories = JSON.parse(snippet.categories || '[]');
+            // Parse the categories, handling both string and array formats
+            let categories: string[] = [];
+            try {
+              if (snippet.categories) {
+                // Handle both JSON string and direct array cases
+                categories = typeof snippet.categories === 'string' 
+                  ? JSON.parse(snippet.categories)
+                  : Array.isArray(snippet.categories) 
+                    ? snippet.categories 
+                    : [];
+
+                // If we have a single category stored in the old field, include it
+                if (categories.length === 0 && snippet.category) {
+                  categories = [snippet.category];
+                }
+              } else if (snippet.category) {
+                // Fallback to old category field if categories is not available
+                categories = [snippet.category];
+              }
+            } catch (e) {
+              console.error('Error parsing categories:', e);
+              // Fallback to single category if JSON parsing fails
+              categories = snippet.category ? [snippet.category] : [];
+            }
+
             return (
               <div key={snippet.id} className="flex justify-between items-center">
                 <div className="flex flex-col">
