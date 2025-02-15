@@ -85,12 +85,10 @@ export function Leaderboard() {
   }, {} as Record<string, number>);
 
   const sortedContributors = Object.entries(topContributors || {})
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 10);
+    .sort(([, a], [, b]) => b - a);
 
   const topVoted = [...(snippets || [])]
-    .sort((a, b) => b.votes - a.votes)
-    .slice(0, 10);
+    .sort((a, b) => b.votes - a.votes);
 
   return (
     <div className="container mx-auto py-8 px-4">
