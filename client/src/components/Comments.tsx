@@ -103,7 +103,7 @@ export function Comments({ snippetId }: CommentsProps) {
                 <div className="flex justify-between items-start mb-1">
                   <Link 
                     href={`/profile/${comment.authorUsername}`}
-                    className="font-medium text-xs hover:text-primary transition-colors"
+                    className="font-medium text-xs hover:text-primary hover:underline transition-colors"
                   >
                     {comment.authorUsername}
                   </Link>
