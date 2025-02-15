@@ -1,7 +1,7 @@
 import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import { db } from "@db";
-import { snippets, votes, users } from "@db/schema";
+import { snippets, votes, users, comments } from "@db/schema";
 import { eq, desc, sql, and } from "drizzle-orm";
 import multer from "multer";
 import path from "path";
@@ -89,6 +89,14 @@ export function registerRoutes(app: Express): Server {
       ip_address TEXT,
       created_at TIMESTAMP NOT NULL DEFAULT NOW(),
       UNIQUE(snippet_id, user_id, ip_address)
+    );
+
+    CREATE TABLE IF NOT EXISTS comments (
+        id SERIAL PRIMARY KEY,
+        snippetId INTEGER NOT NULL REFERENCES snippets(id),
+        authorId INTEGER NOT NULL REFERENCES users(id),
+        content TEXT NOT NULL,
+        createdAt TIMESTAMP NOT NULL DEFAULT NOW()
     );
   `);
 
@@ -595,6 +603,80 @@ export function registerRoutes(app: Express): Server {
       console.error('Error deleting snippet:', error);
       res.status(500).json({ 
         message: error instanceof Error ? error.message : "Error deleting snippet" 
+      });
+    }
+  });
+
+  // Get comments for a snippet
+  app.get("/api/snippets/:id/comments", async (req, res) => {
+    const snippetId = parseInt(req.params.id);
+    try {
+      const snippetComments = await db
+        .select({
+          id: comments.id,
+          content: comments.content,
+          createdAt: comments.createdAt,
+          authorId: comments.authorId,
+          authorUsername: users.username,
+          authorWebsite: users.website,
+        })
+        .from(comments)
+        .where(eq(comments.snippetId, snippetId))
+        .leftJoin(users, eq(comments.authorId, users.id))
+        .orderBy(desc(comments.createdAt));
+
+      res.json(snippetComments);
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+      res.status(500).json({ message: 'Error fetching comments' });
+    }
+  });
+
+  // Add a new comment
+  app.post("/api/snippets/:id/comments", async (req, res) => {
+    const snippetId = parseInt(req.params.id);
+    const { content } = req.body;
+
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Must be logged in to comment" });
+      }
+
+      if (!content) {
+        return res.status(400).json({ message: "Comment content is required" });
+      }
+
+      // Create the comment
+      const [newComment] = await db
+        .insert(comments)
+        .values({
+          content,
+          snippetId,
+          authorId: req.user.id,
+          createdAt: new Date(),
+        })
+        .returning();
+
+      // Fetch the complete comment with author information
+      const [commentWithAuthor] = await db
+        .select({
+          id: comments.id,
+          content: comments.content,
+          createdAt: comments.createdAt,
+          authorId: comments.authorId,
+          authorUsername: users.username,
+          authorWebsite: users.website,
+        })
+        .from(comments)
+        .where(eq(comments.id, newComment.id))
+        .leftJoin(users, eq(comments.authorId, users.id))
+        .limit(1);
+
+      res.status(201).json(commentWithAuthor);
+    } catch (error) {
+      console.error('Error creating comment:', error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Error creating comment" 
       });
     }
   });

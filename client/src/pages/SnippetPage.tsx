@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { SnippetCard } from "@/components/SnippetCard";
+import { Comments } from "@/components/Comments"; // Added import
 import type { Snippet } from "@/lib/types";
 import { useRoute } from "wouter";
 import { useState } from "react";
@@ -47,6 +48,9 @@ export function SnippetPage() {
           />
         </div>
       )}
+      <div className="mt-8"> {/* Added div to wrap Comments */}
+        <Comments snippetId={snippetId} />
+      </div>
     </div>
   );
 }

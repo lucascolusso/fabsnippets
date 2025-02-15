@@ -33,9 +33,19 @@ export const votes = pgTable("votes", {
   createdAt: timestamp("created_at").defaultNow().notNull()
 });
 
+export const comments = pgTable("comments", {
+  id: serial("id").primaryKey(),
+  content: text("content").notNull(),
+  snippetId: integer("snippet_id").notNull().references(() => snippets.id),
+  authorId: integer("author_id").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Relations
 export const userRelations = relations(users, ({ many }) => ({
   snippets: many(snippets),
-  votes: many(votes)
+  votes: many(votes),
+  comments: many(comments)
 }));
 
 export const snippetsRelations = relations(snippets, ({ one, many }) => ({
@@ -43,7 +53,8 @@ export const snippetsRelations = relations(snippets, ({ one, many }) => ({
     fields: [snippets.authorId],
     references: [users.id],
   }),
-  votes: many(votes)
+  votes: many(votes),
+  comments: many(comments)
 }));
 
 export const votesRelations = relations(votes, ({ one }) => ({
@@ -53,6 +64,17 @@ export const votesRelations = relations(votes, ({ one }) => ({
   }),
   user: one(users, {
     fields: [votes.userId],
+    references: [users.id],
+  }),
+}));
+
+export const commentsRelations = relations(comments, ({ one }) => ({
+  snippet: one(snippets, {
+    fields: [comments.snippetId],
+    references: [snippets.id],
+  }),
+  author: one(users, {
+    fields: [comments.authorId],
     references: [users.id],
   }),
 }));
@@ -67,6 +89,9 @@ export const selectSnippetSchema = createSelectSchema(snippets);
 export const insertVoteSchema = createInsertSchema(votes);
 export const selectVoteSchema = createSelectSchema(votes);
 
+export const insertCommentSchema = createInsertSchema(comments);
+export const selectCommentSchema = createSelectSchema(comments);
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -76,3 +101,6 @@ export type NewSnippet = typeof snippets.$inferInsert;
 
 export type Vote = typeof votes.$inferSelect;
 export type NewVote = typeof votes.$inferInsert;
+
+export type Comment = typeof comments.$inferSelect;
+export type NewComment = typeof comments.$inferInsert;
