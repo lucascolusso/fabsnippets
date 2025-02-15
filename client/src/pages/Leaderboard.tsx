@@ -37,16 +37,23 @@ function TopVotedCard({ snippets }: { snippets: Snippet[] }) {
         <CardTitle>Most Voted Snippets</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
+        <div className="space-y-4">
           {snippets.map((snippet, index) => (
-            <div key={snippet.id} className="flex justify-between items-center">
-              <div className="flex flex-col">
+            <div key={snippet.id} className="flex justify-between items-start">
+              <div className="flex flex-col space-y-1">
                 <span>
                   {index + 1}.{" "}
                   <Link href={`/snippet/${snippet.id}`} className="hover:text-primary hover:underline">
                     {snippet.title}
                   </Link>
                 </span>
+                <div className="flex flex-wrap gap-1">
+                  {(Array.isArray(snippet.categories) ? snippet.categories : []).map((category: string) => (
+                    <span key={category} className="text-xs px-2 py-1 rounded bg-primary/10">
+                      {category}
+                    </span>
+                  ))}
+                </div>
                 <span className="text-sm text-muted-foreground">
                   by{" "}
                   <Link href={`/profile/${snippet.authorUsername}`} className="hover:text-primary hover:underline">
@@ -54,18 +61,9 @@ function TopVotedCard({ snippets }: { snippets: Snippet[] }) {
                   </Link>
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="flex gap-1">
-                  {(Array.isArray(snippet.categories) ? snippet.categories : []).map((category: string) => (
-                    <span key={category} className="text-xs px-2 py-1 rounded bg-primary/10">
-                      {category}
-                    </span>
-                  ))}
-                </div>
-                <span className="text-muted-foreground">
-                  {snippet.votes} vote{snippet.votes === 1 ? "" : "s"}
-                </span>
-              </div>
+              <span className="text-muted-foreground ml-4">
+                {snippet.votes} vote{snippet.votes === 1 ? "" : "s"}
+              </span>
             </div>
           ))}
         </div>
