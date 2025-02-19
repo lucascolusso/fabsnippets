@@ -31,19 +31,25 @@ interface SnippetCardProps {
 
 const parsedCategories = (snippet: Snippet): CodeCategory[] => {
   try {
+    // If categories is null, undefined, or empty string
     if (!snippet.categories) {
-      return [];
+      // Try to fall back to single category if it exists
+      return snippet.category ? [snippet.category as CodeCategory] : [];
     }
-    // If categories is already an array, return it
+    // If categories is already an array
     if (Array.isArray(snippet.categories)) {
       return snippet.categories;
     }
-    // Otherwise parse the string
-    const parsed = JSON.parse(snippet.categories as string);
-    return Array.isArray(parsed) ? parsed : [];
+    // If categories is a string, try to parse it
+    if (typeof snippet.categories === 'string' && snippet.categories.trim()) {
+      const parsed = JSON.parse(snippet.categories);
+      return Array.isArray(parsed) ? parsed : [];
+    }
+    return [];
   } catch (e) {
     console.error('Error parsing categories:', e);
-    return [];
+    // Fallback to single category if parsing fails
+    return snippet.category ? [snippet.category as CodeCategory] : [];
   }
 };
 
