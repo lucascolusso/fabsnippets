@@ -1,4 +1,4 @@
-import express, { type Express } from "express";
+import express, { type Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { db } from "@db";
 import { snippets, votes, users, comments } from "@db/schema";
@@ -11,6 +11,18 @@ import fs from 'fs';
 import { promises as fsPromises } from 'fs';
 import { createBackup, restoreFromBackup } from '../scripts/dbBackup';
 import { setupAuth } from './auth';
+
+// Extend Express Request type to include user property
+declare module 'express' {
+  interface Request {
+    user?: {
+      id: number;
+      username: string;
+      email?: string;
+      website?: string;
+    };
+  }
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -230,7 +242,7 @@ export function registerRoutes(app: Express): Server {
         code,
         category: Array.isArray(categories) ? categories[0] : null, // Store first category in old field
         categories: JSON.stringify(categories), // Store all categories as JSON
-        authorId: req.user.id,
+        authorId: req.user!.id,
         imagePath,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -392,7 +404,7 @@ export function registerRoutes(app: Express): Server {
 
     try {
       // Get user ID if authenticated
-      const userId = req.isAuthenticated() ? req.user.id : null;
+      const userId = req.isAuthenticated() ? req.user!.id : null;
 
       // Check if already voted based on either user ID or IP, for this specific snippet
       const existingVote = await db.query.votes.findFirst({
@@ -583,7 +595,7 @@ export function registerRoutes(app: Express): Server {
       }
 
       // Check if user is the author
-      if (snippet.authorId !== req.user.id) {
+      if (snippet.authorId !== req.user!.id) {
         return res.status(403).json({ message: "Not authorized to edit this snippet" });
       }
 
@@ -654,7 +666,7 @@ export function registerRoutes(app: Express): Server {
       }
 
       // Check if user is the author
-      if (snippet.authorId !== req.user.id) {
+      if (snippet.authorId !== req.user!.id) {
         return res.status(403).json({ message: "Not authorized to delete this snippet" });
       }
 
@@ -715,7 +727,7 @@ export function registerRoutes(app: Express): Server {
         .values({
           content,
           snippetId,
-          authorId: req.user.id,
+          authorId: req.user!.id,
           createdAt: new Date(),
         })
         .returning();

@@ -66,9 +66,27 @@ export function Home() {
     setSelectedCategories(new Set());
   }, []);
 
-  const filteredSnippets = snippets?.filter(snippet => 
-    selectedCategories.size === 0 || (snippet.category && selectedCategories.has(snippet.category as CodeCategory))
-  ) ?? [];
+  const filteredSnippets = snippets?.filter(snippet => {
+    if (selectedCategories.size === 0) return true;
+
+    // Parse categories if it's a string
+    let snippetCategories: string[] = [];
+    try {
+      if (typeof snippet.categories === 'string') {
+        snippetCategories = JSON.parse(snippet.categories);
+      } else if (Array.isArray(snippet.categories)) {
+        snippetCategories = snippet.categories;
+      }
+    } catch (e) {
+      console.error('Error parsing categories:', e);
+      return false;
+    }
+
+    // Check if any selected category exists in the snippet's categories
+    return Array.from(selectedCategories).some(selectedCategory => 
+      snippetCategories.includes(selectedCategory)
+    );
+  }) ?? [];
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-3xl">
