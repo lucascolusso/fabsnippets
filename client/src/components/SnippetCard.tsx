@@ -32,10 +32,14 @@ interface SnippetCardProps {
 const parsedCategories = (snippet: Snippet): CodeCategory[] => {
   try {
     if (!snippet.categories) {
-      // Fallback to single category if categories field is not present
-      return snippet.category ? [snippet.category] : [];
+      return [];
     }
-    const parsed = JSON.parse(snippet.categories);
+    // If categories is already an array, return it
+    if (Array.isArray(snippet.categories)) {
+      return snippet.categories;
+    }
+    // Otherwise parse the string
+    const parsed = JSON.parse(snippet.categories as string);
     return Array.isArray(parsed) ? parsed : [];
   } catch (e) {
     console.error('Error parsing categories:', e);
