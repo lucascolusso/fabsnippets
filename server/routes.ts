@@ -303,12 +303,31 @@ export function registerRoutes(app: Express): Server {
 
       if (search) {
         const searchTerm = search.toString().toLowerCase();
-        const filtered = allSnippets.filter(snippet => 
-          snippet.title.toLowerCase().includes(searchTerm) ||
-          snippet.code.toLowerCase().includes(searchTerm) ||
-          snippet.authorUsername.toLowerCase().includes(searchTerm) ||
-          snippet.categories.toLowerCase().includes(searchTerm)
-        );
+        const filtered = allSnippets.filter(snippet => {
+          const title = snippet.title?.toLowerCase() || '';
+          const code = snippet.code?.toLowerCase() || '';
+          const author = snippet.authorUsername?.toLowerCase() || '';
+          let categories: string[] = [];
+
+          try {
+            // Handle both string and array formats for categories
+            if (typeof snippet.categories === 'string') {
+              categories = JSON.parse(snippet.categories);
+            } else if (Array.isArray(snippet.categories)) {
+              categories = snippet.categories;
+            }
+          } catch (e) {
+            console.error('Error parsing categories:', e);
+            categories = [];
+          }
+
+          const categoriesString = categories.join(' ').toLowerCase();
+
+          return title.includes(searchTerm) ||
+                 code.includes(searchTerm) ||
+                 author.includes(searchTerm) ||
+                 categoriesString.includes(searchTerm);
+        });
         return res.json(filtered);
       }
 
