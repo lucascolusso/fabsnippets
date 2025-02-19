@@ -1,25 +1,56 @@
 import { useQuery } from "@tanstack/react-query";
 import { SnippetCard } from "@/components/SnippetCard";
 import type { Snippet, CodeCategory } from "@/lib/types";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 const categories: CodeCategory[] = ['Prompt', 'TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery'];
 
 export function Home() {
   const [selectedCategories, setSelectedCategories] = useState<Set<CodeCategory>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
-  const { data: snippets, isLoading } = useQuery<Snippet[]>({
-    queryKey: ['/api/snippets', searchTerm],
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const { toast } = useToast();
+
+  // Debounce search term
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 300); // 300ms delay
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
+
+  const { data: snippets, isLoading, error } = useQuery<Snippet[]>({
+    queryKey: ['/api/snippets', debouncedSearch],
     queryFn: async () => {
-      const response = await fetch(`/api/snippets${searchTerm ? `?search=${searchTerm}` : ''}`);
-      return response.json();
-    }
+      try {
+        const response = await fetch(`/api/snippets${debouncedSearch ? `?search=${encodeURIComponent(debouncedSearch)}` : ''}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch snippets');
+        }
+        const data = await response.json();
+        if (!Array.isArray(data)) {
+          throw new Error('Invalid response format');
+        }
+        return data;
+      } catch (error) {
+        console.error('Search error:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch search results. Please try again.",
+          variant: "destructive",
+        });
+        return [];
+      }
+    },
+    refetchOnWindowFocus: false,
   });
 
-  const toggleCategory = (category: CodeCategory) => {
+  const toggleCategory = useCallback((category: CodeCategory) => {
     setSelectedCategories(prev => {
       const newSet = new Set(prev);
       if (newSet.has(category)) {
@@ -29,15 +60,15 @@ export function Home() {
       }
       return newSet;
     });
-  };
+  }, []);
 
-  const clearCategories = () => {
+  const clearCategories = useCallback(() => {
     setSelectedCategories(new Set());
-  };
+  }, []);
 
   const filteredSnippets = snippets?.filter(snippet => 
-    selectedCategories.size === 0 ? true : selectedCategories.has(snippet.category)
-  );
+    selectedCategories.size === 0 || (snippet.category && selectedCategories.has(snippet.category as CodeCategory))
+  ) ?? [];
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-3xl">
@@ -79,15 +110,23 @@ export function Home() {
         </div>
       </div>
 
-      {isLoading ? (
+      {error ? (
+        <div className="text-center py-8 text-muted-foreground">
+          Failed to load snippets. Please try again later.
+        </div>
+      ) : isLoading ? (
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="w-full h-[400px] animate-pulse bg-secondary rounded-lg" />
           ))}
         </div>
+      ) : filteredSnippets.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
+          No snippets found{searchTerm ? ` for "${searchTerm}"` : ''}.
+        </div>
       ) : (
         <div className="space-y-4">
-          {filteredSnippets?.map((snippet) => (
+          {filteredSnippets.map((snippet) => (
             <SnippetCard key={snippet.id} snippet={snippet} />
           ))}
         </div>
