@@ -36,7 +36,15 @@ export function Home() {
         if (!Array.isArray(data)) {
           throw new Error('Invalid response format');
         }
-        return data;
+        // Ensure categories are properly parsed for each snippet
+        return data.map(snippet => ({
+          ...snippet,
+          categories: Array.isArray(snippet.categories) 
+            ? snippet.categories 
+            : typeof snippet.categories === 'string'
+              ? JSON.parse(snippet.categories)
+              : []
+        }));
       } catch (error) {
         console.error('Search error:', error);
         toast({
