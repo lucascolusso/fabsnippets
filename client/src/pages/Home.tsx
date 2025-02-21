@@ -118,7 +118,7 @@ export function Home() {
               selectedCategories.size === 0 && "border border-primary font-medium"
             )}
           >
-            All Categories
+            All
           </Button>
           {categories.map((category) => (
             <Button
