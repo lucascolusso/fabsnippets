@@ -227,9 +227,15 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             )}
             <Button variant="outline" size="sm" onClick={handleCopy}>
               {isCopied ? (
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                <>
+                  <CheckCircle2 className="h-4 w-4 text-green-500 mr-1" />
+                  <span>Copied</span>
+                </>
               ) : (
-                <Copy className="h-4 w-4" />
+                <>
+                  <Copy className="h-4 w-4 mr-1" />
+                  <span>Copy</span>
+                </>
               )}
             </Button>
           </div>
