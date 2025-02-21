@@ -312,46 +312,24 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             </ScrollArea>
           )}
 
-          <div className="flex flex-wrap items-center justify-end gap-1 pt-0.5">
-            <div className="flex items-center gap-1">
-              {snippet.imagePath && !imageError && (
-                <>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setShowImage(true)}
-                    className="h-6 w-6"
-                  >
-                    <Image className="h-3 w-3" />
-                  </Button>
-                  <Dialog open={showImage} onOpenChange={setShowImage}>
-                    <DialogContent className="max-w-2xl">
-                      <DialogHeader>
-                        <DialogTitle className="text-sm">Visualization for {snippet.title}</DialogTitle>
-                      </DialogHeader>
-                      <div className="max-h-[60vh] overflow-hidden">
-                        <img
-                          src={`/uploads/${snippet.imagePath}`}
-                          alt="Snippet visualization"
-                          className="w-full object-contain"
-                          onError={handleImageError}
-                        />
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </>
-              )}
-              {!window.location.pathname.includes('/snippet/') && snippet.commentCount > 0 && (
-                <div className="flex items-center gap-0.5 text-xs text-muted-foreground">
-                  <MessageSquare className="h-3 w-3" />
-                  <span>{snippet.commentCount}</span>
-                </div>
+          <div className="flex flex-wrap items-center w-full gap-1 pt-0.5">
+            <div className="grid grid-cols-3 w-full gap-1">
+              {!window.location.pathname.includes('/snippet/') && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.location.href = `/snippet/${snippet.id}`}
+                  className="h-6 text-xs px-2 flex items-center justify-center"
+                >
+                  <MessageSquare className="h-3 w-3 mr-1" />
+                  <span>{snippet.commentCount || 0}</span>
+                </Button>
               )}
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleCopy}
-                className="h-6 text-xs px-2"
+                className="h-6 text-xs px-2 flex items-center justify-center"
               >
                 {isCopied ? (
                   <>
@@ -369,7 +347,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                 variant="outline"
                 onClick={() => voteMutation.mutate()}
                 disabled={voteMutation.isPending}
-                className="h-6 px-2 flex items-center gap-1 text-[10px]"
+                className="h-6 px-2 flex items-center justify-center gap-1 text-[10px]"
               >
                 <ThumbsUp className="h-3 w-3" />
                 <span>{snippet.votes}</span>
