@@ -8,11 +8,28 @@ import type { Snippet, CodeCategory } from "@/lib/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useUser } from "@/hooks/use-user";
 import {
   AlertDialog,
@@ -24,6 +41,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
 
 interface SnippetCardProps {
   snippet: Snippet;
@@ -61,6 +79,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { user } = useUser();
+  const [hasLiked, setHasLiked] = useState(false); // Added state for like
 
   const form = useForm({
     defaultValues: {
@@ -126,12 +145,16 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/snippets"] });
+      setHasLiked(true);
       toast({
         title: "Vote recorded",
         description: "Thanks for voting!",
       });
     },
     onError: (error: Error) => {
+      if (error.message.includes("already voted")) {
+        setHasLiked(true);
+      }
       toast({
         title: error.message.includes("already voted") ? "Already voted" : "Couldn't vote",
         description: error.message,
@@ -321,9 +344,12 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                 variant="ghost"
                 onClick={() => voteMutation.mutate()}
                 disabled={voteMutation.isPending}
-                className="h-8 px-2 flex items-center justify-center gap-1 text-[10px]"
+                className={cn(
+                  "h-8 px-2 flex items-center justify-center gap-1 text-[10px]",
+                  hasLiked && "font-bold text-primary"
+                )}
               >
-                <ThumbsUp className="h-3 w-3" />
+                <ThumbsUp className={cn("h-3 w-3", hasLiked && "fill-current")} />
                 <span>Like</span>
               </Button>
               {!window.location.pathname.includes('/snippet/') && (
