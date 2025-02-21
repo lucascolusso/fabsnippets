@@ -466,9 +466,24 @@ export function registerRoutes(app: Express): Server {
           imagePath: snippets.imagePath,
           createdAt: snippets.createdAt,
           votes: snippets.votes,
+          commentCount: sql<number>`COUNT(DISTINCT ${comments.id})::integer`,
         })
         .from(snippets)
         .leftJoin(users, eq(snippets.authorId, users.id))
+        .leftJoin(comments, eq(snippets.id, comments.snippetId))
+        .groupBy(
+          snippets.id,
+          snippets.title,
+          snippets.code,
+          snippets.categories,
+          snippets.category,
+          snippets.authorId,
+          users.username,
+          users.website,
+          snippets.imagePath,
+          snippets.createdAt,
+          snippets.votes,
+        )
         .orderBy(desc(snippets.votes));
 
       let results = await query;
