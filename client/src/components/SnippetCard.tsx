@@ -318,7 +318,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             </div>
             <div className="grid grid-cols-3 w-full gap-1">
               <Button
-                variant="outline"
+                variant="ghost"
                 onClick={() => voteMutation.mutate()}
                 disabled={voteMutation.isPending}
                 className="h-6 px-2 flex items-center justify-center gap-1 text-[10px]"
@@ -328,7 +328,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
               </Button>
               {!window.location.pathname.includes('/snippet/') && (
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
                   onClick={() => window.location.href = `/snippet/${snippet.id}`}
                   className="h-6 text-xs px-2 flex items-center justify-center"
@@ -338,7 +338,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                 </Button>
               )}
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 onClick={handleCopy}
                 className="h-6 text-xs px-2 flex items-center justify-center"
