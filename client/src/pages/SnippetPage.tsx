@@ -1,10 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { SnippetCard } from "@/components/SnippetCard";
-import { Comments } from "@/components/Comments"; // Added import
+import { Comments } from "@/components/Comments";
 import type { Snippet } from "@/lib/types";
 import { useRoute } from "wouter";
-import { useState } from "react";
+import { useState, Suspense, lazy } from "react";
 import { toast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
+
+// Lazy load the image component
+const SnippetImage = lazy(() => import("@/components/SnippetImage"));
 
 export function SnippetPage() {
   const [, params] = useRoute<{ id: string }>("/snippet/:id");
@@ -20,7 +24,7 @@ export function SnippetPage() {
     });
   };
 
-  const { data: snippet } = useQuery<Snippet>({
+  const { data: snippet, isLoading } = useQuery<Snippet>({
     queryKey: [`/api/snippets/${snippetId}`],
     queryFn: async () => {
       const response = await fetch(`/api/snippets/${snippetId}`);
@@ -29,10 +33,22 @@ export function SnippetPage() {
       }
       return response.json();
     },
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    cacheTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
   });
 
+  if (isLoading) {
+    return (
+      <div className="container mx-auto py-8 px-4 max-w-3xl space-y-8">
+        <Skeleton className="w-full h-[200px] rounded-lg" />
+        <Skeleton className="w-full h-[300px] rounded-lg" />
+        <Skeleton className="w-full h-[200px] rounded-lg" />
+      </div>
+    );
+  }
+
   if (!snippet) {
-    return <div className="container mx-auto py-8">Loading...</div>;
+    return <div className="container mx-auto py-8">Snippet not found</div>;
   }
 
   return (
@@ -40,15 +56,15 @@ export function SnippetPage() {
       <SnippetCard snippet={snippet} />
       {snippet.imagePath && !imageError && (
         <div className="mt-8">
-          <img 
-            src={`/uploads/${snippet.imagePath}`} 
-            alt="Snippet visualization" 
-            className="w-full rounded-lg shadow-lg object-contain max-h-[60vh]"
-            onError={handleImageError}
-          />
+          <Suspense fallback={<Skeleton className="w-full h-[300px] rounded-lg" />}>
+            <SnippetImage 
+              src={`/uploads/${snippet.imagePath}`}
+              onError={handleImageError}
+            />
+          </Suspense>
         </div>
       )}
-      <div className="mt-8"> {/* Added div to wrap Comments */}
+      <div className="mt-8">
         <Comments snippetId={snippetId} />
       </div>
     </div>
