@@ -65,7 +65,7 @@ function App() {
                 </>
               ) : (
                 <Link href="/auth">
-                  <Button variant="ghost" size="sm" className="text-white hover:text-primary/90">
+                  <Button variant="ghost" size="sm" className="text-xs text-white hover:text-primary/90">
                     Login / Sign Up
                   </Button>
                 </Link>
