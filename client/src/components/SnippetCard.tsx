@@ -314,6 +314,15 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
 
           <div className="flex flex-wrap items-center w-full gap-1 pt-0.5">
             <div className="grid grid-cols-3 w-full gap-1">
+              <Button
+                variant="outline"
+                onClick={() => voteMutation.mutate()}
+                disabled={voteMutation.isPending}
+                className="h-6 px-2 flex items-center justify-center gap-1 text-[10px]"
+              >
+                <ThumbsUp className="h-3 w-3" />
+                <span>Like {snippet.votes}</span>
+              </Button>
               {!window.location.pathname.includes('/snippet/') && (
                 <Button
                   variant="outline"
@@ -322,7 +331,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                   className="h-6 text-xs px-2 flex items-center justify-center"
                 >
                   <MessageSquare className="h-3 w-3 mr-1" />
-                  <span>{snippet.commentCount || 0}</span>
+                  <span>Comment {snippet.commentCount || 0}</span>
                 </Button>
               )}
               <Button
@@ -342,15 +351,6 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                     <span>Copy</span>
                   </>
                 )}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => voteMutation.mutate()}
-                disabled={voteMutation.isPending}
-                className="h-6 px-2 flex items-center justify-center gap-1 text-[10px]"
-              >
-                <ThumbsUp className="h-3 w-3" />
-                <span>{snippet.votes}</span>
               </Button>
             </div>
           </div>
