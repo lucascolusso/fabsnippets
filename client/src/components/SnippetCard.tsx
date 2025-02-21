@@ -221,14 +221,14 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
               <div className="flex gap-1 flex-shrink-0">
                 {isAuthor && (
                   <>
-                    <Button variant="outline" size="icon" className="h-6 w-6">
+                    <Button variant="outline" size="icon" className="h-8 w-8">
                       <Edit2 className="h-3 w-3" />
                     </Button>
                     <Button
                       variant="outline"
                       size="icon"
                       onClick={() => setShowDeleteDialog(true)}
-                      className="text-destructive hover:text-destructive h-6 w-6"
+                      className="text-destructive hover:text-destructive h-8 w-8"
                     >
                       <Trash2 className="h-3 w-3" />
                     </Button>
@@ -290,10 +290,10 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                   )}
                 />
                 <div className="flex gap-1">
-                  <Button type="submit" disabled={updateMutation.isPending} className="h-6 text-xs">
+                  <Button type="submit" disabled={updateMutation.isPending} className="h-8 text-xs">
                     {updateMutation.isPending ? "Saving..." : "Save"}
                   </Button>
-                  <Button type="button" variant="outline" onClick={() => setIsEditing(false)} className="h-6 text-xs">
+                  <Button type="button" variant="outline" onClick={() => setIsEditing(false)} className="h-8 text-xs">
                     Cancel
                   </Button>
                 </div>
@@ -321,7 +321,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                 variant="ghost"
                 onClick={() => voteMutation.mutate()}
                 disabled={voteMutation.isPending}
-                className="h-6 px-2 flex items-center justify-center gap-1 text-[10px]"
+                className="h-8 px-2 flex items-center justify-center gap-1 text-[10px]"
               >
                 <ThumbsUp className="h-3 w-3" />
                 <span>Like {snippet.votes}</span>
@@ -331,7 +331,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                   variant="ghost"
                   size="sm"
                   onClick={() => window.location.href = `/snippet/${snippet.id}`}
-                  className="h-6 text-xs px-2 flex items-center justify-center"
+                  className="h-8 text-xs px-2 flex items-center justify-center"
                 >
                   <MessageSquare className="h-3 w-3 mr-1" />
                   <span>Comment {snippet.commentCount || 0}</span>
@@ -341,7 +341,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                 variant="ghost"
                 size="sm"
                 onClick={handleCopy}
-                className="h-6 text-xs px-2 flex items-center justify-center"
+                className="h-8 text-xs px-2 flex items-center justify-center"
               >
                 {isCopied ? (
                   <>
