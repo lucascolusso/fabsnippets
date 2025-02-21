@@ -192,48 +192,48 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
 
   return (
     <Card className="w-full shadow-md">
-      <CardContent className="p-2 space-y-2">
-        <div className="flex items-center justify-between gap-1 mb-1">
+      <CardContent className="p-1 space-y-1">
+        <div className="flex items-center justify-between gap-1 mb-0.5">
           <div className="flex items-center gap-1 flex-wrap">
             <Link href={`/snippet/${snippet.id}`} className="hover:text-primary hover:underline">
-              <h2 className="text-base font-semibold">{snippet.title}</h2>
+              <h2 className="text-sm font-semibold">{snippet.title}</h2>
             </Link>
-            <div className="flex gap-1 flex-wrap">
+            <div className="flex gap-0.5 flex-wrap">
               {parsedCategories(snippet).map((category, index) => (
                 <span
                   key={`${category}-${index}`}
-                  className="inline-block px-1 py-0.5 text-[10px] font-semibold rounded bg-primary/10"
+                  className="inline-block px-0.5 py-0.5 text-[8px] font-semibold rounded bg-primary/10"
                 >
                   {category}
                 </span>
               ))}
             </div>
           </div>
-          <div className="flex gap-2 flex-shrink-0">
+          <div className="flex gap-1 flex-shrink-0">
             {isAuthor && (
               <>
-                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                  <Edit2 className="h-4 w-4" />
+                <Button variant="outline" size="icon" className="h-6 w-6">
+                  <Edit2 className="h-3 w-3" />
                 </Button>
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="icon"
                   onClick={() => setShowDeleteDialog(true)}
-                  className="text-destructive hover:text-destructive"
+                  className="text-destructive hover:text-destructive h-6 w-6"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3 w-3" />
                 </Button>
               </>
             )}
-            <Button variant="outline" size="sm" onClick={handleCopy}>
+            <Button variant="outline" size="sm" onClick={handleCopy} className="h-6 text-xs px-2">
               {isCopied ? (
                 <>
-                  <CheckCircle2 className="h-4 w-4 text-green-500 mr-1" />
+                  <CheckCircle2 className="h-3 w-3 text-green-500 mr-1" />
                   <span>Copied</span>
                 </>
               ) : (
                 <>
-                  <Copy className="h-4 w-4 mr-1" />
+                  <Copy className="h-3 w-3 mr-1" />
                   <span>Copy</span>
                 </>
               )}
@@ -243,15 +243,15 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
 
         {isEditing ? (
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
               <FormField
                 control={form.control}
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Title</FormLabel>
+                    <FormLabel className="text-xs">Title</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} className="text-xs h-7" />
                     </FormControl>
                   </FormItem>
                 )}
@@ -261,20 +261,20 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                 name="categories"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Categories</FormLabel>
+                    <FormLabel className="text-xs">Categories</FormLabel>
                     <Select onValueChange={field.onChange} multiple value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="h-7 text-xs">
                           <SelectValue placeholder="Select categories" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="Prompt">Prompt</SelectItem>
-                        <SelectItem value="TMDL">TMDL</SelectItem>
-                        <SelectItem value="DAX">DAX</SelectItem>
-                        <SelectItem value="SQL">SQL</SelectItem>
-                        <SelectItem value="Python">Python</SelectItem>
-                        <SelectItem value="PowerQuery">PowerQuery</SelectItem>
+                        <SelectItem value="Prompt" className="text-xs">Prompt</SelectItem>
+                        <SelectItem value="TMDL" className="text-xs">TMDL</SelectItem>
+                        <SelectItem value="DAX" className="text-xs">DAX</SelectItem>
+                        <SelectItem value="SQL" className="text-xs">SQL</SelectItem>
+                        <SelectItem value="Python" className="text-xs">Python</SelectItem>
+                        <SelectItem value="PowerQuery" className="text-xs">PowerQuery</SelectItem>
                       </SelectContent>
                     </Select>
                   </FormItem>
@@ -285,58 +285,59 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                 name="code"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Code</FormLabel>
+                    <FormLabel className="text-xs">Code</FormLabel>
                     <FormControl>
-                      <CodeEditor {...field} className="text-[11px] h-full font-mono" />
+                      <CodeEditor {...field} className="text-[10px] h-full font-mono" />
                     </FormControl>
                   </FormItem>
                 )}
               />
-              <div className="flex gap-2">
-                <Button type="submit" disabled={updateMutation.isPending}>
+              <div className="flex gap-1">
+                <Button type="submit" disabled={updateMutation.isPending} className="h-6 text-xs">
                   {updateMutation.isPending ? "Saving..." : "Save"}
                 </Button>
-                <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
+                <Button type="button" variant="outline" onClick={() => setIsEditing(false)} className="h-6 text-xs">
                   Cancel
                 </Button>
               </div>
             </form>
           </Form>
         ) : (
-          <ScrollArea className="h-[200px]">
+          <ScrollArea className="h-[180px]">
             <div>
               <CodeEditor
                 value={snippet.code}
                 onChange={() => { }}
                 readOnly
-                className="text-[11px] h-full font-mono"
+                className="text-[10px] h-full font-mono"
               />
             </div>
           </ScrollArea>
         )}
 
-        <div className="flex flex-wrap items-center justify-between gap-1 pt-1">
-          <div className="flex items-center gap-0.5 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-between gap-1 pt-0.5">
+          <div className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
             <span>Submitted by</span>
             <Link href={`/profile/${snippet.authorUsername}`} className="underline">
               {snippet.authorUsername}
             </Link>
             <span>on {new Date(snippet.createdAt).toLocaleDateString()}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {snippet.imagePath && !imageError && (
               <>
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="icon"
                   onClick={() => setShowImage(true)}
+                  className="h-6 w-6"
                 >
                   <Image className="h-3 w-3" />
                 </Button>
                 <Dialog open={showImage} onOpenChange={setShowImage}>
                   <DialogContent className="max-w-2xl">
                     <DialogHeader>
-                      <DialogTitle>Visualization for {snippet.title}</DialogTitle>
+                      <DialogTitle className="text-sm">Visualization for {snippet.title}</DialogTitle>
                     </DialogHeader>
                     <div className="max-h-[60vh] overflow-hidden">
                       <img
@@ -351,45 +352,24 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
               </>
             )}
             {!window.location.pathname.includes('/snippet/') && snippet.commentCount > 0 && (
-              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              <div className="flex items-center gap-0.5 text-xs text-muted-foreground">
                 <MessageSquare className="h-3 w-3" />
                 <span>{snippet.commentCount}</span>
               </div>
             )}
             <Button
               variant="outline"
-              size="sm"
+              size="icon"
               onClick={() => voteMutation.mutate()}
               disabled={voteMutation.isPending}
+              className="h-6 w-6"
             >
-              <ThumbsUp className="h-3 w-3 mr-1" />
-              {snippet.votes}
+              <ThumbsUp className="h-3 w-3" />
+              <span className="ml-1 text-[10px]">{snippet.votes}</span>
             </Button>
           </div>
         </div>
       </CardContent>
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your snippet.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                deleteMutation.mutate();
-                setShowDeleteDialog(false);
-              }}
-              className="bg-destructive hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Card>
   );
 }
