@@ -360,13 +360,12 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
               )}
               <Button
                 variant="outline"
-                size="icon"
                 onClick={() => voteMutation.mutate()}
                 disabled={voteMutation.isPending}
-                className="h-6 w-6"
+                className="h-6 px-2 flex items-center gap-1 text-[10px]"
               >
                 <ThumbsUp className="h-3 w-3" />
-                <span className="ml-1 text-[10px]">{snippet.votes}</span>
+                <span>{snippet.votes}</span>
               </Button>
             </div>
           </div>
