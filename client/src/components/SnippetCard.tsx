@@ -191,185 +191,209 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
   const isAuthor = user?.id === snippet.authorId;
 
   return (
-    <Card className="w-full shadow-md">
-      <CardContent className="p-1 space-y-1">
-        <div className="flex items-center justify-between gap-1 mb-0.5">
-          <div className="flex items-center gap-1 flex-wrap">
-            <Link href={`/snippet/${snippet.id}`} className="hover:text-primary hover:underline">
-              <h2 className="text-sm font-semibold">{snippet.title}</h2>
-            </Link>
-            <div className="flex gap-0.5 flex-wrap">
-              {parsedCategories(snippet).map((category, index) => (
-                <span
-                  key={`${category}-${index}`}
-                  className="inline-block px-0.5 py-0.5 text-[8px] font-semibold rounded bg-primary/10"
-                >
-                  {category}
-                </span>
-              ))}
+    <>
+      <Card className="w-full shadow-md">
+        <CardContent className="p-1 space-y-1">
+          <div className="flex items-center justify-between gap-1 mb-0.5">
+            <div className="flex items-center gap-1 flex-wrap">
+              <Link href={`/snippet/${snippet.id}`} className="hover:text-primary hover:underline">
+                <h2 className="text-sm font-semibold">{snippet.title}</h2>
+              </Link>
+              <div className="flex gap-0.5 flex-wrap">
+                {parsedCategories(snippet).map((category, index) => (
+                  <span
+                    key={`${category}-${index}`}
+                    className="inline-block px-0.5 py-0.5 text-[8px] font-semibold rounded bg-primary/10"
+                  >
+                    {category}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
-          <div className="flex gap-1 flex-shrink-0">
-            {isAuthor && (
-              <>
-                <Button variant="outline" size="icon" className="h-6 w-6">
-                  <Edit2 className="h-3 w-3" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setShowDeleteDialog(true)}
-                  className="text-destructive hover:text-destructive h-6 w-6"
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
-              </>
-            )}
-            <Button variant="outline" size="sm" onClick={handleCopy} className="h-6 text-xs px-2">
-              {isCopied ? (
+            <div className="flex gap-1 flex-shrink-0">
+              {isAuthor && (
                 <>
-                  <CheckCircle2 className="h-3 w-3 text-green-500 mr-1" />
-                  <span>Copied</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="h-3 w-3 mr-1" />
-                  <span>Copy</span>
+                  <Button variant="outline" size="icon" className="h-6 w-6">
+                    <Edit2 className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="text-destructive hover:text-destructive h-6 w-6"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
                 </>
               )}
-            </Button>
-          </div>
-        </div>
-
-        {isEditing ? (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs">Title</FormLabel>
-                    <FormControl>
-                      <Input {...field} className="text-xs h-7" />
-                    </FormControl>
-                  </FormItem>
+              <Button variant="outline" size="sm" onClick={handleCopy} className="h-6 text-xs px-2">
+                {isCopied ? (
+                  <>
+                    <CheckCircle2 className="h-3 w-3 text-green-500 mr-1" />
+                    <span>Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-3 w-3 mr-1" />
+                    <span>Copy</span>
+                  </>
                 )}
-              />
-              <FormField
-                control={form.control}
-                name="categories"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs">Categories</FormLabel>
-                    <Select onValueChange={field.onChange} multiple value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="h-7 text-xs">
-                          <SelectValue placeholder="Select categories" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Prompt" className="text-xs">Prompt</SelectItem>
-                        <SelectItem value="TMDL" className="text-xs">TMDL</SelectItem>
-                        <SelectItem value="DAX" className="text-xs">DAX</SelectItem>
-                        <SelectItem value="SQL" className="text-xs">SQL</SelectItem>
-                        <SelectItem value="Python" className="text-xs">Python</SelectItem>
-                        <SelectItem value="PowerQuery" className="text-xs">PowerQuery</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="code"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs">Code</FormLabel>
-                    <FormControl>
-                      <CodeEditor {...field} className="text-[10px] h-full font-mono" />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <div className="flex gap-1">
-                <Button type="submit" disabled={updateMutation.isPending} className="h-6 text-xs">
-                  {updateMutation.isPending ? "Saving..." : "Save"}
-                </Button>
-                <Button type="button" variant="outline" onClick={() => setIsEditing(false)} className="h-6 text-xs">
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          </Form>
-        ) : (
-          <ScrollArea className="h-[180px]">
-            <div>
-              <CodeEditor
-                value={snippet.code}
-                onChange={() => { }}
-                readOnly
-                className="text-[10px] h-full font-mono"
-              />
+              </Button>
             </div>
-          </ScrollArea>
-        )}
+          </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-1 pt-0.5">
-          <div className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
-            <span>Submitted by</span>
-            <Link href={`/profile/${snippet.authorUsername}`} className="underline">
-              {snippet.authorUsername}
-            </Link>
-            <span>on {new Date(snippet.createdAt).toLocaleDateString()}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            {snippet.imagePath && !imageError && (
-              <>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setShowImage(true)}
-                  className="h-6 w-6"
-                >
-                  <Image className="h-3 w-3" />
-                </Button>
-                <Dialog open={showImage} onOpenChange={setShowImage}>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                      <DialogTitle className="text-sm">Visualization for {snippet.title}</DialogTitle>
-                    </DialogHeader>
-                    <div className="max-h-[60vh] overflow-hidden">
-                      <img
-                        src={`/uploads/${snippet.imagePath}`}
-                        alt="Snippet visualization"
-                        className="w-full object-contain"
-                        onError={handleImageError}
-                      />
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </>
-            )}
-            {!window.location.pathname.includes('/snippet/') && snippet.commentCount > 0 && (
-              <div className="flex items-center gap-0.5 text-xs text-muted-foreground">
-                <MessageSquare className="h-3 w-3" />
-                <span>{snippet.commentCount}</span>
+          {isEditing ? (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">Title</FormLabel>
+                      <FormControl>
+                        <Input {...field} className="text-xs h-7" />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="categories"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">Categories</FormLabel>
+                      <Select onValueChange={field.onChange} multiple value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="h-7 text-xs">
+                            <SelectValue placeholder="Select categories" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Prompt" className="text-xs">Prompt</SelectItem>
+                          <SelectItem value="TMDL" className="text-xs">TMDL</SelectItem>
+                          <SelectItem value="DAX" className="text-xs">DAX</SelectItem>
+                          <SelectItem value="SQL" className="text-xs">SQL</SelectItem>
+                          <SelectItem value="Python" className="text-xs">Python</SelectItem>
+                          <SelectItem value="PowerQuery" className="text-xs">PowerQuery</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="code"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">Code</FormLabel>
+                      <FormControl>
+                        <CodeEditor {...field} className="text-[10px] h-full font-mono" />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <div className="flex gap-1">
+                  <Button type="submit" disabled={updateMutation.isPending} className="h-6 text-xs">
+                    {updateMutation.isPending ? "Saving..." : "Save"}
+                  </Button>
+                  <Button type="button" variant="outline" onClick={() => setIsEditing(false)} className="h-6 text-xs">
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          ) : (
+            <ScrollArea className="h-[180px]">
+              <div>
+                <CodeEditor
+                  value={snippet.code}
+                  onChange={() => { }}
+                  readOnly
+                  className="text-[10px] h-full font-mono"
+                />
               </div>
-            )}
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => voteMutation.mutate()}
-              disabled={voteMutation.isPending}
-              className="h-6 w-6"
-            >
-              <ThumbsUp className="h-3 w-3" />
-              <span className="ml-1 text-[10px]">{snippet.votes}</span>
-            </Button>
+            </ScrollArea>
+          )}
+
+          <div className="flex flex-wrap items-center justify-between gap-1 pt-0.5">
+            <div className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
+              <span>Submitted by</span>
+              <Link href={`/profile/${snippet.authorUsername}`} className="underline">
+                {snippet.authorUsername}
+              </Link>
+              <span>on {new Date(snippet.createdAt).toLocaleDateString()}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              {snippet.imagePath && !imageError && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setShowImage(true)}
+                    className="h-6 w-6"
+                  >
+                    <Image className="h-3 w-3" />
+                  </Button>
+                  <Dialog open={showImage} onOpenChange={setShowImage}>
+                    <DialogContent className="max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle className="text-sm">Visualization for {snippet.title}</DialogTitle>
+                      </DialogHeader>
+                      <div className="max-h-[60vh] overflow-hidden">
+                        <img
+                          src={`/uploads/${snippet.imagePath}`}
+                          alt="Snippet visualization"
+                          className="w-full object-contain"
+                          onError={handleImageError}
+                        />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </>
+              )}
+              {!window.location.pathname.includes('/snippet/') && snippet.commentCount > 0 && (
+                <div className="flex items-center gap-0.5 text-xs text-muted-foreground">
+                  <MessageSquare className="h-3 w-3" />
+                  <span>{snippet.commentCount}</span>
+                </div>
+              )}
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => voteMutation.mutate()}
+                disabled={voteMutation.isPending}
+                className="h-6 w-6"
+              >
+                <ThumbsUp className="h-3 w-3" />
+                <span className="ml-1 text-[10px]">{snippet.votes}</span>
+              </Button>
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-sm">Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs">
+              This action cannot be undone. This will permanently delete your snippet.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="h-7 text-xs">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                deleteMutation.mutate();
+                setShowDeleteDialog(false);
+              }}
+              className="bg-destructive hover:bg-destructive/90 h-7 text-xs"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
