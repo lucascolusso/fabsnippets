@@ -195,10 +195,19 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
       <Card className="w-full shadow-md">
         <CardContent className="p-1 space-y-1">
           <div className="flex items-center justify-between gap-1 mb-0.5">
-            <div className="flex items-center gap-1 flex-wrap">
+            <div className="flex flex-col gap-0.5">
               <Link href={`/snippet/${snippet.id}`} className="hover:text-primary hover:underline">
                 <h2 className="text-sm font-semibold">{snippet.title}</h2>
               </Link>
+              <div className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                <span>Submitted by</span>
+                <Link href={`/profile/${snippet.authorUsername}`} className="underline">
+                  {snippet.authorUsername}
+                </Link>
+                <span>on {new Date(snippet.createdAt).toLocaleDateString()}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-1">
               <div className="flex gap-0.5 flex-wrap">
                 {parsedCategories(snippet).map((category, index) => (
                   <span
@@ -209,36 +218,36 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                   </span>
                 ))}
               </div>
-            </div>
-            <div className="flex gap-1 flex-shrink-0">
-              {isAuthor && (
-                <>
-                  <Button variant="outline" size="icon" className="h-6 w-6">
-                    <Edit2 className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setShowDeleteDialog(true)}
-                    className="text-destructive hover:text-destructive h-6 w-6"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </>
-              )}
-              <Button variant="outline" size="sm" onClick={handleCopy} className="h-6 text-xs px-2">
-                {isCopied ? (
+              <div className="flex gap-1 flex-shrink-0">
+                {isAuthor && (
                   <>
-                    <CheckCircle2 className="h-3 w-3 text-green-500 mr-1" />
-                    <span>Copied</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-3 w-3 mr-1" />
-                    <span>Copy</span>
+                    <Button variant="outline" size="icon" className="h-6 w-6">
+                      <Edit2 className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setShowDeleteDialog(true)}
+                      className="text-destructive hover:text-destructive h-6 w-6"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
                   </>
                 )}
-              </Button>
+                <Button variant="outline" size="sm" onClick={handleCopy} className="h-6 text-xs px-2">
+                  {isCopied ? (
+                    <>
+                      <CheckCircle2 className="h-3 w-3 text-green-500 mr-1" />
+                      <span>Copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-3 w-3 mr-1" />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -316,14 +325,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             </ScrollArea>
           )}
 
-          <div className="flex flex-wrap items-center justify-between gap-1 pt-0.5">
-            <div className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
-              <span>Submitted by</span>
-              <Link href={`/profile/${snippet.authorUsername}`} className="underline">
-                {snippet.authorUsername}
-              </Link>
-              <span>on {new Date(snippet.createdAt).toLocaleDateString()}</span>
-            </div>
+          <div className="flex flex-wrap items-center justify-end gap-1 pt-0.5">
             <div className="flex items-center gap-1">
               {snippet.imagePath && !imageError && (
                 <>
