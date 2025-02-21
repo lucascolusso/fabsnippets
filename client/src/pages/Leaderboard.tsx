@@ -34,7 +34,7 @@ function TopVotedCard({ snippets }: { snippets: Snippet[] }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Most Voted Snippets</CardTitle>
+        <CardTitle>Most liked snippets</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -62,7 +62,7 @@ function TopVotedCard({ snippets }: { snippets: Snippet[] }) {
                 </span>
               </div>
               <span className="text-muted-foreground ml-4">
-                {snippet.votes} vote{snippet.votes === 1 ? "" : "s"}
+                {snippet.votes} like{snippet.votes === 1 ? "" : "s"}
               </span>
             </div>
           ))}
