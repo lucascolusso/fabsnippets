@@ -5,9 +5,9 @@ import { Copy, ThumbsUp, CheckCircle2, Image, Edit2, Trash2, MessageSquare } fro
 import { Link } from "wouter";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Snippet, CodeCategory } from "@/lib/types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -79,7 +79,31 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { user } = useUser();
-  const [hasLiked, setHasLiked] = useState(false); // Added state for like
+  const [hasLiked, setHasLiked] = useState(false);
+
+  // Add vote status check query
+  const { data: voteStatus } = useQuery({
+    queryKey: [`/api/snippets/${snippet.id}/vote-status`],
+    queryFn: async () => {
+      try {
+        const res = await fetch(`/api/snippets/${snippet.id}/vote-status`, {
+          credentials: "include",
+        });
+        if (!res.ok) return { hasVoted: false };
+        return res.json();
+      } catch (e) {
+        return { hasVoted: false };
+      }
+    },
+    enabled: !!user, // Only run if user is logged in
+  });
+
+  // Update hasLiked when vote status changes
+  useEffect(() => {
+    if (voteStatus?.hasVoted) {
+      setHasLiked(true);
+    }
+  }, [voteStatus]);
 
   const form = useForm({
     defaultValues: {
