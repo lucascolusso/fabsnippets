@@ -131,6 +131,7 @@ export function Leaderboard() {
     .sort((a, b) => b.votes - a.votes);
 
   const mostCommented = [...(snippets || [])]
+    .filter(snippet => (snippet.commentCount || 0) > 0)
     .sort((a, b) => (b.commentCount || 0) - (a.commentCount || 0));
 
   return (
