@@ -130,9 +130,19 @@ export function Leaderboard() {
   const topVoted = [...(snippets || [])]
     .sort((a, b) => b.votes - a.votes);
 
+  // Debug the snippets data
+  console.log('All snippets:', snippets?.map(s => ({ id: s.id, title: s.title, commentCount: s.commentCount })));
+
   const mostCommented = [...(snippets || [])]
-    .filter(snippet => snippet.commentCount != null && snippet.commentCount > 0)
+    .filter(snippet => {
+      // Debug each snippet's commentCount
+      console.log(`Snippet ${snippet.id} commentCount:`, snippet.commentCount);
+      return snippet.commentCount != null && snippet.commentCount > 0;
+    })
     .sort((a, b) => (b.commentCount || 0) - (a.commentCount || 0));
+
+  // Debug the filtered results
+  console.log('Filtered mostCommented:', mostCommented.map(s => ({ id: s.id, title: s.title, commentCount: s.commentCount })));
 
   return (
     <div className="container mx-auto py-8 px-4">
