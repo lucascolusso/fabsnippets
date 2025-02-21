@@ -324,7 +324,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                 className="h-8 px-2 flex items-center justify-center gap-1 text-[10px]"
               >
                 <ThumbsUp className="h-3 w-3" />
-                <span>Like {snippet.votes}</span>
+                <span>Like</span>
               </Button>
               {!window.location.pathname.includes('/snippet/') && (
                 <Button
@@ -334,7 +334,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                   className="h-8 text-xs px-2 flex items-center justify-center"
                 >
                   <MessageSquare className="h-3 w-3 mr-1" />
-                  <span>Comment {snippet.commentCount || 0}</span>
+                  <span>Comment</span>
                 </Button>
               )}
               <Button
