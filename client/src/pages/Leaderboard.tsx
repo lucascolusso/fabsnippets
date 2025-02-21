@@ -6,13 +6,13 @@ import type { Snippet } from "@/lib/types";
 function ContributorCard({ contributors }: { contributors: [string, number][] }) {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Top Contributors</CardTitle>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg">Top Contributors</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
+        <div className="space-y-1">
           {contributors.map(([author, count], index) => (
-            <div key={author} className="flex justify-between items-center">
+            <div key={author} className="flex justify-between items-center text-xs">
               <span>
                 {index + 1}.{" "}
                 <Link href={`/profile/${author}`} className="hover:text-primary hover:underline">
@@ -33,15 +33,15 @@ function ContributorCard({ contributors }: { contributors: [string, number][] })
 function TopVotedCard({ snippets }: { snippets: Snippet[] }) {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Most liked snippets</CardTitle>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg">Most liked snippets</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {snippets.map((snippet, index) => (
             <div key={snippet.id} className="flex justify-between items-start">
-              <div className="flex flex-col space-y-1">
-                <span>
+              <div className="flex flex-col space-y-0.5">
+                <span className="text-xs">
                   {index + 1}.{" "}
                   <Link href={`/snippet/${snippet.id}`} className="hover:text-primary hover:underline">
                     {snippet.title}
@@ -49,19 +49,19 @@ function TopVotedCard({ snippets }: { snippets: Snippet[] }) {
                 </span>
                 <div className="flex flex-wrap gap-1">
                   {(Array.isArray(snippet.categories) ? snippet.categories : []).map((category: string) => (
-                    <span key={category} className="text-xs px-2 py-1 rounded bg-primary/10">
+                    <span key={category} className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10">
                       {category}
                     </span>
                   ))}
                 </div>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-[10px] text-muted-foreground">
                   by{" "}
                   <Link href={`/profile/${snippet.authorUsername}`} className="hover:text-primary hover:underline">
                     {snippet.authorUsername}
                   </Link>
                 </span>
               </div>
-              <span className="text-muted-foreground ml-4">
+              <span className="text-[10px] text-muted-foreground ml-4">
                 {snippet.votes} like{snippet.votes === 1 ? "" : "s"}
               </span>
             </div>
@@ -75,15 +75,15 @@ function TopVotedCard({ snippets }: { snippets: Snippet[] }) {
 function MostCommentedCard({ snippets }: { snippets: Snippet[] }) {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Most discussed snippets</CardTitle>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg">Most discussed snippets</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {snippets.map((snippet, index) => (
             <div key={snippet.id} className="flex justify-between items-start">
-              <div className="flex flex-col space-y-1">
-                <span>
+              <div className="flex flex-col space-y-0.5">
+                <span className="text-xs">
                   {index + 1}.{" "}
                   <Link href={`/snippet/${snippet.id}`} className="hover:text-primary hover:underline">
                     {snippet.title}
@@ -91,19 +91,19 @@ function MostCommentedCard({ snippets }: { snippets: Snippet[] }) {
                 </span>
                 <div className="flex flex-wrap gap-1">
                   {(Array.isArray(snippet.categories) ? snippet.categories : []).map((category: string) => (
-                    <span key={category} className="text-xs px-2 py-1 rounded bg-primary/10">
+                    <span key={category} className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10">
                       {category}
                     </span>
                   ))}
                 </div>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-[10px] text-muted-foreground">
                   by{" "}
                   <Link href={`/profile/${snippet.authorUsername}`} className="hover:text-primary hover:underline">
                     {snippet.authorUsername}
                   </Link>
                 </span>
               </div>
-              <span className="text-muted-foreground ml-4">
+              <span className="text-[10px] text-muted-foreground ml-4">
                 {snippet.commentCount} comment{snippet.commentCount === 1 ? "" : "s"}
               </span>
             </div>
@@ -130,27 +130,17 @@ export function Leaderboard() {
   const topVoted = [...(snippets || [])]
     .sort((a, b) => b.votes - a.votes);
 
-  // Debug the snippets data
-  console.log('All snippets:', snippets?.map(s => ({ id: s.id, title: s.title, commentCount: s.commentCount })));
-
   const mostCommented = [...(snippets || [])]
-    .filter(snippet => {
-      // Debug each snippet's commentCount
-      console.log(`Snippet ${snippet.id} commentCount:`, snippet.commentCount);
-      return snippet.commentCount != null && snippet.commentCount > 0;
-    })
+    .filter(snippet => snippet.commentCount != null && snippet.commentCount > 0)
     .sort((a, b) => (b.commentCount || 0) - (a.commentCount || 0));
 
-  // Debug the filtered results
-  console.log('Filtered mostCommented:', mostCommented.map(s => ({ id: s.id, title: s.title, commentCount: s.commentCount })));
-
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Leaderboard</h1>
+    <div className="container mx-auto py-6 px-4">
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-xl font-bold">Leaderboard</h1>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         <ContributorCard contributors={sortedContributors} />
         <TopVotedCard snippets={topVoted} />
         <MostCommentedCard snippets={mostCommented} />
