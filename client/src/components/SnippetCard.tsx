@@ -247,7 +247,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
 
   return (
     <>
-      <Card className="w-full shadow-md rounded-xl comments-card bg-[#252728]">
+      <Card className="w-full shadow-md rounded-xl comments-card bg-[#252728] border-0">
         <CardContent className="p-3 space-y-1">
           <div className="flex items-center justify-between gap-1 mb-0.5">
             <div className="flex flex-col gap-0.5">
