@@ -102,7 +102,7 @@ export function Home() {
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-3xl">
-      <div className="space-y-3 mb-4">
+      <div className="space-y-1 mb-4">
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
