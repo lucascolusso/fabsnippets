@@ -248,7 +248,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
   return (
     <>
       <Card className="w-full shadow-md rounded-xl" style={{ backgroundColor: '#252728' }}>
-        <CardContent className="p-4 space-y-1">
+        <CardContent className="p-3 space-y-1">
           <div className="flex items-center justify-between gap-1 mb-0.5">
             <div className="flex flex-col gap-0.5">
               <Link href={`/snippet/${snippet.id}`} className="hover:text-primary hover:underline">
