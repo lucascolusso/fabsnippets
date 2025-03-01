@@ -11,6 +11,7 @@ import fs from 'fs';
 import { promises as fsPromises } from 'fs';
 import { createBackup, restoreFromBackup } from '../scripts/dbBackup';
 import { setupAuth } from './auth';
+import { generateSitemap } from './sitemap';
 
 // Extend Express Request type to include user property
 declare module 'express' {
@@ -768,6 +769,26 @@ export function registerRoutes(app: Express): Server {
       res.status(500).json({ 
         message: error instanceof Error ? error.message : "Error creating comment" 
       });
+    }
+  });
+
+  // Sitemap route - generates and serves XML sitemap for SEO
+  app.get("/sitemap.xml", async (req, res) => {
+    try {
+      // Determine the base URL from the request
+      const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+      const host = req.headers['x-forwarded-host'] || req.get('host');
+      const baseUrl = `${protocol}://${host}`;
+      
+      // Generate the sitemap XML
+      const sitemapXml = await generateSitemap(baseUrl);
+      
+      // Set appropriate headers and send the response
+      res.header('Content-Type', 'application/xml');
+      res.send(sitemapXml);
+    } catch (error) {
+      console.error('Error generating sitemap:', error);
+      res.status(500).send('Error generating sitemap');
     }
   });
 
