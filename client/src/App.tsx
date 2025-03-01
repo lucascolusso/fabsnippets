@@ -91,7 +91,6 @@ function App() {
           <div className="space-x-4">
             <Link to="/" className="hover:text-primary">Home</Link>
             <Link to="/leaderboard" className="hover:text-primary">Leaderboard</Link>
-            <Link to="/sitemap" className="hover:text-primary">Sitemap</Link>
           </div>
           <p className="mt-2">© {new Date().getFullYear()} FabSnippets. All rights reserved.</p>
         </div>
