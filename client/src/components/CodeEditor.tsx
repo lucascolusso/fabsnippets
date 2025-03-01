@@ -22,6 +22,7 @@ export function CodeEditor({
       className={cn(
         "font-mono text-xs leading-relaxed resize-none focus:ring-1 focus:ring-primary",
         "font-['JetBrains_Mono',Menlo,Monaco,Consolas,monospace]",
+        "border-0 bg-[#252728]", // Explicitly set the background color and remove border
         readOnly ? "min-h-0 flex-1" : "min-h-[300px]",
         className
       )}
