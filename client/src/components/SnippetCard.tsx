@@ -362,12 +362,12 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             </Form>
           ) : (
             <ScrollArea className="h-[180px]">
-              <div className="mt-1 p-1 rounded-xl bg-[#1a1a1a] text-xs"> {/* Changed background color here */}
+              <div className="mt-1 p-1 rounded-xl border border-[#65686C] text-xs" style={{ backgroundColor: '#252728' }}>
                 <CodeEditor
                   value={snippet.code}
                   onChange={() => { }}
                   readOnly
-                  className="text-[10px] h-full font-mono"
+                  className="text-[10px] h-full font-mono bg-transparent"
                 />
               </div>
             </ScrollArea>

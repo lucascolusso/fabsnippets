@@ -20,7 +20,7 @@ export function CodeEditor({
       onChange={(e) => onChange(e.target.value)}
       readOnly={readOnly}
       className={cn(
-        "font-mono text-xs leading-relaxed min-h-[300px] resize-none bg-secondary/50",
+        "font-mono text-xs leading-relaxed min-h-[300px] resize-none",
         "focus:ring-1 focus:ring-primary font-[JetBrains Mono],Menlo,Monaco,Consolas,monospace",
         className
       )}
