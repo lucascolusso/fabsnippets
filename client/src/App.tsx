@@ -8,7 +8,7 @@ import { SitemapPage } from "./pages/SitemapPage";
 import { NewSnippetModal } from "./components/NewSnippetModal";
 import { AuthPage } from "./pages/AuthPage";
 import { useUser } from "./hooks/use-user";
-import { Loader2, Map } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Button } from "./components/ui/button";
 
 function App() {
@@ -50,13 +50,6 @@ function App() {
                   My Profile
                 </Link>
               )}
-              <Link 
-                href="/sitemap" 
-                className={`text-xs font-medium transition-colors relative ${location === "/sitemap" ? "font-bold bg-black text-white after:scale-x-100 after:bg-teal-500 after:h-[2px]" : "hover:after:scale-x-100 hover:text-primary/90"} after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary after:scale-x-0 after:transition-transform px-3 py-1.5 rounded-t-md flex items-center gap-1`}
-              >
-                <Map className="h-3 w-3" />
-                Sitemap
-              </Link>
             </div>
             <div className="flex items-center gap-2">
               {user ? (
@@ -92,6 +85,17 @@ function App() {
         <Route path="/sitemap" component={SitemapPage} />
         {user?.isAdmin && <Route path="/backups" component={BackupManagement} />}
       </Switch>
+      
+      <footer className="border-t mt-12 py-4 text-sm text-center text-muted-foreground">
+        <div className="container mx-auto flex flex-col items-center">
+          <div className="space-x-4">
+            <Link to="/" className="hover:text-primary">Home</Link>
+            <Link to="/leaderboard" className="hover:text-primary">Leaderboard</Link>
+            <Link to="/sitemap" className="hover:text-primary">Sitemap</Link>
+          </div>
+          <p className="mt-2">© {new Date().getFullYear()} FabSnippets. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }

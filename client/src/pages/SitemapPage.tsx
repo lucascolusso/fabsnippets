@@ -43,19 +43,11 @@ export function SitemapPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Breadcrumb className="mb-6">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <Link to="/">
-              <BreadcrumbLink>Home</BreadcrumbLink>
-            </Link>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink>Sitemap</BreadcrumbLink>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+      <div className="flex items-center gap-2 mb-6 text-sm">
+        <Link to="/" className="text-primary hover:underline">Home</Link>
+        <span className="text-muted-foreground">→</span>
+        <span>Sitemap</span>
+      </div>
       
       <div className="grid gap-6">
         <Card>
