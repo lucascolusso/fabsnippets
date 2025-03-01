@@ -359,7 +359,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             </ScrollArea>
           )}
           <div className="flex flex-wrap items-center w-full gap-1 pt-0.5">
-            <div className="w-full flex justify-between text-muted-foreground text-xs mb-1 pb-1 border-b">
+            <div className="w-full flex justify-between text-muted-foreground text-xs mb-1 pb-1 border-b border-[#65686C]">
               <span>{snippet.votes} {snippet.votes === 1 ? 'like' : 'likes'}</span>
               <span>{snippet.commentCount || 0} {(snippet.commentCount || 0) === 1 ? 'comment' : 'comments'}</span>
             </div>
