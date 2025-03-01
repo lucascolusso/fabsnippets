@@ -10,6 +10,7 @@ import { AuthPage } from "./pages/AuthPage";
 import { useUser } from "./hooks/use-user";
 import { Loader2 } from "lucide-react";
 import { Button } from "./components/ui/button";
+import "./styles/topbar.css";
 
 function App() {
   const [location] = useLocation();
