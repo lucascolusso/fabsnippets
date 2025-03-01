@@ -239,7 +239,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
 
   return (
     <>
-      <Card className="w-full shadow-md">
+      <Card className="w-full shadow-md" style={{ backgroundColor: '#252728' }}>
         <CardContent className="p-1 space-y-1">
           <div className="flex items-center justify-between gap-1 mb-0.5">
             <div className="flex flex-col gap-0.5">
