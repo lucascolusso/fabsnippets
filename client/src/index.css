@@ -21,13 +21,17 @@
   }
   
   .code-snippet-wrapper {
-    @apply border border-muted rounded-xl p-0;
+    @apply border border-muted rounded-xl p-0 h-full flex-grow;
     background-color: #252728;
+    display: flex;
+    flex-direction: column;
   }
   
   .code-snippet-editor {
     @apply text-[10px] bg-transparent w-full h-full resize-none;
     font-family: monospace;
     min-height: unset !important;
+    flex-grow: 1;
+    display: flex;
   }
 }

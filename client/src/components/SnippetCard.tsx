@@ -361,16 +361,18 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
               </form>
             </Form>
           ) : (
-            <ScrollArea className="h-[180px]">
-              <div className="mt-1 p-1 code-snippet-wrapper">
-                <CodeEditor
-                  value={snippet.code}
-                  onChange={() => { }}
-                  readOnly
-                  className="code-snippet-editor"
-                />
-              </div>
-            </ScrollArea>
+            <div className="mt-1 flex flex-col h-[180px]">
+              <ScrollArea className="flex-grow">
+                <div className="p-1 code-snippet-wrapper">
+                  <CodeEditor
+                    value={snippet.code}
+                    onChange={() => { }}
+                    readOnly
+                    className="code-snippet-editor"
+                  />
+                </div>
+              </ScrollArea>
+            </div>
           )}
           <div className="flex flex-wrap items-center w-full gap-1 pt-0.5">
             <div className="w-full flex justify-between text-muted-foreground text-xs mb-1 pb-1 border-b border-[#65686C]" style={{ borderBottomWidth: '1px', borderBottomStyle: 'solid' }}>
