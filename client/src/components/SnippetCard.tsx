@@ -348,7 +348,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             </Form>
           ) : (
             <ScrollArea className="h-[180px]">
-              <div>
+              <div className="mt-1 p-1 rounded-md bg-[#1a1a1a] text-xs"> {/* Changed background color here */}
                 <CodeEditor
                   value={snippet.code}
                   onChange={() => { }}
