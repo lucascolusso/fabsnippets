@@ -96,6 +96,10 @@ export function Home() {
     );
   }) ?? [];
 
+  // Split categories into two groups - first line and second line
+  const firstLineCategories = categories.slice(0, categories.indexOf('DAX') + 1); // Up to and including DAX
+  const secondLineCategories = categories.slice(categories.indexOf('DAX') + 1); // After DAX
+
   return (
     <div className="container mx-auto py-6 px-4 max-w-3xl">
       <div className="space-y-3 mb-4">
@@ -109,6 +113,8 @@ export function Home() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+
+        {/* First line of categories with "All" button */}
         <div className="flex gap-1 overflow-x-auto pb-1 justify-center">
           <Button
             variant={selectedCategories.size === 0 ? "ghost" : "outline"}
@@ -120,7 +126,24 @@ export function Home() {
           >
             All
           </Button>
-          {categories.map((category) => (
+          {firstLineCategories.map((category) => (
+            <Button
+              key={category}
+              variant={selectedCategories.has(category) ? "ghost" : "outline"}
+              onClick={() => toggleCategory(category)}
+              className={cn(
+                "whitespace-nowrap text-xs py-1 px-2 h-auto",
+                selectedCategories.has(category) && "border border-primary font-medium"
+              )}
+            >
+              {category}
+            </Button>
+          ))}
+        </div>
+
+        {/* Second line of categories */}
+        <div className="flex gap-1 overflow-x-auto pb-1 justify-center">
+          {secondLineCategories.map((category) => (
             <Button
               key={category}
               variant={selectedCategories.has(category) ? "ghost" : "outline"}
