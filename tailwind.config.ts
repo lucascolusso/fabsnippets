@@ -6,6 +6,7 @@ export default {
   theme: {
     fontFamily: {
       sans: ['Public Sans', 'sans-serif'],
+      mono: ['monospace', 'SFMono-Regular'],
     },
     extend: {
       borderRadius: {

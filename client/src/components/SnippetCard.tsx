@@ -247,7 +247,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
 
   return (
     <>
-      <Card className="w-full shadow-md rounded-xl" style={{ backgroundColor: '#252728' }}>
+      <Card className="w-full shadow-md rounded-xl comments-card">
         <CardContent className="p-3 space-y-1">
           <div className="flex items-center justify-between gap-1 mb-0.5">
             <div className="flex flex-col gap-0.5">
@@ -345,7 +345,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                     <FormItem>
                       <FormLabel className="text-xs">Code</FormLabel>
                       <FormControl>
-                        <CodeEditor {...field} className="text-[10px] h-full font-mono" />
+                        <CodeEditor {...field} className="code-snippet-editor" />
                       </FormControl>
                     </FormItem>
                   )}
@@ -362,18 +362,18 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             </Form>
           ) : (
             <ScrollArea className="h-[180px]">
-              <div className="mt-1 p-1 rounded-xl border border-[#65686C] text-xs" style={{ backgroundColor: '#252728' }}>
+              <div className="mt-1 p-1 code-snippet-wrapper">
                 <CodeEditor
                   value={snippet.code}
                   onChange={() => { }}
                   readOnly
-                  className="text-[10px] h-full font-mono bg-transparent"
+                  className="code-snippet-editor"
                 />
               </div>
             </ScrollArea>
           )}
           <div className="flex flex-wrap items-center w-full gap-1 pt-0.5">
-            <div className="w-full flex justify-between text-muted-foreground text-xs mb-1 pb-1 border-b border-[#65686C]">
+            <div className="w-full flex justify-between text-muted-foreground text-xs mb-1 pb-1 border-b border-muted">
               <span>{snippet.votes} {snippet.votes === 1 ? 'like' : 'likes'}</span>
               <span>{snippet.commentCount || 0} {(snippet.commentCount || 0) === 1 ? 'comment' : 'comments'}</span>
             </div>
