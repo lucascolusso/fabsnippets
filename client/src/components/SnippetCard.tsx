@@ -49,25 +49,33 @@ interface SnippetCardProps {
 
 const parsedCategories = (snippet: Snippet): CodeCategory[] => {
   try {
-    // If categories is null, undefined, or empty string
-    if (!snippet.categories) {
-      // Try to fall back to single category if it exists
-      return snippet.category ? [snippet.category as CodeCategory] : [];
-    }
-    // If categories is already an array
-    if (Array.isArray(snippet.categories)) {
+    // If categories property exists and is an array, return it
+    if (snippet.categories && Array.isArray(snippet.categories)) {
       return snippet.categories;
     }
-    // If categories is a string, try to parse it
-    if (typeof snippet.categories === 'string' && snippet.categories.trim()) {
-      const parsed = JSON.parse(snippet.categories);
-      return Array.isArray(parsed) ? parsed : [];
+    
+    // Handle legacy format where categories might be a string
+    const categoriesValue = (snippet as any).categories;
+    if (typeof categoriesValue === 'string' && categoriesValue.trim()) {
+      try {
+        const parsed = JSON.parse(categoriesValue);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        // If parsing fails, return empty array
+        return [];
+      }
     }
+    
+    // Handle legacy format where there might be a single category
+    if ((snippet as any).category) {
+      return [(snippet as any).category as CodeCategory];
+    }
+    
+    // Default to empty array if no categories found
     return [];
   } catch (e) {
     console.error('Error parsing categories:', e);
-    // Fallback to single category if parsing fails
-    return snippet.category ? [snippet.category as CodeCategory] : [];
+    return [];
   }
 };
 
@@ -239,8 +247,8 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
 
   return (
     <>
-      <Card className="w-full shadow-md" style={{ backgroundColor: '#252728' }}>
-        <CardContent className="p-1 space-y-1">
+      <Card className="w-full shadow-md rounded-xl" style={{ backgroundColor: '#252728' }}>
+        <CardContent className="p-4 space-y-1">
           <div className="flex items-center justify-between gap-1 mb-0.5">
             <div className="flex flex-col gap-0.5">
               <Link href={`/snippet/${snippet.id}`} className="hover:text-primary hover:underline">
@@ -306,21 +314,27 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs">Categories</FormLabel>
-                      <Select onValueChange={field.onChange} multiple value={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="h-7 text-xs">
-                            <SelectValue placeholder="Select categories" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Prompt" className="text-xs">Prompt</SelectItem>
-                          <SelectItem value="TMDL" className="text-xs">TMDL</SelectItem>
-                          <SelectItem value="DAX" className="text-xs">DAX</SelectItem>
-                          <SelectItem value="SQL" className="text-xs">SQL</SelectItem>
-                          <SelectItem value="Python" className="text-xs">Python</SelectItem>
-                          <SelectItem value="PowerQuery" className="text-xs">PowerQuery</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className="flex flex-wrap gap-1">
+                        {['Prompt', 'TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery'].map((category) => (
+                          <Button
+                            key={category}
+                            type="button"
+                            size="sm"
+                            variant={field.value.includes(category as CodeCategory) ? "default" : "outline"}
+                            className="h-6 text-xs"
+                            onClick={() => {
+                              const currentCategories = [...field.value];
+                              if (currentCategories.includes(category as CodeCategory)) {
+                                field.onChange(currentCategories.filter(c => c !== category));
+                              } else {
+                                field.onChange([...currentCategories, category as CodeCategory]);
+                              }
+                            }}
+                          >
+                            {category}
+                          </Button>
+                        ))}
+                      </div>
                     </FormItem>
                   )}
                 />
@@ -348,7 +362,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             </Form>
           ) : (
             <ScrollArea className="h-[180px]">
-              <div className="mt-1 p-1 rounded-md bg-[#1a1a1a] text-xs"> {/* Changed background color here */}
+              <div className="mt-1 p-1 rounded-xl bg-[#1a1a1a] text-xs"> {/* Changed background color here */}
                 <CodeEditor
                   value={snippet.code}
                   onChange={() => { }}
