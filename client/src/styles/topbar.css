@@ -2,4 +2,5 @@
 /* Top navigation bar styling */
 nav, header, .navbar {
   background-color: #252728 !important;
+  border-bottom: 1px solid #3A3C3D !important;
 }
