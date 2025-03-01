@@ -7,6 +7,11 @@
 @import '@fontsource/public-sans/700.css';
 
 @layer base {
+
+.comments-card {
+  background-color: #252728;
+}
+
   * {
     @apply border-border;
   }

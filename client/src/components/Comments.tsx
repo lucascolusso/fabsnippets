@@ -70,7 +70,7 @@ export function Comments({ snippetId }: CommentsProps) {
   };
 
   return (
-    <Card className="comments-card text-sm">
+    <Card className="text-sm bg-[#252728]">
       <CardHeader className="px-4 py-3">
         <CardTitle className="text-base">Comments</CardTitle>
       </CardHeader>
