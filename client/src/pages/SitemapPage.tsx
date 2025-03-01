@@ -24,7 +24,8 @@ export function SitemapPage() {
         
         const urls = Array.from(urlElements).map(urlElement => {
           const loc = urlElement.getElementsByTagName('loc')[0]?.textContent || '';
-          const lastmod = urlElement.getElementsByTagName('lastmod')[0]?.textContent;
+          const lastmodElement = urlElement.getElementsByTagName('lastmod')[0];
+          const lastmod = lastmodElement ? lastmodElement.textContent || undefined : undefined;
           
           return { url: loc, lastmod };
         });
@@ -45,7 +46,9 @@ export function SitemapPage() {
       <Breadcrumb className="mb-6">
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink as={Link} href="/">Home</BreadcrumbLink>
+            <Link to="/">
+              <BreadcrumbLink>Home</BreadcrumbLink>
+            </Link>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>

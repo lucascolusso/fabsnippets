@@ -4,10 +4,11 @@ import { Leaderboard } from "./pages/Leaderboard";
 import { Profile } from "./pages/Profile";
 import { SnippetPage } from "./pages/SnippetPage";
 import { BackupManagement } from "./pages/BackupManagement";
+import { SitemapPage } from "./pages/SitemapPage";
 import { NewSnippetModal } from "./components/NewSnippetModal";
 import { AuthPage } from "./pages/AuthPage";
 import { useUser } from "./hooks/use-user";
-import { Loader2 } from "lucide-react";
+import { Loader2, Map } from "lucide-react";
 import { Button } from "./components/ui/button";
 
 function App() {
@@ -49,6 +50,13 @@ function App() {
                   My Profile
                 </Link>
               )}
+              <Link 
+                href="/sitemap" 
+                className={`text-xs font-medium transition-colors relative ${location === "/sitemap" ? "font-bold bg-black text-white after:scale-x-100 after:bg-teal-500 after:h-[2px]" : "hover:after:scale-x-100 hover:text-primary/90"} after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary after:scale-x-0 after:transition-transform px-3 py-1.5 rounded-t-md flex items-center gap-1`}
+              >
+                <Map className="h-3 w-3" />
+                Sitemap
+              </Link>
             </div>
             <div className="flex items-center gap-2">
               {user ? (
@@ -81,6 +89,7 @@ function App() {
         <Route path="/leaderboard" component={Leaderboard} />
         <Route path="/profile/:name" component={Profile} />
         <Route path="/snippet/:id" component={SnippetPage} />
+        <Route path="/sitemap" component={SitemapPage} />
         {user?.isAdmin && <Route path="/backups" component={BackupManagement} />}
       </Switch>
     </div>
