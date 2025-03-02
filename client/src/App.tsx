@@ -33,20 +33,20 @@ function App() {
             <div className="flex-1 flex items-center justify-center gap-2">
               <Link 
                 href="/" 
-                className={`text-xs font-medium transition-colors relative ${location === "/" ? "font-bold bg-black text-white after:scale-x-100 after:bg-teal-500 after:h-[2px]" : "hover:after:scale-x-100 hover:text-primary/90"} after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary after:scale-x-0 after:transition-transform px-3 py-1.5 rounded-t-md`}
+                className={`text-xs transition-colors relative ${location === "/" ? "font-semibold bg-black text-white rounded-full" : "hover:text-primary/90"} px-4 py-1.5`}
               >
                 Feed
               </Link>
               <Link 
                 href="/leaderboard" 
-                className={`text-xs font-medium transition-colors relative ${location === "/leaderboard" ? "font-bold bg-black text-white after:scale-x-100 after:bg-teal-500 after:h-[2px]" : "hover:after:scale-x-100 hover:text-primary/90"} after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary after:scale-x-0 after:transition-transform px-3 py-1.5 rounded-t-md`}
+                className={`text-xs transition-colors relative ${location === "/leaderboard" ? "font-semibold bg-black text-white rounded-full" : "hover:text-primary/90"} px-4 py-1.5`}
               >
                 Leaderboard
               </Link>
               {user && (
                 <Link 
                   href={`/profile/${user.username}`}
-                  className={`text-xs font-medium transition-colors relative ${location.includes("/profile/") ? "font-bold bg-black text-white after:scale-x-100 after:bg-teal-500 after:h-[2px]" : "hover:after:scale-x-100 hover:text-primary/90"} after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary after:scale-x-0 after:transition-transform px-3 py-1.5 rounded-t-md`}
+                  className={`text-xs transition-colors relative ${location.includes("/profile/") ? "font-semibold bg-black text-white rounded-full" : "hover:text-primary/90"} px-4 py-1.5`}
                 >
                   My Profile
                 </Link>
