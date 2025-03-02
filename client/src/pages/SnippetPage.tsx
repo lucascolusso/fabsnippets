@@ -39,7 +39,7 @@ export function SnippetPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto py-8 px-4 max-w-3xl space-y-8">
+      <div className="container mx-auto py-8 px-4 max-w-[500px] space-y-8">
         <Skeleton className="w-full h-[200px] rounded-lg" />
         <Skeleton className="w-full h-[300px] rounded-lg" />
         <Skeleton className="w-full h-[200px] rounded-lg" />
@@ -52,7 +52,7 @@ export function SnippetPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-3xl">
+    <div className="container mx-auto py-8 px-4 max-w-[500px]">
       <SnippetCard snippet={snippet} />
       {snippet.imagePath && !imageError && (
         <div className="mt-8">

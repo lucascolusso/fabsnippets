@@ -101,7 +101,7 @@ export function Profile() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-3xl">
+    <div className="container mx-auto py-8 px-4 max-w-[500px]">
       <Card className="mb-8">
         <CardHeader>
           <div className="flex justify-between items-start">
