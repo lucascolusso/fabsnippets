@@ -120,8 +120,8 @@ export function Home() {
               variant={selectedCategories.size === 0 ? "ghost" : "outline"}
               onClick={clearCategories}
               className={cn(
-                "whitespace-nowrap text-xs py-1 px-2 h-auto",
-                selectedCategories.size === 0 && "border border-primary font-medium"
+                "whitespace-nowrap text-xs py-1 px-2 h-auto rounded-full",
+                selectedCategories.size === 0 && "border border-primary font-semibold"
               )}
             >
               All
@@ -132,8 +132,8 @@ export function Home() {
                 variant={selectedCategories.has(category) ? "ghost" : "outline"}
                 onClick={() => toggleCategory(category)}
                 className={cn(
-                  "whitespace-nowrap text-xs py-1 px-2 h-auto",
-                  selectedCategories.has(category) && "border border-primary font-medium"
+                  "whitespace-nowrap text-xs py-1 px-2 h-auto rounded-full",
+                  selectedCategories.has(category) && "border border-primary font-semibold"
                 )}
               >
                 {category}
