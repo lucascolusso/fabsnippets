@@ -115,6 +115,8 @@ export function Home() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
+          
+          <div className="w-full h-[1px] bg-border opacity-50 my-1"></div>
 
           {/* First line of categories with "All" button */}
           <div className="flex gap-1 overflow-x-auto pb-1 justify-center">
