@@ -22,15 +22,15 @@
   
   .code-snippet-wrapper {
     @apply rounded-xl p-0 h-full flex-grow;
-    background-color: #252728;
+    background-color: #1A1A1B;
     display: flex;
     flex-direction: column;
-    border: 1px solid #65686C;
+    border: 0;
   }
   
   .code-snippet-editor {
     @apply text-[9px] w-full h-full resize-none border-0;
-    background-color: #252728 !important; /* Use !important to override any other styles */
+    background-color: #1A1A1B !important; /* Use !important to override any other styles */
     font-family: monospace;
     min-height: unset !important;
     flex-grow: 1;
