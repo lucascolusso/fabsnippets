@@ -263,11 +263,11 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
               </div>
             </div>
             <div className="flex items-center gap-1">
-              <div className="flex gap-0.5 flex-wrap">
+              <div className="flex gap-1 flex-wrap">
                 {parsedCategories(snippet).map((category, index) => (
                   <span
                     key={`${category}-${index}`}
-                    className="inline-block px-0.5 py-0.5 text-[8px] font-semibold rounded bg-primary/10"
+                    className="inline-block px-1.5 py-0.5 text-[10px] font-semibold rounded bg-primary/20 text-primary-foreground/90"
                   >
                     {category}
                   </span>
