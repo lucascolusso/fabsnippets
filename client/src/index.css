@@ -21,10 +21,11 @@
   }
   
   .code-snippet-wrapper {
-    @apply border-0 rounded-xl p-0 h-full flex-grow;
+    @apply rounded-xl p-0 h-full flex-grow;
     background-color: #252728;
     display: flex;
     flex-direction: column;
+    border: 1px solid #65686C;
   }
   
   .code-snippet-editor {
