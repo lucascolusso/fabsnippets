@@ -267,7 +267,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                 {parsedCategories(snippet).map((category, index) => (
                   <span
                     key={`${category}-${index}`}
-                    className="inline-block px-1.5 py-0.5 text-[10px] font-semibold rounded bg-primary/20 text-primary-foreground/90"
+                    className="inline-block px-1.5 py-0.5 text-[10px] font-semibold rounded bg-primary/10"
                   >
                     {category}
                   </span>
