@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent } from "@/components/ui/card";
 
 const categories: CodeCategory[] = ['Prompt', 'TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery'];
 
@@ -102,62 +103,64 @@ export function Home() {
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-3xl">
-      <div className="space-y-1 mb-4">
-        <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search snippet titles and code, contributors, or categories..."
-            className="w-full pl-9 pr-4 py-2 rounded-lg border bg-[#333334]"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+      <Card className="w-full shadow-md rounded-xl comments-card bg-[#252728] border-0 mb-4">
+        <CardContent className="p-3 space-y-2">
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search snippet titles and code, contributors, or categories..."
+              className="w-full pl-9 pr-4 py-2 rounded-lg border bg-[#333334]"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
 
-        {/* First line of categories with "All" button */}
-        <div className="flex gap-1 overflow-x-auto pb-1 justify-center">
-          <Button
-            variant={selectedCategories.size === 0 ? "ghost" : "outline"}
-            onClick={clearCategories}
-            className={cn(
-              "whitespace-nowrap text-xs py-1 px-2 h-auto",
-              selectedCategories.size === 0 && "border border-primary font-medium"
-            )}
-          >
-            All
-          </Button>
-          {firstLineCategories.map((category) => (
+          {/* First line of categories with "All" button */}
+          <div className="flex gap-1 overflow-x-auto pb-1 justify-center">
             <Button
-              key={category}
-              variant={selectedCategories.has(category) ? "ghost" : "outline"}
-              onClick={() => toggleCategory(category)}
+              variant={selectedCategories.size === 0 ? "ghost" : "outline"}
+              onClick={clearCategories}
               className={cn(
                 "whitespace-nowrap text-xs py-1 px-2 h-auto",
-                selectedCategories.has(category) && "border border-primary font-medium"
+                selectedCategories.size === 0 && "border border-primary font-medium"
               )}
             >
-              {category}
+              All
             </Button>
-          ))}
-        </div>
+            {firstLineCategories.map((category) => (
+              <Button
+                key={category}
+                variant={selectedCategories.has(category) ? "ghost" : "outline"}
+                onClick={() => toggleCategory(category)}
+                className={cn(
+                  "whitespace-nowrap text-xs py-1 px-2 h-auto",
+                  selectedCategories.has(category) && "border border-primary font-medium"
+                )}
+              >
+                {category}
+              </Button>
+            ))}
+          </div>
 
-        {/* Second line of categories */}
-        <div className="flex gap-1 overflow-x-auto pb-1 justify-center">
-          {secondLineCategories.map((category) => (
-            <Button
-              key={category}
-              variant={selectedCategories.has(category) ? "ghost" : "outline"}
-              onClick={() => toggleCategory(category)}
-              className={cn(
-                "whitespace-nowrap text-xs py-1 px-2 h-auto",
-                selectedCategories.has(category) && "border border-primary font-medium"
-              )}
-            >
-              {category}
-            </Button>
-          ))}
-        </div>
-      </div>
+          {/* Second line of categories */}
+          <div className="flex gap-1 overflow-x-auto pb-1 justify-center">
+            {secondLineCategories.map((category) => (
+              <Button
+                key={category}
+                variant={selectedCategories.has(category) ? "ghost" : "outline"}
+                onClick={() => toggleCategory(category)}
+                className={cn(
+                  "whitespace-nowrap text-xs py-1 px-2 h-auto",
+                  selectedCategories.has(category) && "border border-primary font-medium"
+                )}
+              >
+                {category}
+              </Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {error ? (
         <div className="text-center py-8 text-muted-foreground">
