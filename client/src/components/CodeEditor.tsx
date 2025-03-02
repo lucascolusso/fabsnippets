@@ -20,10 +20,10 @@ export function CodeEditor({
       onChange={(e) => onChange(e.target.value)}
       readOnly={readOnly}
       className={cn(
-        "font-mono text-xs leading-relaxed resize-none focus:ring-1 focus:ring-primary",
+        "font-mono leading-relaxed resize-none focus:ring-1 focus:ring-primary",
         "font-['JetBrains_Mono',Menlo,Monaco,Consolas,monospace]",
         "border-0 bg-[#252728]", // Explicitly set the background color and remove border
-        readOnly ? "min-h-0 flex-1" : "min-h-[300px]",
+        readOnly ? "min-h-0 flex-1 text-[9px]" : "min-h-[300px] text-xs",
         className
       )}
       placeholder="Paste your code here..."

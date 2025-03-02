@@ -29,7 +29,7 @@
   }
   
   .code-snippet-editor {
-    @apply text-[10px] w-full h-full resize-none border-0;
+    @apply text-[9px] w-full h-full resize-none border-0;
     background-color: #252728 !important; /* Use !important to override any other styles */
     font-family: monospace;
     min-height: unset !important;
