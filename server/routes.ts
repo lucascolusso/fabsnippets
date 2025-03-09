@@ -31,12 +31,39 @@ const __dirname = dirname(__filename);
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, '../uploads');
 
-// Initialize directories
+// Initialize directories and ensure they have proper permissions
 async function initializeDirectories() {
   try {
-    await fsPromises.access(uploadsDir);
-  } catch {
-    await fsPromises.mkdir(uploadsDir, { recursive: true });
+    console.log("Checking for uploads directory...");
+    try {
+      await fsPromises.access(uploadsDir);
+      console.log("Uploads directory exists");
+      
+      // Ensure proper permissions on existing directory
+      await fsPromises.chmod(uploadsDir, 0o755);
+      console.log("Updated permissions on uploads directory");
+    } catch {
+      console.log("Creating uploads directory...");
+      await fsPromises.mkdir(uploadsDir, { recursive: true, mode: 0o755 });
+      console.log("Created uploads directory with proper permissions");
+    }
+    
+    // Create the public/uploads directory if it doesn't exist
+    // This is a symbolic link to the uploads directory for development
+    const publicUploadsDir = path.join(__dirname, '../public/uploads');
+    try {
+      await fsPromises.access(publicUploadsDir);
+      console.log("Public uploads directory exists");
+    } catch {
+      console.log("Creating public uploads directory...");
+      await fsPromises.mkdir(publicUploadsDir, { recursive: true });
+      console.log("Created public uploads directory");
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error initializing directories:", error);
+    return false;
   }
 }
 

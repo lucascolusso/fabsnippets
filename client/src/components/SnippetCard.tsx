@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CodeEditor } from "./CodeEditor";
-import { Copy, ThumbsUp, CheckCircle2, Image, Edit2, Trash2, MessageSquare } from "lucide-react";
+import { Copy, ThumbsUp, CheckCircle2, Image, Edit2, Trash2, MessageSquare, ImageOff } from "lucide-react";
 import { Link } from "wouter";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Snippet, CodeCategory } from "@/lib/types";
@@ -13,6 +13,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -42,6 +44,7 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import SnippetImage from "./SnippetImage";
 
 interface SnippetCardProps {
   snippet: Snippet;
@@ -361,17 +364,58 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
               </form>
             </Form>
           ) : (
-            <ScrollArea className="h-[180px]">
-              <div className="mt-1 p-1 code-snippet-wrapper">
-                <CodeEditor
-                  value={snippet.code}
-                  onChange={() => { }}
-                  readOnly
-                  className="code-snippet-editor"
-                />
-              </div>
-            </ScrollArea>
+            <>
+              <ScrollArea className="h-[180px]">
+                <div className="mt-1 p-1 code-snippet-wrapper">
+                  <CodeEditor
+                    value={snippet.code}
+                    onChange={() => { }}
+                    readOnly
+                    className="code-snippet-editor"
+                  />
+                </div>
+              </ScrollArea>
+              
+              {/* Image indicator button if image is attached */}
+              {snippet.imagePath && !imageError && (
+                <div className="flex justify-end mt-1">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setShowImage(true)}
+                    className="text-xs h-7 px-2"
+                  >
+                    <Image className="h-3 w-3 mr-1" />
+                    <span>View Image</span>
+                  </Button>
+                </div>
+              )}
+            </>
           )}
+          
+          {/* Image Dialog */}
+          <Dialog open={showImage} onOpenChange={setShowImage}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>{snippet.title}</DialogTitle>
+                <DialogDescription>
+                  Image visualization for this snippet
+                </DialogDescription>
+              </DialogHeader>
+              {snippet.imagePath && (
+                <SnippetImage 
+                  src={`/uploads/${snippet.imagePath}`} 
+                  onError={handleImageError}
+                  className="mt-2"
+                />
+              )}
+              <DialogFooter className="sm:justify-start">
+                <Button type="button" variant="secondary" onClick={() => setShowImage(false)}>
+                  Close
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
           <div className="flex flex-wrap items-center w-full gap-1 pt-0.5">
             <div className="w-full flex justify-between text-muted-foreground text-xs mb-1 pb-1 border-b border-[#65686C]" style={{ borderBottomWidth: '1px', borderBottomStyle: 'solid' }}>
               <span>{snippet.votes} {snippet.votes === 1 ? 'like' : 'likes'}</span>

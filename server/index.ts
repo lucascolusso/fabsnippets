@@ -46,20 +46,25 @@ app.use((req, res, next) => {
 
 (async () => {
   const server = await registerRoutes(app);
-
-  // Error handling middleware - need 4 parameters for Express to recognize it as error middleware
-  app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-    log(`Error: ${message}`);
-    res.status(status).json({ message });
-  });
-
+  
+  // Set up Vite or static serving before 404 handling
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
+  
+  // Add generic error handler for Express
+  app.use((req, res, next) => {
+    // Generic handler for non-route-matched requests
+    next();
+  });
+
+  // Add a general 404 handler for any undefined routes
+  app.use((req, res) => {
+    log(`404 - Not Found: ${req.originalUrl}`);
+    res.status(404).json({ message: "Route not found" });
+  });
 
   // Add error handling for the server
   const PORT = 5000;
