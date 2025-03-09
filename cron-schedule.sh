@@ -23,7 +23,12 @@ CLEANUP_EXIT_CODE=$?
 echo "=== Completed automated maintenance at $(date) with exit code: $CLEANUP_EXIT_CODE ===" >> "$LOG_FILE"
 
 # Create a symlink to the latest log for easy access
-ln -sf "$(basename "$LOG_FILE")" logs/latest-maintenance.log
+LOGFILE_BASENAME=$(basename "$LOG_FILE")
+echo "Creating symlink from $LOGFILE_BASENAME to latest-maintenance.log..." >> "$LOG_FILE"
+cd logs
+ln -sf "$LOGFILE_BASENAME" latest-maintenance.log
+cd ..
+echo "Symlink created successfully" >> "$LOG_FILE"
 
 # Rotate logs - keep only the latest 10 log files
 find logs -name "cron-maintenance-*.log" -type f | sort -r | tail -n +11 | xargs -r rm
