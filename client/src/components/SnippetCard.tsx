@@ -404,7 +404,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
               </DialogHeader>
               {snippet.imagePath && (
                 <SnippetImage 
-                  src={`/uploads/${snippet.imagePath}`} 
+                  src={snippet.imagePath} 
                   onError={handleImageError}
                   className="mt-2"
                 />

@@ -26,6 +26,17 @@ export default function SnippetImage({ src, onError, className = "" }: SnippetIm
     return `${url}${url.includes('?') ? '&' : '?'}t=${Date.now()}`;
   };
   
+  // Normalize the image source path
+  const normalizeImagePath = (imagePath: string) => {
+    // If it's already a full URL or starts with /, return as is
+    if (imagePath.startsWith('http') || imagePath.startsWith('/')) {
+      return imagePath;
+    }
+    
+    // Otherwise, assume it's a filename and prepend uploads path
+    return `/uploads/${imagePath}`;
+  };
+  
   // Check if the image exists and set up the URL
   useEffect(() => {
     if (!src) {
@@ -41,25 +52,24 @@ export default function SnippetImage({ src, onError, className = "" }: SnippetIm
     // Create a new image object to preload and test the image
     const img = new Image();
     
+    // Normalize the path first
+    const normalizedSrc = normalizeImagePath(src);
+    
     img.onload = () => {
-      // Only add cache-busting if it's an upload URL
-      if (src.startsWith('/uploads/')) {
-        setImageSrc(getCacheBustedUrl(src));
-      } else {
-        setImageSrc(src);
-      }
+      // Add cache-busting to all images to prevent stale caches
+      setImageSrc(getCacheBustedUrl(normalizedSrc));
       setError(false);
     };
     
     img.onerror = () => {
-      console.error(`Failed to load image: ${src}`);
+      console.error(`Failed to load image: ${normalizedSrc}`);
       setError(true);
       setLoading(false);
       onError();
     };
     
-    // Start loading the image
-    img.src = src;
+    // Start loading the image with normalized path
+    img.src = normalizedSrc;
     
     // Clean up
     return () => {
