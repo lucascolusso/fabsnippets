@@ -124,7 +124,7 @@ export function SnippetPage() {
           </CardHeader>
           <CardContent>
             <SnippetImage 
-              src={snippet.imagePath.includes('/') ? snippet.imagePath : `/uploads/${snippet.imagePath}`}
+              src={snippet.imagePath}
               onError={handleImageError}
               className="w-full mt-2"
             />

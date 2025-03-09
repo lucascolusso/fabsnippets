@@ -16,7 +16,7 @@ interface SnippetImageProps {
  */
 export default function SnippetImage({ src, onError, className = "" }: SnippetImageProps) {
   const [loading, setLoading] = useState(true);
-  const [imageSrc, setImageSrc] = useState(src);
+  const [imageSrc, setImageSrc] = useState("");
   const [error, setError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const [retryLoading, setRetryLoading] = useState(false);
@@ -28,7 +28,7 @@ export default function SnippetImage({ src, onError, className = "" }: SnippetIm
   
   // Normalize the image source path
   const normalizeImagePath = (imagePath: string) => {
-    // If it's already a full URL or starts with /, return as is
+    // If it's already a full URL (http/https) or starts with /, return as is
     if (imagePath.startsWith('http') || imagePath.startsWith('/')) {
       return imagePath;
     }
@@ -37,7 +37,7 @@ export default function SnippetImage({ src, onError, className = "" }: SnippetIm
     return `/uploads/${imagePath}`;
   };
   
-  // Check if the image exists and set up the URL
+  // Load and check the image
   useEffect(() => {
     if (!src) {
       setError(true);
@@ -45,19 +45,20 @@ export default function SnippetImage({ src, onError, className = "" }: SnippetIm
       return;
     }
     
-    // Reset states when src changes
+    // Reset states when src changes or when retrying
     setLoading(true);
     setError(false);
     
-    // Create a new image object to preload and test the image
-    const img = new Image();
-    
-    // Normalize the path first
+    // Get normalized path
     const normalizedSrc = normalizeImagePath(src);
     
+    // Create a new image object to preload
+    const img = new Image();
+    
     img.onload = () => {
-      // Add cache-busting to all images to prevent stale caches
+      // Add cache-busting to prevent stale caches
       setImageSrc(getCacheBustedUrl(normalizedSrc));
+      setLoading(false);
       setError(false);
     };
     
@@ -68,29 +69,29 @@ export default function SnippetImage({ src, onError, className = "" }: SnippetIm
       onError();
     };
     
-    // Start loading the image with normalized path
+    // Start loading the image
     img.src = normalizedSrc;
     
-    // Clean up
+    // Clean up function
     return () => {
       img.onload = null;
       img.onerror = null;
     };
   }, [src, retryCount, onError]);
 
-  // Handle successful image load
-  const handleLoad = () => {
-    setLoading(false);
-    setError(false);
-    setRetryLoading(false);
-  };
-
-  // Handle image load error
-  const handleError = () => {
+  // Handle image load error from the DOM
+  const handleImageError = () => {
     setLoading(false);
     setError(true);
     setRetryLoading(false);
     onError();
+  };
+
+  // Handle successful image load from the DOM
+  const handleImageLoad = () => {
+    setLoading(false);
+    setError(false);
+    setRetryLoading(false);
   };
 
   // Retry loading the image
@@ -139,14 +140,16 @@ export default function SnippetImage({ src, onError, className = "" }: SnippetIm
       {loading && (
         <Skeleton className="w-full h-[300px] rounded-lg absolute top-0 left-0" />
       )}
-      <img 
-        src={imageSrc} 
-        alt="Snippet visualization" 
-        className="w-full rounded-lg shadow-lg object-contain max-h-[60vh]"
-        onError={handleError}
-        onLoad={handleLoad}
-        loading="lazy"
-      />
+      {!loading && imageSrc && (
+        <img 
+          src={imageSrc} 
+          alt="Snippet visualization" 
+          className="w-full rounded-lg shadow-lg object-contain max-h-[60vh]"
+          onError={handleImageError}
+          onLoad={handleImageLoad}
+          loading="lazy"
+        />
+      )}
     </div>
   );
 }
