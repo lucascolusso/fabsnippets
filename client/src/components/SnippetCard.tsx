@@ -279,7 +279,12 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
               <div className="flex gap-1 flex-shrink-0">
                 {isAuthor && (
                   <>
-                    <Button variant="outline" size="icon" className="h-8 w-8">
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      onClick={() => setIsEditing(true)}
+                      className="h-8 w-8"
+                    >
                       <Edit2 className="h-3 w-3" />
                     </Button>
                     <Button
