@@ -17,9 +17,10 @@ export function SnippetPage() {
 
   const handleImageError = () => {
     setImageError(true);
+    console.log("Failed to load image for snippet ID:", snippetId);
     toast({
-      title: "Image Error",
-      description: "Could not load the image",
+      title: "Image Not Available",
+      description: "The image for this snippet could not be loaded",
       variant: "destructive"
     });
   };
@@ -31,10 +32,10 @@ export function SnippetPage() {
       if (!response.ok) {
         throw new Error('Failed to fetch snippet');
       }
-      return response.json();
+      return response.json() as Promise<Snippet>;
     },
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    cacheTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
+    gcTime: 1000 * 60 * 30, // Keep in cache for 30 minutes (formerly cacheTime)
   });
 
   if (isLoading) {
