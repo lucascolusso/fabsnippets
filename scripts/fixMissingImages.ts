@@ -5,6 +5,7 @@ import path from "path";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { eq, isNotNull } from "drizzle-orm";
+import { monitorImageErrors } from "./monitorImageErrors.js";
 
 // ESM module dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
@@ -32,13 +33,18 @@ const createPlaceholderSVG = (snippetId: number, snippetTitle: string) => {
 async function fixMissingImages() {
   console.log("Starting image fix process...");
   
-  // Get all snippets with image paths
-  const allSnippets = await db.select().from(snippets).where(
-    isNotNull(snippets.imagePath)
-  );
+  // First, use the monitoring script to identify issues
+  console.log("Running image error monitoring to identify issues...");
+  const imageErrors = await monitorImageErrors();
   
-  console.log(`Found ${allSnippets.length} snippets with image paths to check`);
+  if (imageErrors.length === 0) {
+    console.log("No image issues detected. All images are valid and accessible.");
+    return;
+  }
   
+  console.log(`Found ${imageErrors.length} image issues to fix.`);
+  
+  // Setup directories
   const uploadsDir = path.join(__dirname, "../uploads");
   const publicUploadsDir = path.join(__dirname, "../public/uploads");
   const backupsDir = path.join(__dirname, "../backups");
@@ -83,76 +89,91 @@ async function fixMissingImages() {
   }
   console.log(`Found ${backupFiles.length} potential backup files`);
   
-  // Check each snippet's image
+  // Fix each image issue detected
   let fixedCount = 0;
-  let alreadyOkCount = 0;
   let placeholderCount = 0;
   
-  for (const snippet of allSnippets) {
-    if (!snippet.imagePath) continue;
+  for (const error of imageErrors) {
+    const snippet = await db.query.snippets.findFirst({
+      where: eq(snippets.id, error.snippetId)
+    });
     
-    // Check if image exists in main uploads folder
-    const imageExists = existingFiles.includes(snippet.imagePath);
+    if (!snippet || !snippet.imagePath) continue;
     
-    // Verify the image file is valid by checking its size
-    let imageValid = false;
-    if (imageExists) {
+    console.log(`Fixing ${error.errorType} issue for snippet ID ${error.snippetId}: ${error.imagePath}`);
+    
+    // Extract just the filename from the path
+    const imagePath = snippet.imagePath.includes('/') 
+      ? snippet.imagePath.split('/').pop() || snippet.imagePath
+      : snippet.imagePath;
+    
+    // Check if image exists in public uploads folder as fallback
+    const publicImageExists = publicUploadFiles.includes(imagePath);
+    
+    if (publicImageExists) {
+      // Copy from public uploads to main uploads
       try {
-        const filePath = path.join(uploadsDir, snippet.imagePath);
-        const stats = fs.statSync(filePath);
-        imageValid = stats.size > 100; // Check if file has reasonable content
-        
-        if (!imageValid) {
-          console.log(`Image file for snippet ID ${snippet.id} exists but is too small (${stats.size} bytes)`);
-        }
+        const sourceFilePath = path.join(publicUploadsDir, imagePath);
+        const targetFilePath = path.join(uploadsDir, imagePath);
+        fs.copyFileSync(sourceFilePath, targetFilePath);
+        console.log(`✅ Fixed: Copied from public uploads ${imagePath}`);
+        fixedCount++;
+        continue;
       } catch (error) {
-        console.error(`Error validating image for snippet ${snippet.id}:`, error);
-        imageValid = false;
+        console.error(`❌ Error copying from public uploads for snippet ${snippet.id}:`, error);
       }
     }
     
-    if (!imageExists || !imageValid) {
-      console.log(`${!imageExists ? "Missing" : "Invalid"} image for snippet ID ${snippet.id}: ${snippet.imagePath}`);
-      
-      // Check if image exists in public uploads folder as fallback
-      const publicImageExists = publicUploadFiles.includes(snippet.imagePath);
-      
-      if (publicImageExists) {
-        // Copy from public uploads to main uploads
-        try {
-          const sourceFilePath = path.join(publicUploadsDir, snippet.imagePath);
-          const targetFilePath = path.join(uploadsDir, snippet.imagePath);
-          fs.copyFileSync(sourceFilePath, targetFilePath);
-          console.log(`✅ Fixed: Copied from public uploads ${snippet.imagePath}`);
-          fixedCount++;
-          continue;
-        } catch (error) {
-          console.error(`❌ Error copying from public uploads for snippet ${snippet.id}:`, error);
+    // Check if image exists in any backup directory
+    let foundInBackup = false;
+    if (fs.existsSync(backupsDir)) {
+      const backupDirs = fs.readdirSync(backupsDir);
+      for (const dir of backupDirs) {
+        const fullBackupDir = path.join(backupsDir, dir);
+        if (fs.statSync(fullBackupDir).isDirectory()) {
+          const potentialBackupFile = path.join(fullBackupDir, imagePath);
+          if (fs.existsSync(potentialBackupFile)) {
+            try {
+              const targetFilePath = path.join(uploadsDir, imagePath);
+              fs.copyFileSync(potentialBackupFile, targetFilePath);
+              console.log(`✅ Fixed: Restored from backup directory ${dir}`);
+              fixedCount++;
+              foundInBackup = true;
+              break;
+            } catch (err) {
+              console.error(`❌ Error copying from backup for snippet ${snippet.id}:`, err);
+            }
+          }
         }
       }
-      
-      // If still missing, create a custom SVG placeholder
+    }
+    
+    // If still missing, create a custom SVG placeholder
+    if (!foundInBackup) {
       try {
         const placeholderSvg = createPlaceholderSVG(snippet.id, snippet.title);
-        const targetFilePath = path.join(uploadsDir, snippet.imagePath);
+        const targetFilePath = path.join(uploadsDir, imagePath);
         fs.writeFileSync(targetFilePath, placeholderSvg);
         console.log(`✅ Created placeholder SVG for snippet ${snippet.id}`);
         placeholderCount++;
-      } catch (error) {
-        console.error(`❌ Error creating placeholder for snippet ${snippet.id}:`, error);
+      } catch (err) {
+        console.error(`❌ Error creating placeholder for snippet ${snippet.id}:`, err);
       }
-    } else {
-      alreadyOkCount++;
     }
   }
   
   console.log(`
 Image fix process completed:
-- Total snippets with images: ${allSnippets.length}
-- Already OK: ${alreadyOkCount}
-- Restored from public/uploads: ${fixedCount}
-- Created placeholders: ${placeholderCount}
+- Total issues found: ${imageErrors.length}
+- Issues fixed from public/uploads or backups: ${fixedCount}
+- Placeholders created: ${placeholderCount}
+- Remaining issues: ${imageErrors.length - fixedCount - placeholderCount}
   `);
+  
+  // Run monitoring again to verify fixes
+  console.log("\nVerifying fixes...");
+  const remainingIssues = await monitorImageErrors();
+  console.log(`After fixes, ${remainingIssues.length} issues remain.`);
 }
 
 // Run the script

@@ -16,18 +16,21 @@ show_usage() {
   echo "Options:"
   echo "  --cleanup    Run orphaned image cleanup only"
   echo "  --monitor    Run image error monitoring only"
-  echo "  --all        Run both cleanup and monitoring (default)"
+  echo "  --fix        Run image validation and fix process"
+  echo "  --all        Run all maintenance tasks (default)"
   echo "  --help       Display this help message"
 }
 
 # Process command-line arguments
 RUN_CLEANUP=0
 RUN_MONITOR=0
+RUN_FIX=0
 
 if [ $# -eq 0 ]; then
   # Default behavior if no arguments: run everything
   RUN_CLEANUP=1
   RUN_MONITOR=1
+  RUN_FIX=1
 else
   # Process specific arguments
   for arg in "$@"; do
@@ -38,9 +41,13 @@ else
       --monitor)
         RUN_MONITOR=1
         ;;
+      --fix)
+        RUN_FIX=1
+        ;;
       --all)
         RUN_CLEANUP=1
         RUN_MONITOR=1
+        RUN_FIX=1
         ;;
       --help)
         show_usage
@@ -94,6 +101,24 @@ if [ $RUN_MONITOR -eq 1 ]; then
     echo "Monitoring completed successfully"
   else
     echo "Error: Monitoring process failed"
+  fi
+  echo ""
+fi
+
+# Run image validation and fix if requested
+if [ $RUN_FIX -eq 1 ]; then
+  echo "=== Running Image Validation and Fix Process ==="
+  echo "This process will automatically fix any detected image issues"
+  echo "Starting image validation and fix..."
+  
+  # Run the scheduleImageCheck script
+  echo "Executing image validation and fix script..."
+  npx tsx scripts/scheduleImageCheck.ts
+  
+  if [ $? -eq 0 ]; then
+    echo "Image validation and fix completed successfully"
+  else
+    echo "Error: Image validation and fix process failed"
   fi
   echo ""
 fi
