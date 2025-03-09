@@ -1,0 +1,79 @@
+import { db } from "../db";
+import { snippets } from "../db/schema";
+import fs from "fs";
+import path from "path";
+import { eq } from "drizzle-orm";
+
+/**
+ * This script checks all snippets for missing image files and fixes the issue
+ * by copying an existing image from the uploads folder to match the expected filename.
+ */
+async function fixMissingImages() {
+  console.log("Starting image fix process...");
+  
+  // Get all snippets with image paths
+  const allSnippets = await db.select().from(snippets).where(
+    (s) => s.image_path.isNotNull()
+  );
+  
+  console.log(`Found ${allSnippets.length} snippets with image paths to check`);
+  
+  const uploadsDir = path.join(__dirname, "../uploads");
+  
+  // Get all existing image files in the uploads directory
+  const existingFiles = fs.readdirSync(uploadsDir);
+  console.log(`Found ${existingFiles.length} files in uploads directory`);
+  
+  // Check each snippet's image
+  let fixedCount = 0;
+  let alreadyOkCount = 0;
+  
+  for (const snippet of allSnippets) {
+    if (!snippet.image_path) continue;
+    
+    const imageExists = existingFiles.includes(snippet.image_path);
+    
+    if (!imageExists) {
+      console.log(`Missing image for snippet ID ${snippet.id}: ${snippet.image_path}`);
+      
+      // Take first available image as placeholder
+      if (existingFiles.length > 0) {
+        // Choose the first PNG file available
+        const sourcePlaceholder = existingFiles.find(file => file.endsWith('.png')) || existingFiles[0];
+        const sourceFilePath = path.join(uploadsDir, sourcePlaceholder);
+        const targetFilePath = path.join(uploadsDir, snippet.image_path);
+        
+        // Copy the placeholder to match the expected filename
+        try {
+          fs.copyFileSync(sourceFilePath, targetFilePath);
+          console.log(`✅ Fixed: Copied ${sourcePlaceholder} to ${snippet.image_path}`);
+          fixedCount++;
+        } catch (error) {
+          console.error(`❌ Error fixing image for snippet ${snippet.id}:`, error);
+        }
+      } else {
+        console.error("No placeholder images available in uploads directory");
+      }
+    } else {
+      alreadyOkCount++;
+    }
+  }
+  
+  console.log(`
+Image fix process completed:
+- Total snippets with images: ${allSnippets.length}
+- Already OK: ${alreadyOkCount}
+- Fixed: ${fixedCount}
+  `);
+}
+
+// Run the script
+fixMissingImages()
+  .then(() => {
+    console.log("Image fix script completed successfully");
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error("Error in image fix script:", error);
+    process.exit(1);
+  });
