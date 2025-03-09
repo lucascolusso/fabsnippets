@@ -47,8 +47,8 @@ app.use((req, res, next) => {
 (async () => {
   const server = await registerRoutes(app);
 
-  // Error handling middleware needs to be after all route handlers
-  app.use(function(err: any, _req: Request, res: Response, _next: NextFunction) {
+  // Error handling middleware - need 4 parameters for Express to recognize it as error middleware
+  app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
     log(`Error: ${message}`);
