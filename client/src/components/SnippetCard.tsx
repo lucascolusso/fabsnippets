@@ -498,13 +498,25 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
           ) : (
             <>
               <ScrollArea className="h-[180px]">
-                <div className="mt-1 p-1 code-snippet-wrapper">
+                <div className="mt-1 p-1 code-snippet-wrapper relative">
                   <CodeEditor
                     value={snippet.code}
                     onChange={() => { }}
                     readOnly
                     className="code-snippet-editor"
                   />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleCopy}
+                    className="absolute bottom-2 right-2 h-7 w-7 bg-background/70 hover:bg-background backdrop-blur-sm rounded-full"
+                  >
+                    {isCopied ? (
+                      <CheckCircle2 className="h-3 w-3 text-green-500" />
+                    ) : (
+                      <Copy className="h-3 w-3" />
+                    )}
+                  </Button>
                 </div>
               </ScrollArea>
               
