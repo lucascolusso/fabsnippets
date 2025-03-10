@@ -509,12 +509,12 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                     variant="ghost"
                     size="icon"
                     onClick={handleCopy}
-                    className="absolute bottom-2 right-2 h-7 w-7 bg-background/70 hover:bg-background backdrop-blur-sm rounded-full"
+                    className="absolute bottom-2 right-2 h-9 w-9 p-2 bg-background/70 hover:bg-background backdrop-blur-sm rounded-full"
                   >
                     {isCopied ? (
-                      <CheckCircle2 className="h-3 w-3 text-green-500" />
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
                     ) : (
-                      <Copy className="h-3 w-3" />
+                      <Copy className="h-4 w-4" />
                     )}
                   </Button>
                 </div>
