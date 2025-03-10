@@ -354,7 +354,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                 {parsedCategories(snippet).map((category, index) => (
                   <span
                     key={`${category}-${index}`}
-                    className="inline-block px-1.5 py-0.5 text-[10px] font-semibold rounded bg-primary/10"
+                    className="inline-block px-1.5 py-0.5 text-xs font-semibold rounded bg-primary/10"
                   >
                     {category}
                   </span>
@@ -393,9 +393,9 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs">Title</FormLabel>
+                      <FormLabel className="text-sm">Title</FormLabel>
                       <FormControl>
-                        <Input {...field} className="text-xs h-7" />
+                        <Input {...field} className="text-sm h-8" />
                       </FormControl>
                     </FormItem>
                   )}
@@ -405,7 +405,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                   name="categories"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs">Categories</FormLabel>
+                      <FormLabel className="text-sm">Categories</FormLabel>
                       <div className="flex flex-wrap gap-1">
                         {['Prompt', 'TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery'].map((category) => (
                           <Button
@@ -413,7 +413,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                             type="button"
                             size="sm"
                             variant={field.value.includes(category as CodeCategory) ? "default" : "outline"}
-                            className="h-6 text-xs"
+                            className="h-7 text-sm"
                             onClick={() => {
                               const currentCategories = [...field.value];
                               if (currentCategories.includes(category as CodeCategory)) {
@@ -435,7 +435,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                   name="code"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs">Code</FormLabel>
+                      <FormLabel className="text-sm">Code</FormLabel>
                       <FormControl>
                         <CodeEditor {...field} className="code-snippet-editor" />
                       </FormControl>
@@ -444,7 +444,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                 />
                 {/* Image upload section */}
                 <FormItem className="mt-2">
-                  <FormLabel className="text-xs">Image</FormLabel>
+                  <FormLabel className="text-sm">Image</FormLabel>
                   <div className="space-y-2">
                     {/* Current image or preview of new image */}
                     {(imagePreview || (!imageError && snippet.imagePath && !imageFile)) && (
@@ -475,9 +475,9 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                           type="file"
                           onChange={handleFileChange}
                           accept="image/*"
-                          className="text-xs h-8"
+                          className="text-sm h-9"
                         />
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-sm text-muted-foreground">
                           Upload an image visualization (max 5MB)
                         </div>
                       </div>
@@ -486,10 +486,10 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                 </FormItem>
                 
                 <div className="flex gap-1">
-                  <Button type="submit" disabled={updateMutation.isPending} className="h-8 text-xs">
+                  <Button type="submit" disabled={updateMutation.isPending} className="h-9 text-sm">
                     {updateMutation.isPending ? "Saving..." : "Save"}
                   </Button>
-                  <Button type="button" variant="outline" onClick={handleCancelEdit} className="h-8 text-xs">
+                  <Button type="button" variant="outline" onClick={handleCancelEdit} className="h-9 text-sm">
                     Cancel
                   </Button>
                 </div>
@@ -570,7 +570,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                 onClick={() => voteMutation.mutate()}
                 disabled={voteMutation.isPending}
                 className={cn(
-                  "h-8 px-2 flex items-center justify-center gap-1 text-[10px]",
+                  "h-8 px-2 flex items-center justify-center gap-1 text-xs",
                   hasLiked && "font-bold text-primary"
                 )}
               >
