@@ -82,7 +82,7 @@ export function NewSnippetModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Submit</Button>
+        <Button className="h-10 text-base">Submit</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
@@ -117,7 +117,7 @@ export function NewSnippetModal() {
                           variant="outline"
                           role="combobox"
                           aria-expanded={openCategories}
-                          className="w-full justify-between"
+                          className="w-full justify-between h-10 text-base"
                         >
                           {field.value.length > 0
                             ? `${field.value.length} categories selected`
@@ -161,7 +161,7 @@ export function NewSnippetModal() {
                       <Badge
                         key={category}
                         variant="secondary"
-                        className="cursor-pointer"
+                        className="cursor-pointer text-sm py-1.5 px-2.5"
                         onClick={() => {
                           field.onChange(field.value.filter((val) => val !== category));
                         }}
@@ -217,7 +217,7 @@ export function NewSnippetModal() {
               )}
             />
 
-            <Button type="submit" disabled={mutation.isPending} className="w-full">
+            <Button type="submit" disabled={mutation.isPending} className="w-full h-10 text-base">
               {mutation.isPending ? "Submitting..." : "Submit"}
             </Button>
           </form>
