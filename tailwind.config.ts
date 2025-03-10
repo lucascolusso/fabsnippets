@@ -8,6 +8,18 @@ export default {
       sans: ['Public Sans', 'sans-serif'],
       mono: ['monospace', 'SFMono-Regular'],
     },
+    fontSize: {
+      xs: '0.875rem',     // 14px (up from 12px)
+      sm: '1rem',         // 16px (up from 14px)
+      base: '1.125rem',   // 18px (up from 16px)
+      lg: '1.25rem',      // 20px (up from 18px)
+      xl: '1.5rem',       // 24px (up from 20px)
+      '2xl': '1.75rem',   // 28px (up from 24px)
+      '3xl': '2rem',      // 32px (up from 30px)
+      '4xl': '2.5rem',    // 40px (up from 36px)
+      '5xl': '3rem',      // 48px (up from 48px - keeping this one the same)
+      '6xl': '3.75rem',   // 60px (up from 60px - keeping this one the same)
+    },
     extend: {
       borderRadius: {
         lg: "var(--radius)",

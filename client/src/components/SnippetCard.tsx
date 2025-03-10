@@ -341,7 +341,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
               <Link href={`/snippet/${snippet.id}`} className="hover:text-primary hover:underline">
                 <h2 className="text-sm font-semibold">{snippet.title}</h2>
               </Link>
-              <div className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
+              <div className="flex items-center gap-0.5 text-xs text-muted-foreground">
                 <span>Submitted by</span>
                 <Link href={`/profile/${snippet.authorUsername}`} className="underline">
                   {snippet.authorUsername}
