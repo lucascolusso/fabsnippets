@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Snippet, CodeCategory } from "@/lib/types";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -91,6 +91,9 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { user } = useUser();
   const [hasLiked, setHasLiked] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Add vote status check query
   const { data: voteStatus } = useQuery({
@@ -134,15 +137,39 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
   };
 
   const updateMutation = useMutation({
-    mutationFn: async (data: { title: string; code: string; categories: CodeCategory[] }) => {
-      const res = await fetch(`/api/snippets/${snippet.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(data)
-      });
-      if (!res.ok) throw new Error(await res.text());
-      return res.json();
+    mutationFn: async (data: { title: string; code: string; categories: CodeCategory[]; image?: File }) => {
+      // Use FormData if there's an image to upload
+      if (data.image) {
+        const formData = new FormData();
+        formData.append('title', data.title);
+        formData.append('code', data.code);
+        
+        // Categories need to be added as individual items
+        data.categories.forEach(category => {
+          formData.append('categories[]', category);
+        });
+        
+        // Add the image file
+        formData.append('image', data.image);
+        
+        const res = await fetch(`/api/snippets/${snippet.id}`, {
+          method: "PUT",
+          credentials: "include",
+          body: formData
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+      } else {
+        // If no image, use JSON as before
+        const res = await fetch(`/api/snippets/${snippet.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/snippets"] });
@@ -242,8 +269,65 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
     }
   };
 
+  // Handle file selection
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file is an image and size is reasonable
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload an image file",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast({
+          title: "File too large",
+          description: "Image must be less than 5MB",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      setImageFile(file);
+      
+      // Create a preview URL
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setImagePreview(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
+  // Handle removing the image
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+  
+  // Reset image state when editing is cancelled
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const onSubmit = (data: { title: string; code: string; categories: CodeCategory[] }) => {
-    updateMutation.mutate(data);
+    // Add image file to data if selected
+    updateMutation.mutate({
+      ...data,
+      image: imageFile || undefined
+    });
   };
 
   const isAuthor = user?.id === snippet.authorId;
@@ -358,11 +442,54 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                     </FormItem>
                   )}
                 />
+                {/* Image upload section */}
+                <FormItem className="mt-2">
+                  <FormLabel className="text-xs">Image</FormLabel>
+                  <div className="space-y-2">
+                    {/* Current image or preview of new image */}
+                    {(imagePreview || (!imageError && snippet.imagePath && !imageFile)) && (
+                      <div className="relative w-full max-h-[200px] overflow-hidden rounded-md border">
+                        <img
+                          src={imagePreview || (snippet.imagePath && `/uploads/${snippet.imagePath}`)}
+                          alt="Snippet visualization"
+                          className="w-full object-contain"
+                          style={{ maxHeight: "200px" }}
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2 h-6 w-6 rounded-full p-0"
+                          onClick={handleRemoveImage}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    )}
+                    
+                    {/* Image upload button */}
+                    {!imagePreview && (!snippet.imagePath || imageError || imageFile === null) && (
+                      <div className="flex items-center gap-2">
+                        <Input
+                          ref={fileInputRef}
+                          type="file"
+                          onChange={handleFileChange}
+                          accept="image/*"
+                          className="text-xs h-8"
+                        />
+                        <div className="text-xs text-muted-foreground">
+                          Upload an image visualization (max 5MB)
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </FormItem>
+                
                 <div className="flex gap-1">
                   <Button type="submit" disabled={updateMutation.isPending} className="h-8 text-xs">
                     {updateMutation.isPending ? "Saving..." : "Save"}
                   </Button>
-                  <Button type="button" variant="outline" onClick={() => setIsEditing(false)} className="h-8 text-xs">
+                  <Button type="button" variant="outline" onClick={handleCancelEdit} className="h-8 text-xs">
                     Cancel
                   </Button>
                 </div>
