@@ -562,7 +562,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                   className="h-8 text-xs px-2 flex items-center justify-center"
                 >
                   <Image className="h-3 w-3 mr-1" />
-                  <span>Image</span>
+                  <span>View image</span>
                 </Button>
               )}
               <Button
