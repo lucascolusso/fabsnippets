@@ -86,7 +86,7 @@ export function NewSnippetModal() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle className="text-base">Submit Snippet</DialogTitle>
+          <DialogTitle className="text-lg">Submit Snippet</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-3">

@@ -548,7 +548,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             </DialogContent>
           </Dialog>
           <div className="flex flex-wrap items-center w-full gap-1 pt-0.5">
-            <div className="w-full flex justify-between text-muted-foreground text-xs mb-1 pb-1 border-b border-[#65686C]" style={{ borderBottomWidth: '1px', borderBottomStyle: 'solid' }}>
+            <div className="w-full flex justify-between text-muted-foreground text-sm mb-1 pb-1 border-b border-[#65686C]" style={{ borderBottomWidth: '1px', borderBottomStyle: 'solid' }}>
               <span>{snippet.votes} {snippet.votes === 1 ? 'like' : 'likes'}</span>
               <span>{snippet.commentCount || 0} {(snippet.commentCount || 0) === 1 ? 'comment' : 'comments'}</span>
             </div>
@@ -559,7 +559,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowImage(true)}
-                  className="h-8 text-xs px-2 flex items-center justify-center"
+                  className="h-9 text-sm px-2 flex items-center justify-center"
                 >
                   <Image className="h-3 w-3 mr-1" />
                   <span>View image</span>
@@ -570,7 +570,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                 onClick={() => voteMutation.mutate()}
                 disabled={voteMutation.isPending}
                 className={cn(
-                  "h-8 px-2 flex items-center justify-center gap-1 text-xs",
+                  "h-9 px-2 flex items-center justify-center gap-1 text-sm",
                   hasLiked && "font-bold text-primary"
                 )}
               >
@@ -582,7 +582,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                   variant="ghost"
                   size="sm"
                   onClick={() => window.location.href = `/snippet/${snippet.id}`}
-                  className="h-8 text-xs px-2 flex items-center justify-center"
+                  className="h-9 text-sm px-2 flex items-center justify-center"
                 >
                   <MessageSquare className="h-3 w-3 mr-1" />
                   <span>Comment</span>
@@ -596,18 +596,18 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="text-sm">Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription className="text-xs">
+            <AlertDialogDescription className="text-sm">
               This action cannot be undone. This will permanently delete your snippet.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="h-7 text-xs">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="h-9 text-sm">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 deleteMutation.mutate();
                 setShowDeleteDialog(false);
               }}
-              className="bg-destructive hover:bg-destructive/90 h-7 text-xs"
+              className="bg-destructive hover:bg-destructive/90 h-9 text-sm"
             >
               Delete
             </AlertDialogAction>
