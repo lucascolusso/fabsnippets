@@ -98,7 +98,7 @@ export function Home() {
   }) ?? [];
 
   return (
-    <div className="container mx-auto py-6 px-4 max-w-[500px]">
+    <div className="container mx-auto py-6 px-4 max-w-[700px]">
       <Card className="w-full shadow-md rounded-xl comments-card bg-[#252728] border-0 mb-4">
         <CardContent className="p-3 space-y-2">
           <div className="relative w-full">
