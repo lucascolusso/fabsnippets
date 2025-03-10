@@ -520,20 +520,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                 </div>
               </ScrollArea>
               
-              {/* Image indicator button if image is attached */}
-              {snippet.imagePath && !imageError && (
-                <div className="flex justify-end mt-1">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => setShowImage(true)}
-                    className="text-xs h-7 px-2"
-                  >
-                    <Image className="h-3 w-3 mr-1" />
-                    <span>View Image</span>
-                  </Button>
-                </div>
-              )}
+              {/* We now have the image button in the action bar */}
             </>
           )}
           
@@ -565,7 +552,19 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
               <span>{snippet.votes} {snippet.votes === 1 ? 'like' : 'likes'}</span>
               <span>{snippet.commentCount || 0} {(snippet.commentCount || 0) === 1 ? 'comment' : 'comments'}</span>
             </div>
-            <div className="grid grid-cols-3 w-full gap-1">
+            <div className={cn("grid w-full gap-1", 
+              snippet.imagePath && !imageError ? "grid-cols-3" : "grid-cols-2")}>
+              {snippet.imagePath && !imageError && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowImage(true)}
+                  className="h-8 text-xs px-2 flex items-center justify-center"
+                >
+                  <Image className="h-3 w-3 mr-1" />
+                  <span>Image</span>
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 onClick={() => voteMutation.mutate()}
@@ -589,24 +588,6 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                   <span>Comment</span>
                 </Button>
               )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCopy}
-                className="h-8 text-xs px-2 flex items-center justify-center"
-              >
-                {isCopied ? (
-                  <>
-                    <CheckCircle2 className="h-3 w-3 text-green-500 mr-1" />
-                    <span>Copied</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-3 w-3 mr-1" />
-                    <span>Copy</span>
-                  </>
-                )}
-              </Button>
             </div>
           </div>
         </CardContent>
