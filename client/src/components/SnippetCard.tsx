@@ -509,7 +509,9 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                     <FormItem>
                       <FormLabel className="text-sm">Code</FormLabel>
                       <FormControl>
-                        <CodeEditor {...field} className="code-snippet-editor" />
+                        <div style={{ height: "160px" }}>
+                          <CodeEditor {...field} className="code-snippet-editor h-full" />
+                        </div>
                       </FormControl>
                     </FormItem>
                   )}

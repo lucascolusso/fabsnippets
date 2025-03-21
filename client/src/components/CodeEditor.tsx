@@ -23,7 +23,7 @@ export function CodeEditor({
         "font-mono leading-relaxed resize-none focus:ring-1 focus:ring-primary",
         "font-['JetBrains_Mono',Menlo,Monaco,Consolas,monospace]",
         "border-0 bg-[#1A1A1B]", // Darker background color and no border
-        readOnly ? "min-h-0 flex-1 text-[14px]" : "min-h-[160px] text-base",
+        readOnly ? "min-h-0 flex-1 text-[14px]" : "h-full text-base",
         className
       )}
       placeholder="Paste your code here..."
