@@ -502,6 +502,15 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                     </FormItem>
                   )}
                 />
+                {/* 
+                  Code Input Field 
+                  
+                  This FormField renders the code editor for snippet editing. 
+                  Important styling notes:
+                  - The wrapping div with fixed height (160px) creates a consistent editor size
+                  - The CodeEditor component uses h-full to fill this container completely
+                  - This approach ensures the editor maintains exactly 160px height regardless of content
+                */}
                 <FormField
                   control={form.control}
                   name="code"
@@ -509,7 +518,8 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                     <FormItem>
                       <FormLabel className="text-sm">Code</FormLabel>
                       <FormControl>
-                        <div style={{ height: "160px" }}>
+                        {/* Fixed height container (160px) for the code editor */}
+                        <div style={{ height: "160px" }} className="code-editor-container">
                           <CodeEditor {...field} className="code-snippet-editor h-full" />
                         </div>
                       </FormControl>
@@ -571,6 +581,14 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
             </Form>
           ) : (
             <>
+              {/* 
+                Read-only Code Display
+                
+                This section displays the snippet code in read-only mode:
+                - Uses ScrollArea with fixed height (180px) to ensure consistent display and allow scrolling
+                - The code-snippet-wrapper provides positioning context for the copy button
+                - The CodeEditor component is set to readOnly mode which applies different styling
+              */}
               <ScrollArea className="h-[180px]">
                 <div className="mt-1 p-1 code-snippet-wrapper relative">
                   <CodeEditor
