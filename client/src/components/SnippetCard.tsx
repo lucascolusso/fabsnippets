@@ -1,3 +1,19 @@
+/**
+ * SnippetCard Component
+ * 
+ * This component renders a code snippet card in the FabSnippets application.
+ * It provides functionality to view, edit, and delete snippets, as well as
+ * vote on them and view their associated images.
+ * 
+ * Key features:
+ * - Display snippet title, author, code, and metadata
+ * - Edit snippet content (for snippet authors only)
+ * - Add/replace/remove images
+ * - Vote on snippets
+ * - Delete snippets (for snippet authors only)
+ * - Copy code to clipboard
+ */
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CodeEditor } from "./CodeEditor";
@@ -50,6 +66,15 @@ interface SnippetCardProps {
   snippet: Snippet;
 }
 
+/**
+ * Parses categories from a snippet object
+ * 
+ * This utility function handles different formats of category data
+ * that may be present in a snippet object, including legacy formats.
+ * 
+ * @param snippet - The snippet object to extract categories from
+ * @returns An array of CodeCategory types
+ */
 const parsedCategories = (snippet: Snippet): CodeCategory[] => {
   try {
     // If categories property exists and is an array, return it
@@ -136,6 +161,18 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
     });
   };
 
+  /**
+   * Update Mutation
+   * 
+   * This mutation handles the API call to update a snippet, supporting both 
+   * JSON data submission and FormData for image uploads.
+   * 
+   * Key features:
+   * - Dynamic content type based on presence of image
+   * - Handles errors with toast notifications
+   * - Updates query cache on success
+   * - Exits edit mode on successful update
+   */
   const updateMutation = useMutation({
     mutationFn: async (data: { title: string; code: string; categories: CodeCategory[]; image?: File }) => {
       // Use FormData if there's an image to upload
@@ -269,7 +306,17 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
     }
   };
 
-  // Handle file selection
+  /**
+   * Handle File Change
+   * 
+   * Processes and validates image file uploads for snippets.
+   * - Validates file type (must be an image)
+   * - Validates file size (must be under 5MB)
+   * - Creates a preview of the image for immediate display
+   * - Updates state with the selected file
+   * 
+   * @param e - Input change event containing the selected file
+   */
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -303,7 +350,14 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
     }
   };
   
-  // Handle removing the image
+  /**
+   * Handle Removing Image
+   * 
+   * Removes the current image or image preview from the form.
+   * - Clears the image file reference
+   * - Removes the image preview
+   * - Resets the file input element
+   */
   const handleRemoveImage = () => {
     setImageFile(null);
     setImagePreview(null);
@@ -312,7 +366,15 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
     }
   };
   
-  // Reset image state when editing is cancelled
+  /**
+   * Handle Cancel Edit
+   * 
+   * Cancels the editing process and resets all related state.
+   * - Exits edit mode
+   * - Clears any selected image file
+   * - Removes any image preview
+   * - Resets the file input element
+   */
   const handleCancelEdit = () => {
     setIsEditing(false);
     setImageFile(null);
@@ -322,6 +384,16 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
     }
   };
 
+  /**
+   * Form Submission Handler
+   * 
+   * Processes the form submission for snippet editing.
+   * - Takes form data (title, code, categories)
+   * - Adds the image file if one was selected
+   * - Triggers the update mutation to save changes
+   * 
+   * @param data - The form data containing snippet details
+   */
   const onSubmit = (data: { title: string; code: string; categories: CodeCategory[] }) => {
     // Add image file to data if selected
     updateMutation.mutate({
