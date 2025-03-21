@@ -28,10 +28,22 @@ declare module 'express' {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Ensure uploads directory exists
+// Path to the uploads directory for storing snippet images
 const uploadsDir = path.join(__dirname, '../uploads');
 
-// Initialize directories and ensure they have proper permissions
+/**
+ * Initialize Directories for Image Storage
+ * 
+ * This function ensures that the necessary directories for storing
+ * snippet image uploads exist and have the correct permissions.
+ * 
+ * Key features:
+ * - Creates missing directories if they don't exist
+ * - Sets proper permissions (0755) for security and access
+ * - Creates both main uploads directory and public facing directory
+ * 
+ * @returns {Promise<boolean>} True if initialization was successful, false otherwise
+ */
 async function initializeDirectories() {
   try {
     console.log("Checking for uploads directory...");
@@ -67,6 +79,16 @@ async function initializeDirectories() {
   }
 }
 
+/**
+ * Multer Configuration for Handling File Uploads
+ * 
+ * This configuration sets up Multer to handle image file uploads for snippet visualizations.
+ * Key features:
+ * - Stores files in the uploads directory
+ * - Generates unique filenames with timestamps and random numbers
+ * - Restricts uploads to image files only
+ * - Limits file size to 5MB
+ */
 const upload = multer({
   storage: multer.diskStorage({
     destination: uploadsDir,
@@ -618,7 +640,25 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Update snippet
+  /**
+   * Update Snippet Endpoint
+   * 
+   * This endpoint allows users to update their own snippets, including the ability
+   * to add, replace, or remove an image visualization.
+   * 
+   * Key features:
+   * - Authentication & authorization checks (only authors can edit their snippets)
+   * - Handles multipart form data for image uploads via multer middleware
+   * - Updates snippet metadata (title, code, categories)
+   * - Only updates the image if a new one is provided
+   * - Returns the updated snippet with author information
+   * 
+   * Request parameters:
+   * - id: Snippet ID to update
+   * 
+   * Authentication: Required
+   * Authorization: Must be the snippet author
+   */
   app.put("/api/snippets/:id", upload.single('image'), async (req, res) => {
     const snippetId = parseInt(req.params.id);
     try {
