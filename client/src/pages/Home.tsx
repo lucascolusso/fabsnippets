@@ -8,7 +8,7 @@ import { cn, getCategoryDisplayName } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 
-const categories: CodeCategory[] = ['Prompt', 'TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery'];
+const categories: CodeCategory[] = ['Prompt', 'TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery', 'C#'];
 
 export function Home() {
   const [selectedCategories, setSelectedCategories] = useState<Set<CodeCategory>>(new Set());

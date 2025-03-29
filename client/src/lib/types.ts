@@ -1,4 +1,4 @@
-export type CodeCategory = 'Prompt' | 'TMDL' | 'DAX' | 'SQL' | 'Python' | 'PowerQuery';
+export type CodeCategory = 'Prompt' | 'TMDL' | 'DAX' | 'SQL' | 'Python' | 'PowerQuery' | 'C#';
 
 export interface Snippet {
   id: number;

@@ -16,12 +16,12 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { cn, getCategoryDisplayName } from "@/lib/utils";
 
-const categories: CodeCategory[] = ['Prompt', 'TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery'];
+const categories: CodeCategory[] = ['Prompt', 'TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery', 'C#'];
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   code: z.string().min(1, "Code is required"),
-  categories: z.array(z.enum(['Prompt', 'TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery'])).min(1, "Select at least one category"),
+  categories: z.array(z.enum(['Prompt', 'TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery', 'C#'])).min(1, "Select at least one category"),
   image: z.instanceof(File).optional()
 });
 
