@@ -24,6 +24,7 @@ import type { Snippet, CodeCategory } from "@/lib/types";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { useState, useEffect, useRef } from "react";
+import { getCategoryDisplayName } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -428,7 +429,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                     key={`${category}-${index}`}
                     className="inline-block px-1.5 py-0.5 text-xs font-semibold rounded bg-primary/10"
                   >
-                    {category}
+                    {getCategoryDisplayName(category)}
                   </span>
                 ))}
               </div>
@@ -495,7 +496,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                               }
                             }}
                           >
-                            {category}
+                            {getCategoryDisplayName(category as CodeCategory)}
                           </Button>
                         ))}
                       </div>

@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "wouter";
-import type { Snippet } from "@/lib/types";
+import type { Snippet, CodeCategory } from "@/lib/types";
+import { getCategoryDisplayName } from "@/lib/utils";
 
 function ContributorCard({ contributors }: { contributors: [string, number][] }) {
   return (
@@ -50,7 +51,7 @@ function TopVotedCard({ snippets }: { snippets: Snippet[] }) {
                 <div className="flex flex-wrap gap-1">
                   {(Array.isArray(snippet.categories) ? snippet.categories : []).map((category: string) => (
                     <span key={category} className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10">
-                      {category}
+                      {getCategoryDisplayName(category as CodeCategory)}
                     </span>
                   ))}
                 </div>
@@ -92,7 +93,7 @@ function MostCommentedCard({ snippets }: { snippets: Snippet[] }) {
                 <div className="flex flex-wrap gap-1">
                   {(Array.isArray(snippet.categories) ? snippet.categories : []).map((category: string) => (
                     <span key={category} className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10">
-                      {category}
+                      {getCategoryDisplayName(category as CodeCategory)}
                     </span>
                   ))}
                 </div>

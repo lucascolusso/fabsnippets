@@ -3,11 +3,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SnippetCard } from "@/components/SnippetCard";
-import type { Snippet, User } from "@/lib/types";
+import type { Snippet, User, CodeCategory } from "@/lib/types";
 import { useRoute, Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExternalLink, Edit2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getCategoryDisplayName } from "@/lib/utils";
 import {
   Form,
   FormControl,
@@ -202,7 +203,7 @@ export function Profile() {
                         href={`/leaderboard?category=${category === 'all' ? '' : category.toLowerCase()}`}
                         className="hover:text-primary"
                       >
-                        {category === 'all' ? 'Overall' : category}
+                        {category === 'all' ? 'Overall' : getCategoryDisplayName(category as CodeCategory)}
                       </Link>
                       <span className="text-muted-foreground">
                         #{position}

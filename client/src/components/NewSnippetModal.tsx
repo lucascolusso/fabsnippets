@@ -14,7 +14,7 @@ import { useState } from "react";
 import type { CodeCategory } from "@/lib/types";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { cn } from "@/lib/utils";
+import { cn, getCategoryDisplayName } from "@/lib/utils";
 
 const categories: CodeCategory[] = ['Prompt', 'TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery'];
 
@@ -149,7 +149,7 @@ export function NewSnippetModal() {
                                   field.value?.includes(category) ? "opacity-100" : "opacity-0"
                                 )}
                               />
-                              {category}
+                              {getCategoryDisplayName(category)}
                             </CommandItem>
                           ))}
                         </CommandGroup>
@@ -166,7 +166,7 @@ export function NewSnippetModal() {
                           field.onChange(field.value.filter((val) => val !== category));
                         }}
                       >
-                        {category} ×
+                        {getCategoryDisplayName(category)} ×
                       </Badge>
                     ))}
                   </div>

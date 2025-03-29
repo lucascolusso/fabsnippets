@@ -4,7 +4,7 @@ import type { Snippet, CodeCategory } from "@/lib/types";
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, getCategoryDisplayName } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -136,7 +136,7 @@ export function Home() {
                   selectedCategories.has(category) && "border border-primary font-semibold"
                 )}
               >
-                {category}
+                {getCategoryDisplayName(category)}
               </Button>
             ))}
           </div>
