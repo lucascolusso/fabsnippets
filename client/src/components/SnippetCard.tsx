@@ -3,12 +3,11 @@
  * 
  * This component renders a code snippet card in the FabSnippets application.
  * It provides functionality to view, edit, and delete snippets, as well as
- * vote on them and view their associated images.
+ * vote on them.
  * 
  * Key features:
  * - Display snippet title, author, code, and metadata
  * - Edit snippet content (for snippet authors only)
- * - Add/replace/remove images
  * - Vote on snippets
  * - Delete snippets (for snippet authors only)
  * - Copy code to clipboard
@@ -17,13 +16,13 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CodeEditor } from "./CodeEditor";
-import { Copy, ThumbsUp, CheckCircle2, Image, Edit2, Trash2, MessageSquare, ImageOff } from "lucide-react";
+import { Copy, ThumbsUp, CheckCircle2, Edit2, Trash2, MessageSquare } from "lucide-react";
 import { Link } from "wouter";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Snippet, CodeCategory } from "@/lib/types";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { getCategoryDisplayName } from "@/lib/utils";
 import {
   Dialog,
@@ -61,7 +60,6 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import SnippetImage from "./SnippetImage";
 
 interface SnippetCardProps {
   snippet: Snippet;
@@ -111,15 +109,10 @@ const parsedCategories = (snippet: Snippet): CodeCategory[] => {
 export function SnippetCard({ snippet }: SnippetCardProps) {
   const queryClient = useQueryClient();
   const [isCopied, setIsCopied] = useState(false);
-  const [showImage, setShowImage] = useState(false);
-  const [imageError, setImageError] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { user } = useUser();
   const [hasLiked, setHasLiked] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Add vote status check query
   const { data: voteStatus } = useQuery({
@@ -153,61 +146,26 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
     }
   });
 
-  const handleImageError = () => {
-    setImageError(true);
-    toast({
-      title: "Image Error",
-      description: "Could not load the image",
-      variant: "destructive"
-    });
-  };
-
   /**
    * Update Mutation
    * 
-   * This mutation handles the API call to update a snippet, supporting both 
-   * JSON data submission and FormData for image uploads.
+   * This mutation handles the API call to update a snippet.
    * 
    * Key features:
-   * - Dynamic content type based on presence of image
    * - Handles errors with toast notifications
    * - Updates query cache on success
    * - Exits edit mode on successful update
    */
   const updateMutation = useMutation({
-    mutationFn: async (data: { title: string; code: string; categories: CodeCategory[]; image?: File }) => {
-      // Use FormData if there's an image to upload
-      if (data.image) {
-        const formData = new FormData();
-        formData.append('title', data.title);
-        formData.append('code', data.code);
-        
-        // Categories need to be added as individual items
-        data.categories.forEach(category => {
-          formData.append('categories[]', category);
-        });
-        
-        // Add the image file
-        formData.append('image', data.image);
-        
-        const res = await fetch(`/api/snippets/${snippet.id}`, {
-          method: "PUT",
-          credentials: "include",
-          body: formData
-        });
-        if (!res.ok) throw new Error(await res.text());
-        return res.json();
-      } else {
-        // If no image, use JSON as before
-        const res = await fetch(`/api/snippets/${snippet.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(data)
-        });
-        if (!res.ok) throw new Error(await res.text());
-        return res.json();
-      }
+    mutationFn: async (data: { title: string; code: string; categories: CodeCategory[] }) => {
+      const res = await fetch(`/api/snippets/${snippet.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data)
+      });
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/snippets"] });
@@ -308,81 +266,13 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
   };
 
   /**
-   * Handle File Change
-   * 
-   * Processes and validates image file uploads for snippets.
-   * - Validates file type (must be an image)
-   * - Validates file size (must be under 5MB)
-   * - Creates a preview of the image for immediate display
-   * - Updates state with the selected file
-   * 
-   * @param e - Input change event containing the selected file
-   */
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Validate file is an image and size is reasonable
-      if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Invalid file type",
-          description: "Please upload an image file",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        toast({
-          title: "File too large",
-          description: "Image must be less than 5MB",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      setImageFile(file);
-      
-      // Create a preview URL
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setImagePreview(event.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-  
-  /**
-   * Handle Removing Image
-   * 
-   * Removes the current image or image preview from the form.
-   * - Clears the image file reference
-   * - Removes the image preview
-   * - Resets the file input element
-   */
-  const handleRemoveImage = () => {
-    setImageFile(null);
-    setImagePreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-  
-  /**
    * Handle Cancel Edit
    * 
    * Cancels the editing process and resets all related state.
    * - Exits edit mode
-   * - Clears any selected image file
-   * - Removes any image preview
-   * - Resets the file input element
    */
   const handleCancelEdit = () => {
     setIsEditing(false);
-    setImageFile(null);
-    setImagePreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
   };
 
   /**
@@ -390,17 +280,12 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
    * 
    * Processes the form submission for snippet editing.
    * - Takes form data (title, code, categories)
-   * - Adds the image file if one was selected
    * - Triggers the update mutation to save changes
    * 
    * @param data - The form data containing snippet details
    */
   const onSubmit = (data: { title: string; code: string; categories: CodeCategory[] }) => {
-    // Add image file to data if selected
-    updateMutation.mutate({
-      ...data,
-      image: imageFile || undefined
-    });
+    updateMutation.mutate(data);
   };
 
   const isAuthor = user?.id === snippet.authorId;
@@ -527,48 +412,6 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                     </FormItem>
                   )}
                 />
-                {/* Image upload section */}
-                <FormItem className="mt-2">
-                  <FormLabel className="text-sm">Image</FormLabel>
-                  <div className="space-y-2">
-                    {/* Current image or preview of new image */}
-                    {(imagePreview || (!imageError && snippet.imagePath && !imageFile)) && (
-                      <div className="relative w-full max-h-[200px] overflow-hidden rounded-md border">
-                        <img
-                          src={imagePreview || (snippet.imagePath && `/uploads/${snippet.imagePath}`)}
-                          alt="Snippet visualization"
-                          className="w-full object-contain"
-                          style={{ maxHeight: "200px" }}
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          className="absolute top-2 right-2 h-6 w-6 rounded-full p-0"
-                          onClick={handleRemoveImage}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    )}
-                    
-                    {/* Image upload button */}
-                    {!imagePreview && (!snippet.imagePath || imageError || imageFile === null) && (
-                      <div className="flex items-center gap-2">
-                        <Input
-                          ref={fileInputRef}
-                          type="file"
-                          onChange={handleFileChange}
-                          accept="image/*"
-                          className="text-sm h-9"
-                        />
-                        <div className="text-sm text-muted-foreground">
-                          Upload an image visualization (max 5MB)
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </FormItem>
                 
                 <div className="flex gap-1">
                   <Button type="submit" disabled={updateMutation.isPending} className="h-9 text-sm">
@@ -612,52 +455,15 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
                   </Button>
                 </div>
               </ScrollArea>
-              
-              {/* We now have the image button in the action bar */}
             </>
           )}
           
-          {/* Image Dialog */}
-          <Dialog open={showImage} onOpenChange={setShowImage}>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>{snippet.title}</DialogTitle>
-                <DialogDescription>
-                  Image visualization for this snippet
-                </DialogDescription>
-              </DialogHeader>
-              {snippet.imagePath && (
-                <SnippetImage 
-                  src={snippet.imagePath} 
-                  onError={handleImageError}
-                  className="mt-2"
-                />
-              )}
-              <DialogFooter className="sm:justify-start">
-                <Button type="button" variant="secondary" onClick={() => setShowImage(false)}>
-                  Close
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
           <div className="flex flex-wrap items-center w-full gap-1 pt-0.5">
             <div className="w-full flex justify-between text-muted-foreground text-sm mb-1 pb-1 border-b border-[#65686C]" style={{ borderBottomWidth: '1px', borderBottomStyle: 'solid' }}>
               <span>{snippet.votes} {snippet.votes === 1 ? 'like' : 'likes'}</span>
               <span>{snippet.commentCount || 0} {(snippet.commentCount || 0) === 1 ? 'comment' : 'comments'}</span>
             </div>
-            <div className={cn("grid w-full gap-1", 
-              snippet.imagePath && !imageError ? "grid-cols-3" : "grid-cols-2")}>
-              {snippet.imagePath && !imageError && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowImage(true)}
-                  className="h-9 text-sm px-2 flex items-center justify-center"
-                >
-                  <Image className="h-3 w-3 mr-1" />
-                  <span>View image</span>
-                </Button>
-              )}
+            <div className="grid w-full gap-1 grid-cols-2">
               <Button
                 variant="ghost"
                 onClick={() => voteMutation.mutate()}

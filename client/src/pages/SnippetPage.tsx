@@ -3,30 +3,16 @@ import { SnippetCard } from "@/components/SnippetCard";
 import { Comments } from "@/components/Comments";
 import type { Snippet } from "@/lib/types";
 import { useRoute, Link } from "wouter";
-import { useState, Suspense } from "react";
-import { toast } from "@/hooks/use-toast";
+import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, ChevronLeft } from "lucide-react";
-import SnippetImage from "@/components/SnippetImage";
 
 export function SnippetPage() {
   const [, params] = useRoute<{ id: string }>("/snippet/:id");
   const snippetId = parseInt(params?.id || "0");
-  const [imageError, setImageError] = useState(false);
-
-  // Handle image loading errors
-  const handleImageError = () => {
-    setImageError(true);
-    console.error("Failed to load image for snippet ID:", snippetId);
-    toast({
-      title: "Image Not Available",
-      description: "The image for this snippet could not be loaded. It may have been deleted or moved.",
-      variant: "destructive"
-    });
-  };
 
   // Fetch snippet data
   const { data: snippet, isLoading, error, isError } = useQuery<Snippet>({
@@ -115,22 +101,6 @@ export function SnippetPage() {
       </div>
       
       <SnippetCard snippet={snippet} />
-      
-      {/* Image display section - only show if snippet has an image path and no errors */}
-      {snippet.imagePath && (
-        <Card className="mt-8 border-0 overflow-hidden">
-          <CardHeader className="pb-0">
-            <CardTitle className="text-sm">Visualization</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <SnippetImage 
-              src={snippet.imagePath}
-              onError={handleImageError}
-              className="w-full mt-2"
-            />
-          </CardContent>
-        </Card>
-      )}
       
       <div className="mt-8">
         <Comments snippetId={snippetId} />

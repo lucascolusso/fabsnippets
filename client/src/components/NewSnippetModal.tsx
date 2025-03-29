@@ -21,8 +21,7 @@ const categories: CodeCategory[] = ['Prompt', 'TMDL', 'DAX', 'SQL', 'Python', 'P
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   code: z.string().min(1, "Code is required"),
-  categories: z.array(z.enum(['Prompt', 'TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery', 'C#'])).min(1, "Select at least one category"),
-  image: z.instanceof(File).optional()
+  categories: z.array(z.enum(['Prompt', 'TMDL', 'DAX', 'SQL', 'Python', 'PowerQuery', 'C#'])).min(1, "Select at least one category")
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -49,9 +48,6 @@ export function NewSnippetModal() {
       values.categories.forEach((category, index) => {
         formData.append(`categories[${index}]`, category);
       });
-      if (values.image) {
-        formData.append('image', values.image);
-      }
 
       const res = await fetch('/api/snippets', {
         method: 'POST',
@@ -183,34 +179,6 @@ export function NewSnippetModal() {
                   <FormLabel>Code</FormLabel>
                   <FormControl>
                     <CodeEditor {...field} className="min-h-[200px]" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="image"
-              render={({ field: { value, onChange, ...field } }) => (
-                <FormItem>
-                  <FormLabel>Image (optional)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          onChange(file);
-                          toast({
-                            title: "Image selected",
-                            description: `Selected ${file.name}`
-                          });
-                        }
-                      }}
-                      {...field}
-                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -19,7 +19,6 @@ export const snippets = pgTable("snippets", {
   category: varchar("category", { length: 20 }), // Keep existing column
   categories: text("categories"), // Add new column
   authorId: integer("author_id").notNull().references(() => users.id),
-  imagePath: text("image_path"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   votes: integer("votes").default(0).notNull()
