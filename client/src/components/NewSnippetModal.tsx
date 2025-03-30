@@ -42,19 +42,22 @@ export function NewSnippetModal() {
 
   const mutation = useMutation({
     mutationFn: async (values: FormValues) => {
-      const formData = new FormData();
-      formData.append('title', values.title);
-      formData.append('code', values.code);
-      values.categories.forEach((category, index) => {
-        formData.append(`categories[${index}]`, category);
-      });
-
       const res = await fetch('/api/snippets', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: values.title,
+          code: values.code,
+          categories: values.categories
+        }),
         credentials: 'include'
       });
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Failed to create snippet');
+      }
       return res.json();
     },
     onSuccess: () => {
