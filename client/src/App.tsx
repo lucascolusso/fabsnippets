@@ -7,6 +7,7 @@ import { BackupManagement } from "./pages/BackupManagement";
 import { SitemapPage } from "./pages/SitemapPage";
 import { NewSnippetModal } from "./components/NewSnippetModal";
 import { AuthPage } from "./pages/AuthPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { useUser } from "./hooks/use-user";
 import { Loader2 } from "lucide-react";
 import { Button } from "./components/ui/button";
@@ -80,6 +81,7 @@ function App() {
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/auth" component={AuthPage} />
+        <Route path="/reset-password" component={ResetPasswordPage} />
         <Route path="/leaderboard" component={Leaderboard} />
         <Route path="/profile/:name" component={Profile} />
         <Route path="/snippet/:id" component={SnippetPage} />

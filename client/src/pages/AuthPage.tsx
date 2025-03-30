@@ -222,14 +222,51 @@ export function AuthPage() {
                   </div>
                   <Button 
                     className="w-full"
-                    onClick={() => {
-                      toast({
-                        title: "Password reset requested",
-                        description: "If an account with this information exists, password reset instructions have been sent.",
-                      });
-                      // Clear the field and switch back to login tab after showing the message
-                      setResetIdentifier("");
-                      setActiveTab("login");
+                    onClick={async () => {
+                      if (!resetIdentifier) {
+                        toast({
+                          variant: "destructive",
+                          title: "Error",
+                          description: "Please enter your username or email.",
+                        });
+                        return;
+                      }
+                      
+                      try {
+                        // Send API request to initiate password reset
+                        const response = await fetch('/api/password-reset/request', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({ identifier: resetIdentifier }),
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                          toast({
+                            title: "Password reset requested",
+                            description: "If an account with this information exists, password reset instructions have been sent.",
+                          });
+                          // Clear the field and switch back to login tab after showing the message
+                          setResetIdentifier("");
+                          setActiveTab("login");
+                        } else {
+                          toast({
+                            variant: "destructive",
+                            title: "Error",
+                            description: data.message || "Failed to request password reset. Please try again.",
+                          });
+                        }
+                      } catch (error) {
+                        console.error('Error requesting password reset:', error);
+                        toast({
+                          variant: "destructive",
+                          title: "Error",
+                          description: "An error occurred while requesting password reset. Please try again.",
+                        });
+                      }
                     }}
                   >
                     Send Reset Instructions

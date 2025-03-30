@@ -11,6 +11,29 @@ import { promises as fsPromises } from 'fs';
 import { createBackup, restoreFromBackup } from '../scripts/dbBackup';
 import { setupAuth } from './auth';
 import { generateSitemap } from './sitemap';
+import { initEmailService, sendPasswordResetEmail, verifyResetToken, invalidateToken } from './email';
+import { scrypt, randomBytes, timingSafeEqual } from "crypto";
+import { promisify } from "util";
+
+// Cryptographic functions for password hashing
+const scryptAsync = promisify(scrypt);
+const crypto = {
+  hash: async (password: string) => {
+    const salt = randomBytes(16).toString("hex");
+    const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+    return `${buf.toString("hex")}.${salt}`;
+  },
+  compare: async (suppliedPassword: string, storedPassword: string) => {
+    const [hashedPassword, salt] = storedPassword.split(".");
+    const hashedPasswordBuf = Buffer.from(hashedPassword, "hex");
+    const suppliedPasswordBuf = (await scryptAsync(
+      suppliedPassword,
+      salt,
+      64
+    )) as Buffer;
+    return timingSafeEqual(hashedPasswordBuf, suppliedPasswordBuf);
+  },
+};
 
 // Extend Express Request type to include user property
 declare module 'express' {
@@ -748,6 +771,109 @@ export function registerRoutes(app: Express): Server {
     } catch (error) {
       console.error('Error generating sitemap:', error);
       res.status(500).send('Error generating sitemap');
+    }
+  });
+
+  // Initialize email service
+  initEmailService();
+
+  // Password reset request endpoint
+  app.post('/api/password-reset/request', async (req, res) => {
+    try {
+      const { identifier } = req.body;
+
+      if (!identifier) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Username or email is required" 
+        });
+      }
+
+      // Get origin for building reset URLs
+      const origin = `${req.protocol}://${req.get('host')}`;
+
+      // Send password reset email
+      const result = await sendPasswordResetEmail(identifier, origin);
+      res.json(result);
+    } catch (error) {
+      console.error('Error requesting password reset:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "An error occurred while processing your request" 
+      });
+    }
+  });
+
+  // Verify reset token endpoint
+  app.get('/api/password-reset/verify', (req, res) => {
+    const { token } = req.query;
+    
+    if (!token || typeof token !== 'string') {
+      return res.status(400).json({
+        valid: false,
+        message: "Invalid or missing token"
+      });
+    }
+    
+    const userId = verifyResetToken(token);
+    
+    if (userId) {
+      return res.json({
+        valid: true,
+        message: "Token is valid"
+      });
+    } else {
+      return res.json({
+        valid: false,
+        message: "Token is invalid or expired"
+      });
+    }
+  });
+
+  // Reset password endpoint
+  app.post('/api/password-reset/reset', async (req, res) => {
+    try {
+      const { token, password } = req.body;
+      
+      if (!token || !password) {
+        return res.status(400).json({
+          success: false,
+          message: "Token and password are required"
+        });
+      }
+      
+      // Verify token and get user ID
+      const userId = verifyResetToken(token);
+      
+      if (!userId) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid or expired token"
+        });
+      }
+      
+      // Hash new password
+      const hashedPassword = await crypto.hash(password);
+      
+      // Update user password
+      await db
+        .update(users)
+        .set({ password: hashedPassword })
+        .where(eq(users.id, userId));
+      
+      // Invalidate the token so it can't be used again
+      invalidateToken(token);
+      
+      res.json({
+        success: true,
+        message: "Password has been reset successfully"
+      });
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      res.status(500).json({
+        success: false,
+        message: "An error occurred while resetting password"
+      });
     }
   });
 
