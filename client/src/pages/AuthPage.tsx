@@ -25,6 +25,7 @@ export function AuthPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [resetIdentifier, setResetIdentifier] = useState("");
+  const [activeTab, setActiveTab] = useState<"login" | "register" | "reset">("login");
   const [, setLocation] = useLocation();
 
   const form = useForm<NewUser>({
@@ -77,7 +78,7 @@ export function AuthPage() {
           <CardTitle className="text-2xl text-center">Welcome to FabSnippets</CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="login" className="w-full">
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "login" | "register" | "reset")} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Login</TabsTrigger>
               <TabsTrigger value="register">Register</TabsTrigger>
@@ -120,7 +121,7 @@ export function AuthPage() {
                       Forgot your password? <button 
                         type="button" 
                         className="text-primary hover:underline inline-flex items-center"
-                        onClick={() => document.querySelector('[value="reset"]')?.dispatchEvent(new MouseEvent('click'))}
+                        onClick={() => setActiveTab("reset")}
                       >
                         Reset your password <span className="ml-1">►</span>
                       </button>
@@ -129,7 +130,7 @@ export function AuthPage() {
                       Don't have an account? <button 
                         type="button" 
                         className="text-primary hover:underline inline-flex items-center"
-                        onClick={() => document.querySelector('[value="register"]')?.dispatchEvent(new MouseEvent('click'))}
+                        onClick={() => setActiveTab("register")}
                       >
                         Sign up <span className="ml-1">►</span>
                       </button>
@@ -192,7 +193,7 @@ export function AuthPage() {
                       Already have an account? <button 
                         type="button" 
                         className="text-primary hover:underline inline-flex items-center"
-                        onClick={() => document.querySelector('[value="login"]')?.dispatchEvent(new MouseEvent('click'))}
+                        onClick={() => setActiveTab("login")}
                       >
                         Log in <span className="ml-1">►</span>
                       </button>
@@ -226,7 +227,7 @@ export function AuthPage() {
                       });
                       // Clear the field and switch back to login tab after showing the message
                       setResetIdentifier("");
-                      document.querySelector('[value="login"]')?.dispatchEvent(new MouseEvent('click'));
+                      setActiveTab("login");
                     }}
                   >
                     Send Reset Instructions
@@ -236,7 +237,7 @@ export function AuthPage() {
                       Remember your password? <button 
                         type="button" 
                         className="text-primary hover:underline inline-flex items-center"
-                        onClick={() => document.querySelector('[value="login"]')?.dispatchEvent(new MouseEvent('click'))}
+                        onClick={() => setActiveTab("login")}
                       >
                         Back to login <span className="ml-1">►</span>
                       </button>
