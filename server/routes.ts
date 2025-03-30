@@ -262,7 +262,6 @@ export function registerRoutes(app: Express): Server {
           snippets.authorId,
           users.username,
           users.website,
-          snippets.imagePath,
           snippets.createdAt,
           snippets.votes
         )
@@ -336,7 +335,6 @@ export function registerRoutes(app: Express): Server {
           snippets.authorId,
           users.username,
           users.website,
-          snippets.imagePath,
           snippets.createdAt,
           snippets.votes
         )
@@ -435,7 +433,6 @@ export function registerRoutes(app: Express): Server {
           snippets.authorId,
           users.username,
           users.website,
-          snippets.imagePath,
           snippets.createdAt,
           snippets.votes,
         )
