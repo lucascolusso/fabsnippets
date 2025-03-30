@@ -75,11 +75,13 @@ export function AuthPage() {
     <div className="container max-w-md mx-auto pt-8">
       <Card>
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center">Welcome to FabSnippets</CardTitle>
+          <CardTitle className="text-2xl text-center">
+            {activeTab === "reset" ? "Reset Your Password" : "Welcome to FabSnippets"}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "login" | "register" | "reset")} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className={`grid w-full ${activeTab === "reset" ? "hidden" : "grid-cols-2"}`}>
               <TabsTrigger value="login">Login</TabsTrigger>
               <TabsTrigger value="register">Register</TabsTrigger>
               <TabsTrigger value="reset" className="hidden">Reset</TabsTrigger>
