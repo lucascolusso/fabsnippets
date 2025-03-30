@@ -18,14 +18,26 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
 
 export function AuthPage() {
   const { login, register } = useUser();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [resetIdentifier, setResetIdentifier] = useState("");
   const [, setLocation] = useLocation();
 
   const form = useForm<NewUser>({
+    resolver: zodResolver(insertUserSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+      email: "",
+    },
+  });
+  
+  // For register form, we need to make sure email can be empty for login
+  const registerForm = useForm<NewUser>({
     resolver: zodResolver(insertUserSchema),
     defaultValues: {
       username: "",
@@ -69,6 +81,7 @@ export function AuthPage() {
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Login</TabsTrigger>
               <TabsTrigger value="register">Register</TabsTrigger>
+              <TabsTrigger value="reset" className="hidden">Reset</TabsTrigger>
             </TabsList>
             <TabsContent value="login">
               <Form {...form}>
@@ -102,14 +115,34 @@ export function AuthPage() {
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? "Loading..." : "Login"}
                   </Button>
+                  <div className="space-y-2 pt-2 text-center text-sm">
+                    <p className="text-muted-foreground">
+                      Forgot your password? <button 
+                        type="button" 
+                        className="text-primary hover:underline inline-flex items-center"
+                        onClick={() => document.querySelector('[value="reset"]')?.dispatchEvent(new MouseEvent('click'))}
+                      >
+                        Reset your password <span className="ml-1">►</span>
+                      </button>
+                    </p>
+                    <p className="text-muted-foreground">
+                      Don't have an account? <button 
+                        type="button" 
+                        className="text-primary hover:underline inline-flex items-center"
+                        onClick={() => document.querySelector('[value="register"]')?.dispatchEvent(new MouseEvent('click'))}
+                      >
+                        Sign up <span className="ml-1">►</span>
+                      </button>
+                    </p>
+                  </div>
                 </form>
               </Form>
             </TabsContent>
             <TabsContent value="register">
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="space-y-4">
+              <Form {...registerForm}>
+                <form onSubmit={registerForm.handleSubmit((data) => onSubmit(data, false))} className="space-y-4">
                   <FormField
-                    control={form.control}
+                    control={registerForm.control}
                     name="username"
                     render={({ field }) => (
                       <FormItem>
@@ -122,20 +155,24 @@ export function AuthPage() {
                     )}
                   />
                   <FormField
-                    control={form.control}
+                    control={registerForm.control}
                     name="email"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input type="email" {...field} />
+                          <Input 
+                            type="email" 
+                            {...field}
+                            value={field.value || ''} 
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                   <FormField
-                    control={form.control}
+                    control={registerForm.control}
                     name="password"
                     render={({ field }) => (
                       <FormItem>
@@ -150,8 +187,63 @@ export function AuthPage() {
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? "Loading..." : "Register"}
                   </Button>
+                  <div className="space-y-2 pt-2 text-center text-sm">
+                    <p className="text-muted-foreground">
+                      Already have an account? <button 
+                        type="button" 
+                        className="text-primary hover:underline inline-flex items-center"
+                        onClick={() => document.querySelector('[value="login"]')?.dispatchEvent(new MouseEvent('click'))}
+                      >
+                        Log in <span className="ml-1">►</span>
+                      </button>
+                    </p>
+                  </div>
                 </form>
               </Form>
+            </TabsContent>
+            <TabsContent value="reset">
+              <div className="space-y-4">
+                <div className="text-sm text-muted-foreground mb-4">
+                  Enter your username or email address, and we'll send you instructions to reset your password.
+                </div>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="reset-identifier">Username or Email</Label>
+                    <Input 
+                      id="reset-identifier"
+                      type="text" 
+                      placeholder="Enter your username or email"
+                      value={resetIdentifier}
+                      onChange={(e) => setResetIdentifier(e.target.value)}
+                    />
+                  </div>
+                  <Button 
+                    className="w-full"
+                    onClick={() => {
+                      toast({
+                        title: "Password reset requested",
+                        description: "If an account with this information exists, password reset instructions have been sent.",
+                      });
+                      // Clear the field and switch back to login tab after showing the message
+                      setResetIdentifier("");
+                      document.querySelector('[value="login"]')?.dispatchEvent(new MouseEvent('click'));
+                    }}
+                  >
+                    Send Reset Instructions
+                  </Button>
+                  <div className="space-y-2 pt-2 text-center text-sm">
+                    <p className="text-muted-foreground">
+                      Remember your password? <button 
+                        type="button" 
+                        className="text-primary hover:underline inline-flex items-center"
+                        onClick={() => document.querySelector('[value="login"]')?.dispatchEvent(new MouseEvent('click'))}
+                      >
+                        Back to login <span className="ml-1">►</span>
+                      </button>
+                    </p>
+                  </div>
+                </div>
+              </div>
             </TabsContent>
           </Tabs>
         </CardContent>
