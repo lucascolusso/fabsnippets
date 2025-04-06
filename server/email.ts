@@ -210,9 +210,9 @@ export async function sendPasswordResetEmail(
 
     // Send email using the appropriate provider
     if (emailProvider === 'resend' && resend) {
-      // Resend email sending
+      // Resend email sending - use a sandbox domain for testing
       const result = await resend.emails.send({
-        from: 'FabSnippets <noreply@fabsnippets.app>',
+        from: 'FabSnippets <onboarding@resend.dev>', // The sandbox domain provided by Resend
         to: user.email,
         subject: emailSubject,
         text: textContent,
